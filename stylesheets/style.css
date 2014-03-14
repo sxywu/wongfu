@@ -1,0 +1,18 @@
+body {
+	background-color: #FFFEFC;
+}
+
+svg#graphSVG {
+	width: 100%;
+	height: 100%;
+	margin:auto;
+	position: absolute;
+}
+
+.hidden {
+	display: none;
+}
+
+.active {
+	z-index: 1000;
+}
