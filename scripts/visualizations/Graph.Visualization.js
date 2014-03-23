@@ -79,7 +79,7 @@ define([
             .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2})
             .attr('fill', 'none')
             .attr('stroke', app.colors.blue)
-            .attr('stroke-width', 3);
+            .attr('stroke-width', 2);
 
     }
 
@@ -134,7 +134,7 @@ define([
             .map(function(d) {return parseInt(d)}).max().value(),
             min = _.chain(value).pluck('statistics').pluck('subscriberCount')
             .map(function(d) {return parseInt(d)}).min().value();
-        nodeScale = d3.scale.linear().domain([min, max]).range([40, 80]);
+        nodeScale = d3.scale.linear().domain([min, max]).range([30, 80]);
         nodes = value;
         return Graph;
     }
