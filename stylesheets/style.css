@@ -1,18 +1,22 @@
 body {
 	background-color: #FFFDFB;
+	font-family: Helvetica;
 }
 
+/*******************
+* SVG
+*/
 svg#videoSVG {
 	position:absolute;
 	bottom:0;
-	width: 6000px;
+	width: 15000px;
 	height: 50%;
 }
 
 .xAxis path,
 .xAxis line {
     fill: none;
-    stroke: black;
+    stroke: #999;
     shape-rendering: crispEdges;
 }
 
@@ -36,6 +40,39 @@ svg#graphSVG {
 	bottom: 35%;
 }
 
+/*******************
+* HTML
+*/
+.videos {
+	position:fixed;
+	width: 30%;
+	left: 25px;
+	height: 100%;
+}
+
+.videos .border {
+	bottom: 25;
+	height: 70%;
+	width: 75%;
+	border-left: 1px solid;
+	border-top: 1px solid;
+	border-right: 0px solid;
+	border-bottom: 0px solid;
+	border-color: #999;
+	position: absolute;
+}
+
+.videos .date {
+	position: absolute;
+	font-size: 2em;
+	top: -36px;
+	color: #666;
+	margin-left: 20px
+}
+
+/*******************
+* General
+*/
 .hidden {
 	display: none;
 }

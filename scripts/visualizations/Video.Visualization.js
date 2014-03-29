@@ -11,17 +11,17 @@ define([
     var youtuber, videos; // data
     var container;
     var yScale, timeScale;
-    var barPadding = 1, barWidth = 3;
+    var barPadding = 1, barWidth = 5;
     var color;
     var Video = function(selection) {
         container = selection;
 
         container.selectAll('.bar')
-            .data(function(d) {
-                return d.video;
-            }).enter().append('rect')
+            .data(videos).enter().append('rect')
             .classed('bar', true)
             .call(enter);
+
+        return Video;
     }
 
     var enter = function(selection) {
@@ -73,17 +73,25 @@ define([
         return Video;
     }
 
-    Video.yScale = function(value) {
+    Video.yScale = function(minViews, maxViews) {
         if (!arguments.length) return yScale;
 
-        yScale = value;
+        if (arguments.length > 1) {
+            yScale = d3.scale.linear().domain([minViews, maxViews]).range([0, height]);
+        } else {
+            yScale = minViews;
+        }
         return Video;
     }
 
-    Video.timeScale = function(value) {
+    Video.timeScale = function(minDate, maxDate) {
         if (!arguments.length) return timeScale;
 
-        timeScale = value;
+        if (arguments.length > 1) {
+            timeScale = d3.time.scale().domain([minDate, maxDate]).range([0, width]);
+        } else {
+            timeScale = minDate;
+        }
         return Video;
     }
 

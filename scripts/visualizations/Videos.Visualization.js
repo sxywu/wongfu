@@ -9,21 +9,13 @@ define([
     d3,
     VideoVisualization
 ) {
-    var width = 800, height, padding = {top: 0, left: 25, right: 25, bottom: 25};
+    var width = 800, height = 500, padding = {top: 0, left: 25, right: 25, bottom: 25};
     var youtuber, videos; // data
     var container;
     var yScale, timeScale;
     var Video = function(selection) {
         container = selection;
-        width = $(container.node()).parent().width() - padding.left - padding.right;
-        height = $(container.node()).parent().height() - padding.top - padding.bottom;
-        var min = _.chain(videos).pluck('video').flatten().pluck('views').min(function(d) {return parseInt(d)}).value(),
-            max = _.chain(videos).pluck('video').flatten().pluck('views').max(function(d) {return parseInt(d)}).value(),
-            minDate = _.chain(videos).pluck('video').flatten().sortBy(function(d) {return d.published}).first().value().published,
-            maxDate = _.chain(videos).pluck('video').flatten().sortBy(function(d) {return d.published}).last().value().published;
 
-        yScale = d3.scale.linear().domain([parseInt(min), parseInt(max)]).range([0, height]);
-        timeScale = d3.time.scale().domain([new Date(minDate), new Date(maxDate)]).range([0, width]);
         var xAxis = d3.svg.axis()
             .orient("bottom")
             .scale(timeScale);
@@ -34,6 +26,7 @@ define([
             .classed('youtuber', true)
             .each(function(d, i) {
                 var vis = VideoVisualization()
+                    .videos(d.videos)
                     .color(app.d3Colors(d.youtuber))
                     .width(width).height(height)
                     .yScale(yScale).timeScale(timeScale);
@@ -44,17 +37,8 @@ define([
             .classed('xAxis', true)
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
-    }
 
-    /**
-    events
-    */
-    var mouseover = function() {
-
-    }
-
-    var mouseleave = function() {
-
+        return Video;
     }
 
     /*
@@ -68,6 +52,20 @@ define([
         return Video;
     }
 
+    Video.yScale = function(minViews, maxViews) {
+        if (!arguments.length) return yScale;
+
+        yScale = d3.scale.linear().domain([minViews, maxViews]).range([0, height]);
+        return Video;
+    }
+
+    Video.timeScale = function(minDate, maxDate) {
+        if (!arguments.length) return timeScale;
+
+        timeScale = d3.time.scale().domain([minDate, maxDate]).range([0, width]);
+        return Video;
+    }
+
     Video.width = function(value) {
         if (!arguments.length) return width;
         width = value;
@@ -76,7 +74,7 @@ define([
 
     Video.height = function(value) {
         if (!arguments.length) return height;
-        height = value;
+        height = value - (padding.top + padding.bottom);
         return Video;
     }
 

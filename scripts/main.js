@@ -34,82 +34,64 @@ require([
     "underscore",
     "backbone",
     "d3",
-    "app/visualizations/Graph.Visualization",
-    "app/visualizations/Videos.Visualization"
+    "app/views/App.View",
+    "app/visualizations/Graph.Visualization"
 ], function(
     $,
     _,
     Backbone,
     d3,
-    GraphVisualization,
-    VideosVisualization
+    AppView,
+    GraphVisualization
 ) {
     app = {};
     app.colors = {blue: "#3B8686", green: "#E0E4CC", orange: "#F38630"};
     app.d3Colors = d3.scale.category10();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
-    d3.json('data/nodes.json', function(nodes) {
-        d3.json('data/links.json', function(links) {
-            nodes = _.sortBy(nodes, function(node) {
-                return node.index;
-            });
 
-            var width = $("svg#graphSVG").width(),
-                height = $("svg#graphSVG").height(),
-                graph = GraphVisualization()
-                    .nodes(nodes).links(links)
-                    .width(width).height(height);
-            d3.select('svg#graphSVG').append('g').call(graph);
+    var appView = new AppView();
 
-        });
-        
-        var videos = [],
-            visualize = _.after(app.youtubers.length, function(v) {
-                var vis = VideosVisualization().videos(v);
-                d3.select('svg#videoSVG').append('g').call(vis);
-            });
-        // _.each(app.youtubers, function(youtuber) {
-        //     if (youtuber === "last") {
-        //         var vis = VideosVisualization().videos(videos);
-        //         d3.select('svg#videoSVG').append('g').call(vis);
-        //         return;
-        //     }
-        //     d3.json('youtubers/' + youtuber + '.json', function(video) {
-        //         video = _.sortBy(video, function(v) {
-        //             return v.published;
-        //         });
-        //         video.youtuber = youtuber;
-        //         videos.push(video);
+    // for debugging
+    window.appView = appView;
+    // d3.json('data/nodes.json', function(nodes) {
+        // d3.json('data/links.json', function(links) {
+        //     nodes = _.sortBy(nodes, function(node) {
+        //         return node.index;
         //     });
+
+        //     var width = $("svg#graphSVG").width(),
+        //         height = $("svg#graphSVG").height(),
+        //         graph = GraphVisualization()
+        //             .nodes(nodes).links(links)
+        //             .width(width).height(height);
+        //     d3.select('svg#graphSVG').append('g').call(graph);
+
         // });
-
-        _.each(app.youtubers, function(youtuber) {
-            d3.json('youtubers/' + youtuber + '.json', function(video) {
-                video = _.sortBy(video, function(v) {
-                    return v.published;
-                });
-                videos.push({
-                    video: video,
-                    youtuber: youtuber
-                });
-                visualize(videos);
-
-                $('.youtuber').append('<div style="color:' + app.d3Colors(youtuber) + '">' + youtuber + '</div>');
-                // var video = VideosVisualization().videos(videos);
-
-                // d3.select('svg#videoSVG').append('g').call(video);
-            });
-        });
         
-
-        // d3.json('youtubers/davidchoimusic.json', function(videos) {
-        //     videos = _.sortBy(videos, function(video) {
-        //         return video.published;
+        // var videos = [],
+        //     visualize = _.after(app.youtubers.length, function(v) {
+        //         var vis = VideosVisualization().videos(v);
+        //         d3.select('svg#videoSVG').append('g').call(vis);
         //     });
-        //     var video = VideoVisualization().youtuber('davidchoimusic').videos(videos);
 
-        //     d3.select('svg#videoSVG').append('g').call(video);
-        // })
+        // _.each(app.youtubers, function(youtuber) {
+        //     var model = new YoutuberModel({
+        //         name: youtuber
+        //     })
+        //     model.fetch();
+            // d3.json('youtubers/' + youtuber + '.json', function(video) {
+            //     video = _.sortBy(video, function(v) {
+            //         return v.published;
+            //     });
+            //     videos.push({
+            //         video: video,
+            //         youtuber: youtuber
+            //     });
+            //     visualize(videos);
+
+            //     $('.youtuber').append('<div style="color:' + app.d3Colors(youtuber) + '">' + youtuber + '</div>');
+            // });
+    //     });
         
-    });
+    // });
 });

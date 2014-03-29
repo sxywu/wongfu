@@ -9,24 +9,19 @@ define([
 ) {
     var force; // force graph
     var container, node, link, text;
-    var nodes, links; // data
+    var nodes = [], links = []; // data
     var nodeScale, linkScale;
     var Graph = function(selection, d) {
         container = selection;
 
         force = d3.layout.force()
             .size([width, height])
-            .charge(-1500).linkDistance(75)
+            .charge(-300).linkDistance(125)
             .on('tick', forceTick);
 
-        container.selectAll("g.node")
-            .data(nodes).call(enterNodes);
+        Graph.render();
 
-        container.selectAll("line.link")
-            .data(links).call(enterLinks);
-
-        force.nodes(nodes).links(links);
-        force.start();
+        return Graph;
 
     }
 
@@ -84,13 +79,43 @@ define([
     }
 
     var enterLinks = function(selection) {
-        link = selection.enter()
+        selection.enter()
             .insert('line', '.node')
             .classed('link', true)
-            .attr('stroke-width', function(d) {return linkScale(d.weight)})
+            .attr('stroke-width', function(d) {return d.weight})
             .attr("stroke", app.colors.blue)
             .attr('opacity', .3)
             .attr("fill", "none");
+    }
+
+    var exitNodes = function(selection) {
+        selection.exit().remove();
+    }
+
+    var exitLinks = function(selection) {
+        selection.exit().remove();
+    }
+
+    Graph.render = function() {
+
+        container.selectAll(".node")
+            .call(initialPositions)
+            .data(nodes, function(d) {return d.youtuber})
+            .call(exitNodes)
+            .call(enterNodes);
+
+        container.selectAll(".link")
+            .data(links, function(d) {return d.sourceIndex + ',' + d.targetIndex;})
+            .call(enterLinks)
+            .call(exitLinks);
+
+        node = container.selectAll(".node");
+        link = container.selectAll(".link");
+
+        force.nodes(nodes).links(links);
+        force.start();
+
+        return Graph;
     }
 
 
@@ -98,8 +123,17 @@ define([
     force layout
     */
 
-    var initialPositions = function() {
-
+    var initialPositions = function(selection) {
+        var old = {};
+        _.each(selection.data(), function(d) {
+            old[d.youtuber] = d;            
+        });
+        _.each(nodes, function(d) {
+            if (old[d.youtuber]) {
+                d.x = old[d.youtuber].x;
+                d.y = old[d.youtuber].y;
+            }
+        });
     }
 
     var forceTick = function() {
@@ -143,9 +177,21 @@ define([
         if (!arguments.length) return links;
 
         var max = _.chain(value).pluck('weight').max().value(),
-            min = _.chain(value).pluck('weight').min().value();
+            min = _.chain(value).pluck('weight').min().value(),
+            nodeIndex = _.pluck(nodes, 'index');
         linkScale = d3.scale.log().domain([min, max]).range([1, 8]);
-        links = value;
+        links = _.chain(value).map(function(link) {
+            var obj = {};
+            obj.sourceIndex = link.source;
+            obj.targetIndex = link.target;
+            obj.source = _.indexOf(nodeIndex, link.source);
+            obj.target = _.indexOf(nodeIndex, link.target);
+            obj.weight = linkScale(link.weight);
+
+            return obj;
+        }).filter(function(link) {
+            return nodes[link.source] && nodes[link.target];
+        }).value();
         return Graph;
     }
 
