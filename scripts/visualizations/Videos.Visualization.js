@@ -9,34 +9,34 @@ define([
     d3,
     VideoVisualization
 ) {
-    var width = 800, height = 500, padding = {top: 0, left: 25, right: 25, bottom: 25};
+    var width = 800, height = 500, padding = {top: 200, left: 150, right: 25, bottom: 800};
     var youtuber, videos; // data
     var container;
     var yScale, timeScale;
     var Video = function(selection) {
         container = selection;
 
-        var xAxis = d3.svg.axis()
-            .orient("bottom")
+        var yAxis = d3.svg.axis()
+            .orient("left")
             .scale(timeScale);
 
-        container.attr('transform', 'translate(' + padding.left + ',0)');
-        container.selectAll('.youtuber')
-            .data(videos).enter().append('g')
-            .classed('youtuber', true)
-            .each(function(d, i) {
-                var vis = VideoVisualization()
-                    .videos(d.videos)
-                    .color(app.d3Colors(d.youtuber))
-                    .width(width).height(height)
-                    .yScale(yScale).timeScale(timeScale);
-                d3.select(this).call(vis);
-            });
+        container.attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
+        // container.selectAll('.youtuber')
+        //     .data(videos).enter().append('g')
+        //     .classed('youtuber', true)
+        //     .each(function(d, i) {
+        //         var vis = VideoVisualization()
+        //             .videos(d.videos)
+        //             .color(app.d3Colors(d.youtuber))
+        //             .width(width).height(height)
+        //             .yScale(yScale).timeScale(timeScale);
+        //         d3.select(this).call(vis);
+        //     });
 
         container.append("g")
             .classed('xAxis', true)
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            // .attr("transform", "translate(0," + height + ")")
+            .call(yAxis);
 
         return Video;
     }
@@ -62,7 +62,7 @@ define([
     Video.timeScale = function(minDate, maxDate) {
         if (!arguments.length) return timeScale;
 
-        timeScale = d3.time.scale().domain([minDate, maxDate]).range([0, width]);
+        timeScale = d3.time.scale().domain([minDate, maxDate]).range([0, height]);
         return Video;
     }
 

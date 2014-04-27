@@ -57,9 +57,15 @@ define([
             .attr('fill', app.colors.blue)
             .attr('fill-opacity', .5);
 
+        node.append('circle')
+            .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2 + 3})
+            .attr('fill', 'white')
+            .attr('stroke', app.colors.blue)
+            .attr('stroke-width', 3);
+
         node.append('defs')
             .append('clipPath').attr('id', function(d) {
-                return 'clipCircle' + d.index;
+                return 'clipGraphCircle' + d.index;
             }).append('circle')
             .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2});
         node.append('image')
@@ -67,14 +73,10 @@ define([
             .attr('y', function(d) {return -nodeScale(parseInt(d.statistics.subscriberCount)) / 2})
             .attr('height', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount))})
             .attr('width', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount))})
-            .attr('clip-path', function(d) {return 'url(#clipCircle' + d.index + ')'})
+            .attr('clip-path', function(d) {return 'url(#clipGraphCircle' + d.index + ')'})
             .attr('xlink:href', function(d) {return d.image});
 
-        node.append('circle')
-            .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2})
-            .attr('fill', 'none')
-            .attr('stroke', app.colors.blue)
-            .attr('stroke-width', 2);
+        
 
     }
 
@@ -82,10 +84,16 @@ define([
         selection.enter()
             .insert('line', '.node')
             .classed('link', true)
-            .attr('stroke-width', function(d) {return d.weight})
-            .attr("stroke", app.colors.blue)
+            .attr("stroke", app.colors.green)
             .attr('opacity', .3)
             .attr("fill", "none");
+
+        updateLinks(selection);
+    }
+
+    var updateLinks = function(selection) {
+        selection.transition().duration(100)
+            .attr('stroke-width', function(d) {return d.weight});
     }
 
     var exitNodes = function(selection) {
@@ -107,6 +115,7 @@ define([
         container.selectAll(".link")
             .data(links, function(d) {return d.sourceIndex + ',' + d.targetIndex;})
             .call(enterLinks)
+            .call(updateLinks)
             .call(exitLinks);
 
         node = container.selectAll(".node");
@@ -179,7 +188,7 @@ define([
         var max = _.chain(value).pluck('weight').max().value(),
             min = _.chain(value).pluck('weight').min().value(),
             nodeIndex = _.pluck(nodes, 'index');
-        linkScale = d3.scale.log().domain([min, max]).range([1, 8]);
+        linkScale = d3.scale.log().domain([min, max]).range([1, 12]);
         links = _.chain(value).map(function(link) {
             var obj = {};
             obj.sourceIndex = link.source;

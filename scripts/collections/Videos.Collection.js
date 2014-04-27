@@ -29,6 +29,9 @@ define([
 		},
 		maxViews: function() {
 			return this.max(function(video) {return video.get('views')}).get('views');
+		},
+		filterByAssociations: function() {
+			return _.filter(this.toJSON(), function(video) {return !_.isEmpty(video.associations)});
 		}
 	});
 });

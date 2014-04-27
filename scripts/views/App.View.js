@@ -5,8 +5,10 @@ define([
 	"d3",
     "app/collections/Youtubers.Collection",
     "app/collections/Videos.Collection",
-    "app/visualizations/Videos.Visualization",
-    "app/visualizations/Graph.Visualization"
+    "app/visualizations/Timeline.Visualization",
+    "app/visualizations/Graph.Visualization",
+    "app/visualizations/Video.Visualization",
+    "app/visualizations/Youtuber.Visualization"
 ], function(
 	$,
 	_,
@@ -14,8 +16,10 @@ define([
 	d3,
 	YoutubersCollection,
 	VideosCollection,
-	VideosVisualization,
-	GraphVisualization
+	TimelineVisualization,
+	GraphVisualization,
+	VideoVisualization,
+	YoutuberVisualization
 ) {
 	return Backbone.View.extend({
 		initialize: function() {
@@ -31,6 +35,7 @@ define([
 		    	render();
 		    });
 
+		    this.prevTop = 0;
 			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
 		    $(window).scroll(scroll);
 		    // this.youtubers.on('reset', calculateTime);
@@ -46,12 +51,28 @@ define([
 				videoHeight = $('#videoSVG').height(),
 				graphWidth = $('#graphSVG').width(),
 				graphHeight = $('#graphSVG').height();
-			this.videosVisualization = VideosVisualization()
-				.videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
+			this.timelineVisualization = TimelineVisualization()
+				// .videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
 				.width(videoWidth).height(videoHeight)
-				.yScale(this.videos.minViews(), this.videos.maxViews())
-				.timeScale(this.videos.minDate(), this.videos.maxDate());
-			d3.select('#videoSVG').append('g').call(this.videosVisualization);
+				
+				.timeScale(this.youtubers.minJoined(), this.youtubers.maxJoined());
+			d3.select('#videoSVG').append('g').call(this.timelineVisualization);
+
+			this.videoVisualization = VideoVisualization()
+				.timeScale(this.timelineVisualization.timeScale())
+				.sizeScale(this.videos.minViews(), this.videos.maxViews());
+			d3.select('#videoSVG').selectAll('.video')
+				.data(this.videos.filterByAssociations())
+				.enter().append('g').classed('video', true)
+				.call(this.videoVisualization);
+
+			this.youtuberVisualization = YoutuberVisualization()
+				.timeScale(this.timelineVisualization.timeScale())
+				.radiusScale(this.youtubers.minSubscribers(), this.youtubers.maxSubscribers());
+			d3.select('#videoSVG').selectAll('.youtuber')
+				.data(this.youtubers.toJSON())
+				.enter().append('g').classed('youtuber', true)
+				.call(this.youtuberVisualization);
 
 			this.graphVisualization = GraphVisualization()
 				.width(graphWidth).height(graphHeight);
@@ -59,15 +80,20 @@ define([
 
 			this.calculateTime();
 			this.onWindowScroll();
+
+
+		    $(window).scroll(this.timelineVisualization.update);
 			
 		},
 		calculateTime: function() {
-			var scale = this.videosVisualization.timeScale(),
+			var scale = this.timelineVisualization.timeScale(),
 				videos = this.videos.groupBy(function(video) {
-					return scale(new Date(video.get('publishedDate').getFullYear(), video.get('publishedDate').getMonth()));
+					return scale(new Date(video.get('publishedDate').getFullYear(), video.get('publishedDate').getMonth(),
+						video.get('publishedDate').getDate()));
 				}),
 				youtubers = this.youtubers.groupBy(function(youtuber) {
-					return scale(new Date(youtuber.get('joinedDate').getFullYear(), youtuber.get('joinedDate').getMonth()));
+					return scale(new Date(youtuber.get('joinedDate').getFullYear(), youtuber.get('joinedDate').getMonth(),
+						youtuber.get('joinedDate').getDate()));
 				}),
 				links = _.chain(this.links)
 				// .map(function(link) {
@@ -83,7 +109,7 @@ define([
 				// 	}).flatten()
 				.groupBy(function(link) {
 						var date = new Date(link.date);
-						return scale(new Date(date.getFullYear(), date.getMonth()));
+						return scale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
 					}).value();
 
 			this.youtubersByTime = youtubers;
@@ -92,25 +118,60 @@ define([
 			console.log(links);
 		},
 		onWindowScroll: function() {
-			var left = $('.videos .border').offset().left,
-				scale = this.videosVisualization.timeScale(),
-				timeFormat = d3.time.format('%B %Y'),
-				date = scale.invert(left),
+			// $('.content').empty();  // TODO: refactor
+
+			var top = $(window).scrollTop() + this.timelineVisualization.padding().top,
+				scale = this.timelineVisualization.timeScale(),
+				date = scale.invert(top),
 				that = this,
-				youtubers = _.chain(this.youtubersByTime).filter(function(youtuber, time) {
+				youtubers = _.chain(this.youtubersByTime).filter(function(youtubers, time) {
 					time = parseInt(time);
-					return time < left;
+					// if (time < top) {
+					// 	content = '';
+					// 	_.each(youtubers, function(youtuber) {
+					// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
+					// 	});
+					// 	$('.youtuberContent').html(content);
+					// }
+					return time < top;
 				}).flatten().map(function(youtuber) {
 					return youtuber.toJSON();
 				}).value(),
 				links = _.chain(this.linksByTime).filter(function(link, time) {
 					time = parseInt(time);
-					return time < left;
+					return time < top;
 				}).flatten().clone().value();
 
-			console.log(timeFormat(date));
-			$('.date').text(timeFormat(date));
+			this.timelineVisualization.update(top, app.timeFormat(date));
+			// $('.date').text(timeFormat(date));
+			// _.each(this.videosByTime, function(videos, time) {
+			// 	time = parseInt(time);
+			// 	if (time < top) {
+			// 		content = '';
+			// 		_.each(videos, function(video) {
+			// 			content += video.get('publishedDate').toDateString() + ': ' + video.get('title') + '<br>';
+			// 			if (!_.isEmpty(video.get('associations'))) {
+			// 				content += '<div class="associations">';
+			// 				_.chain(video.get('associations'))
+			// 					.filter(function(association) {
+			// 						return association !== "wongfuproductions";
+			// 					})
+			// 					.each(function(association, i, list) {
+			// 						content += association;
+			// 						if (i < list.length - 1) {
+			// 							content += ', ';
+			// 						}
+			// 					}).value();
+			// 				content += '</div>';
+			// 			}
+			// 		});
+			// 		$('.videoContent').html(content);
+			// 	}
+			// });
+
 			this.graphVisualization.nodes(youtubers).links(links).render();
+
+			this.prevTop = top;
 
 		}
 	});

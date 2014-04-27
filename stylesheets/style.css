@@ -1,6 +1,6 @@
 body {
 	background-color: #FFFDFB;
-	font-family: Helvetica;
+	font-family: 'Quicksand', 'sans-serif';
 }
 
 /*******************
@@ -8,9 +8,10 @@ body {
 */
 svg#videoSVG {
 	position:absolute;
-	bottom:0;
-	width: 15000px;
-	height: 50%;
+	top: 0;
+	height: 20000px;
+	width: 50%;
+	/*height: 50%;*/
 }
 
 .xAxis path,
@@ -20,10 +21,9 @@ svg#videoSVG {
     shape-rendering: crispEdges;
 }
 
-.xAxis text {
-    font-family: sans-serif;
-    font-size: 11px;
-    color: black;
+.xAxis text, .marker .date, .video text {
+    /*font-size: 16px;*/
+    color: #666;
 }
 
 
@@ -40,36 +40,73 @@ svg#graphSVG {
 	bottom: 35%;
 }
 
+/*.video line, 
+.youtuber line {
+	fill: none;
+	stroke: #666;
+}*/
+
 /*******************
 * HTML
 */
-.videos {
+
+.marker {
+	position: fixed;
+}
+/*.marker {
 	position:fixed;
 	width: 30%;
-	left: 25px;
+	left: 150px;
 	height: 100%;
+	top: 200px;
 }
 
-.videos .border {
-	bottom: 25;
+.marker .date {
+	position: absolute;
+	left: -125px;
+	top: -10px;
+}
+*/
+
+.marker .circle {
+	top: -4px;
+	position: absolute;
+	background-color: #666;
+	width: 8px;
+	height: 8px;
+	border-radius: 8px;
+	left: -4px;
+	/*bottom: 25;
 	height: 70%;
 	width: 75%;
-	border-left: 1px solid;
+	border-left: 0px solid;
 	border-top: 1px solid;
 	border-right: 0px solid;
 	border-bottom: 0px solid;
 	border-color: #999;
 	position: absolute;
+	color: #666;*/
 }
-
+/*
 .videos .date {
 	position: absolute;
 	font-size: 2em;
 	top: -36px;
-	color: #666;
 	margin-left: 20px
 }
 
+.videos .youtuberContent, .videos .videoContent {
+	width: 200%;
+	margin: 25px 15px;
+	font-size: .85em;
+}
+
+.videos .associations {
+	margin-left: 20px;
+	color: #3B8686;
+	font-weight: 600;
+}
+*/
 /*******************
 * General
 */

@@ -45,9 +45,11 @@ require([
     GraphVisualization
 ) {
     app = {};
-    app.colors = {blue: "#3B8686", green: "#E0E4CC", orange: "#F38630"};
+    // http://www.colourlovers.com/palette/3318893/S_i_r_e_n_s_S_o_n_g?widths=1
+    app.colors = {blue: "#40738C", green: "#339999", orange: "#F38630"};
     app.d3Colors = d3.scale.category10();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
+    app.timeFormat = d3.time.format('%B %d, %Y');
 
     var appView = new AppView();
 
