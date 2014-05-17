@@ -11,7 +11,7 @@ define([
     var youtuber, videos; // data
     var container;
     var radiusScale, timeScale;
-    var circlePadding = 10, minRadius = 30, maxRadius = 80;
+    var circlePadding = 15, minRadius = 30, maxRadius = 80;
     var color;
     var Youtuber = function(selection) {
         container = selection;

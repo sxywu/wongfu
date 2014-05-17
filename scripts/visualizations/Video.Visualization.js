@@ -11,10 +11,11 @@ define([
     var youtuber, videos; // data
     var container;
     var sizeScale, timeScale;
-    var rectPadding = 10, minSize = 10, maxSize = 100, borderRadius = 3;
+    var rectPadding = 15, minSize = 10, maxSize = 100, borderRadius = 3;
     var color;
     var Video = function(selection) {
         container = selection;
+        color = app.colors.green;
 
         container.attr('transform', function(d) {
             return 'translate(' + padding.left + ',' + timeScale(d.publishedDate) + ')';
@@ -43,7 +44,9 @@ define([
             .attr('y1', 0)
             .attr('x2', 2 * rectPadding)
             .attr('y1', 0)
-            .attr('stroke-dasharray', '1,1');
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '2,2')
+            .attr('stroke', color);
 
         var text = selection.filter(function(d) {return sizeScale(d.views) > 18});
         
@@ -52,15 +55,24 @@ define([
             .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em')
-            .attr('fill', app.colors.green)
+            .attr('fill', color)
             .text(function(d) {return app.timeFormat(d.publishedDate)})
 
         text.append('text')
             .attr('x', function(d) {return sizeScale(d.views) + 3 * rectPadding})
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
-            .attr('fill', app.colors.green)
+            .attr('fill', color)
             .text(function(d) {return d.title});
+
+        selection.append('rect')
+            .attr('y', function(d) {return -sizeScale(d.views) / 8 * 3})
+            .attr('x', function(d) {return 2 * rectPadding})
+            .attr('width', function(d) {return sizeScale(d.views)})
+            .attr('height', function(d) {return sizeScale(d.views) / 4 * 3})
+            .attr('stroke', color)
+            .attr('fill', 'white')
+            .attr('stroke-width', 1);
 
         selection.append('image')
             .attr('y', function(d) {return -sizeScale(d.views) / 8 * 3})
@@ -71,14 +83,7 @@ define([
             // .attr('opacity', function(d) {return _.isEmpty(d.associations) ? 0 : 1})
             .attr('xlink:href', function(d) {return d.images[0]});
 
-        selection.append('rect')
-            .attr('y', function(d) {return -sizeScale(d.views) / 8 * 3})
-            .attr('x', function(d) {return 2 * rectPadding})
-            .attr('width', function(d) {return sizeScale(d.views)})
-            .attr('height', function(d) {return sizeScale(d.views) / 4 * 3})
-            .attr('stroke', app.colors.green)
-            .attr('fill', 'none')
-            .attr('stroke-width', 1);
+        
     }
 
     var exit = function(selection) {

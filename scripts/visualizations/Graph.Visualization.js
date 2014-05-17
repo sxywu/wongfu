@@ -55,7 +55,7 @@ define([
             .attr('rx', 3)
             .attr('ry', 3)
             .attr('fill', app.colors.blue)
-            .attr('fill-opacity', .5);
+            // .attr('fill-opacity', .5);
 
         node.append('circle')
             .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2 + 3})
@@ -85,7 +85,7 @@ define([
             .insert('line', '.node')
             .classed('link', true)
             .attr("stroke", app.colors.green)
-            .attr('opacity', .3)
+            .attr('opacity', .5)
             .attr("fill", "none");
 
         updateLinks(selection);
