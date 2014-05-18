@@ -3,8 +3,8 @@ define([
 	"underscore",
 	"backbone",
 	"d3",
-    "app/collections/Youtubers.Collection",
-    "app/collections/Videos.Collection",
+    // "app/collections/Youtubers.Collection",
+    // "app/collections/Videos.Collection",
     "app/visualizations/Timeline.Visualization",
     "app/visualizations/Graph.Visualization",
     "app/visualizations/Video.Visualization",
@@ -14,8 +14,8 @@ define([
 	_,
 	Backbone,
 	d3,
-	YoutubersCollection,
-	VideosCollection,
+	// YoutubersCollection,
+	// VideosCollection,
 	TimelineVisualization,
 	GraphVisualization,
 	VideoVisualization,
@@ -23,18 +23,21 @@ define([
 ) {
 	return Backbone.View.extend({
 		initialize: function() {
-			this.youtubers = new YoutubersCollection();
-		    this.videos = new VideosCollection([], {youtuber: "wongfuproductions"});
+			// this.youtubers = new YoutubersCollection();
+		 //    this.videos = new VideosCollection([], {youtuber: "wongfuproductions"});
 		    
-		    var render = _.after(3, _.bind(this.render, this));
-		    this.videos.fetch({success: render});
-		    this.youtubers.fetch({success: render});
-		    var that = this;
-		    d3.json('data/links.json', function(response) {
-		    	that.links = response;
-		    	render();
-		    });
+		    // var processData = _.after(2, _.bind(this.processData, this));
+		    // this.videos.fetch({success: render});
+		    // this.youtubers.fetch({success: render});
+		    
+		    // d3.json('data/links.json', function(response) {
+		    // 	that.links = response;
+		    // 	render();
+		    // });
 
+			this.youtubers = [];
+			this.videos = [];
+			this.fetchData();
 		    this.prevTop = 0;
 			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
 		    $(window).scroll(scroll);
@@ -44,6 +47,59 @@ define([
 		    // this.videos.on('reset', function() {console.log('hi')});
 
 		    
+		},
+		fetchData: function() {
+			// this nested shiz gone get uglyyyyyy
+			var that = this;
+			// first get all youtubers
+		    d3.json('data/nodes.json', function(response) {
+		    	
+		    	that.youtubers = response;
+		    	that.youtubersByName = {};
+		    	_.each(that.youtubers, function(youtuber) {
+		    		youtuber.joinedDate = new Date(youtuber.joined);
+		    		that.youtubersByName[youtuber.youtuber] = youtuber;
+		    	});
+
+		    	console.log(that.youtubersByName)
+
+		    	// get list of youtubers with video data
+		    	d3.json('youtubers/youtubers.json', function(response) {
+		    		// now get all the videos by that youtuber
+		    		var calculateTime = _.after(response.length, _.bind(that.calculateTime, that));
+		    		_.each(response, function(youtuber) {
+		    			d3.json('youtubers/' + youtuber + '.json', function(videos) {
+		    				var videosByAssociation = {};
+		    				videos = _.chain(videos)
+			    				.filter(function(video) {
+			    					video.associations = _.without(video.associations, youtuber);
+			    					return video.associations.length;
+			    				}).sortBy(function(video) {
+			    					_.each(video.associations, function(association) {
+			    						if (videosByAssociation[association]) {
+			    							videosByAssociation[association].push(video);
+			    						} else {
+			    							videosByAssociation[association] = [video];
+			    						}
+			    					});
+
+			    					video.publishedDate = new Date(video.published);
+			    					return video.publishedDate;
+			    				}).value();
+
+
+			    			that.youtubersByName[youtuber].videos = videosByAssociation;
+			    			that.videos.push(videos);
+
+			    			calculateTime();
+		    			});
+		    		});
+		    	});
+		    });
+		},
+		calculateTime: function() {
+			this.videos = _.flatten(this.videos);
+			console.log(this.videos);
 		},
 		render: function() {
 
@@ -95,38 +151,38 @@ define([
 		    });
 			
 		},
-		calculateTime: function() {
-			var scale = this.timelineVisualization.timeScale(),
-				videos = this.videos.groupBy(function(video) {
-					return scale(new Date(video.get('publishedDate').getFullYear(), video.get('publishedDate').getMonth(),
-						video.get('publishedDate').getDate()));
-				}),
-				youtubers = this.youtubers.groupBy(function(youtuber) {
-					return scale(new Date(youtuber.get('joinedDate').getFullYear(), youtuber.get('joinedDate').getMonth(),
-						youtuber.get('joinedDate').getDate()));
-				}),
-				links = _.chain(this.links)
-				// .map(function(link) {
-				// 	return _.chain(link.weight).sortBy(function(date) {
-				// 			return date;
-				// 		}).map(function(date, i) {
-				// 			if (link.source < 0 || _.isObject(link.target)) {
+		// calculateTime: function() {
+		// 	var scale = this.timelineVisualization.timeScale(),
+		// 		videos = this.videos.groupBy(function(video) {
+		// 			return scale(new Date(video.get('publishedDate').getFullYear(), video.get('publishedDate').getMonth(),
+		// 				video.get('publishedDate').getDate()));
+		// 		}),
+		// 		youtubers = this.youtubers.groupBy(function(youtuber) {
+		// 			return scale(new Date(youtuber.get('joinedDate').getFullYear(), youtuber.get('joinedDate').getMonth(),
+		// 				youtuber.get('joinedDate').getDate()));
+		// 		}),
+		// 		links = _.chain(this.links)
+		// 		// .map(function(link) {
+		// 		// 	return _.chain(link.weight).sortBy(function(date) {
+		// 		// 			return date;
+		// 		// 		}).map(function(date, i) {
+		// 		// 			if (link.source < 0 || _.isObject(link.target)) {
 
-				// 			console.log(link, i, date);
-				// 			}
-				// 			return {source: link.source, target: link.target, weight: i + 1, date: new Date(date)};
-				// 		}).value();
-				// 	}).flatten()
-				.groupBy(function(link) {
-						var date = new Date(link.date);
-						return scale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
-					}).value();
+		// 		// 			console.log(link, i, date);
+		// 		// 			}
+		// 		// 			return {source: link.source, target: link.target, weight: i + 1, date: new Date(date)};
+		// 		// 		}).value();
+		// 		// 	}).flatten()
+		// 		.groupBy(function(link) {
+		// 				var date = new Date(link.date);
+		// 				return scale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+		// 			}).value();
 
-			this.youtubersByTime = youtubers;
-			this.videosByTime = videos;
-			this.linksByTime = links;
-			console.log(links);
-		},
+		// 	this.youtubersByTime = youtubers;
+		// 	this.videosByTime = videos;
+		// 	this.linksByTime = links;
+		// 	console.log(links);
+		// },
 		onWindowScroll: function() {
 			// $('.content').empty();  // TODO: refactor
 
