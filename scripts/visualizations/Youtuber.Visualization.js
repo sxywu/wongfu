@@ -7,7 +7,7 @@ define([
     _,
     d3
 ) {
-    var width = 800, height, padding = {top: 0, left: 250, right: 0, bottom: 50};
+    var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
     var youtuber, videos; // data
     var container;
     var radiusScale, timeScale;

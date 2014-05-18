@@ -128,6 +128,11 @@ define([
     }
 
 
+    Graph.position = function(x, y) {
+        container.attr('transform', 'translate(' + x + ',' + y + ')');
+        return Graph;
+    }
+
     /**
     force layout
     */

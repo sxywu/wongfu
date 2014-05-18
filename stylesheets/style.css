@@ -6,11 +6,11 @@ body {
 /*******************
 * SVG
 */
-svg#videoSVG {
+svg {
 	position:absolute;
 	top: 0;
 	height: 20000px;
-	width: 50%;
+	width: 100%;
 	/*height: 50%;*/
 }
 
@@ -27,12 +27,12 @@ svg#videoSVG {
 }
 
 
-svg#graphSVG {
+/*svg#graphSVG {
 	width: 100%;
 	height: 100%;
 	margin:auto;
 	position: fixed;
-}
+}*/
 
 .youtuber {
 	position:fixed;

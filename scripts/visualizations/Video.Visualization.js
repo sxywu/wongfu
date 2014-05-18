@@ -7,7 +7,7 @@ define([
     _,
     d3
 ) {
-    var width = 800, height, padding = {top: 0, left: 250, right: 0, bottom: 50};
+    var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
     var youtuber, videos; // data
     var container;
     var sizeScale, timeScale;
@@ -43,6 +43,7 @@ define([
             .attr('y1', 0)
             .attr('x2', 2 * rectPadding)
             .attr('y1', 0)
+            .attr('stroke', app.colors.green)
             .attr('stroke-dasharray', '1,1');
 
         var text = selection.filter(function(d) {return sizeScale(d.views) > 18});
