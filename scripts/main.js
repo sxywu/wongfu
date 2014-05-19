@@ -52,6 +52,7 @@ require([
     app.timeFormat = d3.time.format('%B %d, %Y');
     app.padding = {top: 250, left: 250, right: 25, bottom: 0};
     app.videoSize = {min: 10, max: 100};
+    app.youtuberSize = {min: 30, max: 80};
 
     var appView = new AppView();
 

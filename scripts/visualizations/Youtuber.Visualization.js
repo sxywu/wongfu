@@ -15,7 +15,7 @@ define([
     var color;
     var Youtuber = function(selection) {
         container = selection;
-        color = app.colors.blue;
+        // color = app.colors.blue;
 
         container.attr('transform', function(d) {
             return 'translate(' + padding.left + ',' + timeScale(d.joinedDate) + ')';
@@ -34,7 +34,7 @@ define([
             .attr('y1', 0)
             .attr('x2', 3 * circlePadding)
             .attr('y1', 0)
-            .attr('stroke', color)
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke-width', 2);
 
         var text = selection.filter(function(d) {return radiusScale(d.statistics.subscriberCount) > 18});
@@ -44,21 +44,21 @@ define([
             .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em')
-            .attr('fill', color)
+            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .text(function(d) {return app.timeFormat(d.joinedDate)})
 
         text.append('text')
             .attr('x', function(d) {return radiusScale(d.statistics.subscriberCount) + 4 * circlePadding})
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
-            .attr('fill', color)
+            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .text(function(d) {return d.author})
 
         selection.append('circle')
             .attr('cx', function(d) {return 3 * circlePadding + radiusScale(d.statistics.subscriberCount) / 2})
             .attr('r', function(d) {return radiusScale(d.statistics.subscriberCount) / 2 + 3})
             .attr('fill', 'white')
-            .attr('stroke', color)
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke-width', 3);
 
         selection.append('defs')
@@ -104,7 +104,7 @@ define([
         if (arguments.length > 1) {
             radiusScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([minRadius, maxRadius]);
         } else {
-            radiusScale = minViews;
+            radiusScale = minSubscribers;
         }
         return Youtuber;
     }

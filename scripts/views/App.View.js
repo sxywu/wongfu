@@ -57,6 +57,7 @@ define([
 		    		that.youtubersByName[youtuber.youtuber] = youtuber;
 
 		    		youtuber.joinedDate = new Date(youtuber.joined);
+		    		youtuber.subscribers = parseInt(youtuber.statistics.subscriberCount);
 		    		return youtuber.joinedDate;
 		    	});
 
@@ -117,11 +118,14 @@ define([
 			// 	latestTime = _.last(this.videos).publishedDate,
 			var earliestTime = new Date(2005, 11, 1),
 				latestTime = new Date(),
-				minVideoViews = _.chain(this.videos).pluck('views').min().value(),
-				maxVideoViews = _.chain(this.videos).pluck('views').max().value(),
+				minViews = _.chain(this.videos).pluck('views').min().value(),
+				maxViews = _.chain(this.videos).pluck('views').max().value(),
+				minSubscribers = _.chain(this.youtubers).pluck('subscribers').min().value(),
+				maxSubscribers = _.chain(this.youtubers).pluck('subscribers').max().value(),
 				height = $('svg').height();
 			this.timeScale = d3.time.scale().domain([earliestTime, latestTime]).range([app.padding.top, height + app.padding.top]);
-			this.videoScale = d3.scale.linear().domain([minVideoViews, maxVideoViews]).range([app.videoSize.min, app.videoSize.max]);
+			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoSize.min, app.videoSize.max]);
+			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberSize.min, app.youtuberSize.max]);
 
 			this.render();
 		},
@@ -148,13 +152,14 @@ define([
 				.enter().append('g').classed('video', true)
 				.call(this.videoVisualization);
 
-			// this.youtuberVisualization = YoutuberVisualization()
-			// 	.timeScale(this.timelineVisualization.timeScale())
-			// 	.radiusScale(this.youtubers.minSubscribers(), this.youtubers.maxSubscribers());
-			// this.timeline.selectAll('.youtuber')
-			// 	.data(this.youtubers.toJSON())
-			// 	.enter().append('g').classed('youtuber', true)
-			// 	.call(this.youtuberVisualization);
+			this.youtuberVisualization = YoutuberVisualization()
+				.timeScale(this.timeScale)
+				.radiusScale(this.youtuberScale);
+			this.timeline.selectAll('.youtuber')
+				.data(this.youtubers)
+				.enter().append('g')
+				.classed('youtuber', true)
+				.call(this.youtuberVisualization);
 
 			// this.graphVisualization = GraphVisualization()
 			// 	.width(graphWidth).height(graphHeight);

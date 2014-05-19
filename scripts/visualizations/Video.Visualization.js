@@ -43,7 +43,7 @@ define([
             .attr('y1', 0)
             .attr('x2', 2 * rectPadding)
             .attr('y1', 0)
-            .attr('stroke', app.colors.green)
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke-dasharray', '1,1');
 
         var text = selection.filter(function(d) {return sizeScale(d.views) > 18});
@@ -53,14 +53,14 @@ define([
             .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em')
-            .attr('fill', app.colors.green)
+            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .text(function(d) {return app.timeFormat(d.publishedDate)})
 
-        text.append('text')
+        selection.append('text')
             .attr('x', function(d) {return sizeScale(d.views) + 3 * rectPadding})
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
-            .attr('fill', app.colors.green)
+            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .text(function(d) {return d.title});
 
         selection.append('image')
@@ -77,7 +77,7 @@ define([
             .attr('x', function(d) {return 2 * rectPadding})
             .attr('width', function(d) {return sizeScale(d.views)})
             .attr('height', function(d) {return sizeScale(d.views) / 4 * 3})
-            .attr('stroke', app.colors.green)
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('fill', 'none')
             .attr('stroke-width', 1);
     }
