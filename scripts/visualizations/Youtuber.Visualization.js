@@ -17,9 +17,10 @@ define([
         container = selection;
         // color = app.colors.blue;
 
-        container.attr('transform', function(d) {
-            return 'translate(' + padding.left + ',' + timeScale(d.joinedDate) + ')';
-        })
+        container
+            .attr('transform', function(d) {
+                return 'translate(' + d.x + ',' + d.y + ')';
+            })
         // .selectAll('.video')
         //     .data(videos).enter().append('image')
         //     .classed('video', true)
@@ -29,15 +30,21 @@ define([
     }
 
     var enter = function(selection) {
-        selection.append('line')
-            .attr('x1', 0)
-            .attr('y1', 0)
-            .attr('x2', 3 * circlePadding)
-            .attr('y1', 0)
+        var diagonal = d3.svg.diagonal()
+            .source(function(d) {return {x: 0, y: 0}})
+            .target(function(d) {return {x: 4 * circlePadding, y: d.imageY}});
+
+        selection.append('path')
+            .attr('d', diagonal)
+            // .attr('x1', 0)
+            // .attr('y1', 0)
+            // .attr('x2', 3 * circlePadding)
+            // .attr('y1', 0)
+            .attr('fill', 'none')
             .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke-width', 2);
 
-        var text = selection.filter(function(d) {return radiusScale(d.statistics.subscriberCount) > 18});
+        var text = selection.filter(function(d) {return app.youtuberSize > 18});
         
         text.append('text')
             .attr('x', function(d) {return -circlePadding})
@@ -48,30 +55,43 @@ define([
             .text(function(d) {return app.timeFormat(d.joinedDate)})
 
         text.append('text')
-            .attr('x', function(d) {return radiusScale(d.statistics.subscriberCount) + 4 * circlePadding})
+            .attr('x', function(d) {return app.youtuberSize + 5 * circlePadding})
+            .attr('y', function(d) {return d.imageY})
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
             .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .text(function(d) {return d.author})
 
+        selection.append('line')
+            .attr('x1', app.youtuberSize + 5 * circlePadding)
+            .attr('y1', function(d) {return d.imageY + 10})
+            .attr('x2', function(d) {return radiusScale(d.subscribers) + app.youtuberSize + 4 * circlePadding})
+            .attr('y2', function(d) {return d.imageY + 10})
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke-width', 3);
+
         selection.append('circle')
-            .attr('cx', function(d) {return 3 * circlePadding + radiusScale(d.statistics.subscriberCount) / 2})
-            .attr('r', function(d) {return radiusScale(d.statistics.subscriberCount) / 2 + 3})
+            .attr('cx', function(d) {return 4 * circlePadding + app.youtuberSize / 2})
+            .attr('cy', function(d) {return d.imageY})
+            .attr('r', function(d) {return app.youtuberSize / 2 + 3})
             .attr('fill', 'white')
             .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke-width', 3);
+
+        
 
         selection.append('defs')
             .append('clipPath').attr('id', function(d) {
                 return 'clipTimelineCircle' + d.index;
             }).append('circle')
-            .attr('cx', function(d) {return 3 * circlePadding + radiusScale(d.statistics.subscriberCount) / 2})
-            .attr('r', function(d) {return radiusScale(d.statistics.subscriberCount) / 2});
+            .attr('cx', function(d) {return 4 * circlePadding + app.youtuberSize / 2})
+            .attr('cy', function(d) {return d.imageY})
+            .attr('r', function(d) {return app.youtuberSize / 2});
         selection.append('image')
-            .attr('y', function(d) {return -radiusScale(d.statistics.subscriberCount) / 2})
-            .attr('x', function(d) {return 3 * circlePadding})
-            .attr('width', function(d) {return radiusScale(d.statistics.subscriberCount)})
-            .attr('height', function(d) {return radiusScale(d.statistics.subscriberCount)})
+            .attr('y', function(d) {return d.imageY - app.youtuberSize / 2})
+            .attr('x', function(d) {return 4 * circlePadding})
+            .attr('width', function(d) {return app.youtuberSize})
+            .attr('height', function(d) {return app.youtuberSize})
             .attr('clip-path', function(d) {return 'url(#clipTimelineCircle' + d.index + ')'})
             // .attr('opacity', function(d) {return _.isEmpty(d.associations) ? 0 : 1})
             .attr('xlink:href', function(d) {return d.image});

@@ -47,12 +47,15 @@ require([
     app = {};
     // http://www.colourlovers.com/palette/3318893/S_i_r_e_n_s_S_o_n_g?widths=1
     app.colors = {blue: "#40738C", green: "#339999", orange: "#F38630"};
-    app.d3Colors = d3.scale.category10();
+    app.d3Colors = d3.scale.category20();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
     app.timeFormat = d3.time.format('%B %d, %Y');
     app.padding = {top: 250, left: 250, right: 25, bottom: 0};
-    app.videoSize = {min: 10, max: 100};
-    app.youtuberSize = {min: 30, max: 80};
+    app.nodePadding = {top: 0, left: 5, right: 5, bottom: 5};
+    app.videoSize = 30;
+    app.youtuberSize = 30;
+    app.videoScaleSize = {min: 100, max: 800};
+    app.youtuberScaleSize = {min: 100, max: 800};
 
     var appView = new AppView();
 

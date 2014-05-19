@@ -122,11 +122,37 @@ define([
 				maxViews = _.chain(this.videos).pluck('views').max().value(),
 				minSubscribers = _.chain(this.youtubers).pluck('subscribers').min().value(),
 				maxSubscribers = _.chain(this.youtubers).pluck('subscribers').max().value(),
-				height = $('svg').height();
+				height = $('svg').height(),
+				that = this;
 			this.timeScale = d3.time.scale().domain([earliestTime, latestTime]).range([app.padding.top, height + app.padding.top]);
-			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoSize.min, app.videoSize.max]);
-			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberSize.min, app.youtuberSize.max]);
+			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoScaleSize.min, app.videoScaleSize.max]);
+			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
 
+			this.nodesByTime = _.groupBy(_.union(this.videos, this.youtubers), function(node) {
+				var date = node.publishedDate || node.joinedDate;
+				return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+			});
+
+			var before = 0;
+			_.each(this.nodesByTime, function(nodes, time) {
+				var height = _.reduce(nodes, function(memo, node) {
+					return memo + (node.views ? app.videoSize : app.youtuberSize) + app.nodePadding.top + app.nodePadding.bottom;
+				}, 0);
+
+				before += height / 2;
+
+				if (nodes.length > 1) {
+					_.each(nodes, function(node, i) {
+						node.x = 0;
+						node.y = time;
+						node.imageY = (height / nodes.length) * (i - (nodes.length - 1) / 2);
+					});
+				} else {
+					nodes[0].x = 0;
+					nodes[0].y = time;
+					nodes[0].imageY = 0;
+				}
+			});
 			this.render();
 		},
 		render: function() {
@@ -182,6 +208,41 @@ define([
 		    	that.graphVisualization.position(left, top);
 		    });
 			
+		},
+		timelineForce: function() {
+			var width = $('svg').width(),
+				height = $('svg').height(),
+				nodes = _.union(this.youtubers, this.videos),
+				that = this,
+				force = d3.layout.force()
+					.nodes(nodes)
+					.size([200, height])
+					.charge(function(d) {
+						var radius = (d.views ? that.videoScale(d.views) / 2 : that.youtuberScale(d.subscribers));
+						console.log(radius);
+						return -Math.pow(radius, 2.0) / 4;
+					}).on('tick', function(e) {
+						var k = e.alpha;
+
+						_.each(nodes, function(node) {
+							node.x += (node.ideal.x - node.x) * k;
+							node.y += (node.ideal.y - node.y) * k;
+						});
+						// console.log(nodes);
+					});
+
+			// set initial position
+			_.each(nodes, function(node) {
+				node.ideal = {};
+				node.x = node.ideal.x = 0;
+				node.y = node.ideal.y = that.timeScale(node.publishedDate || node.joinedDate);
+			});
+
+			force.start();
+			for (var i = 100; i > 0; --i) force.tick();
+			force.stop();
+
+
 		},
 		// calculateTime: function() {
 		// 	var scale = this.timelineVisualization.timeScale(),
