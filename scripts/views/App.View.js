@@ -116,7 +116,7 @@ define([
 
 			// var earliestTime = _.first(this.youtubers).joinedDate,
 			// 	latestTime = _.last(this.videos).publishedDate,
-			var earliestTime = new Date(2005, 11, 1),
+			var earliestTime = new Date(2005, 10, 1),
 				latestTime = new Date(),
 				minViews = _.chain(this.videos).pluck('views').min().value(),
 				maxViews = _.chain(this.videos).pluck('views').max().value(),
@@ -149,20 +149,21 @@ define([
 				.sizeScale(this.videoScale);
 			this.timeline.selectAll('.video')
 				.data(this.videos)
-				.enter().append('g').classed('video', true)
-				.call(this.videoVisualization);
+				.enter().insert('g', '.marker')
+					.classed('video', true)
+					.call(this.videoVisualization);
 
 			this.youtuberVisualization = YoutuberVisualization()
 				.timeScale(this.timeScale)
 				.radiusScale(this.youtuberScale);
 			this.timeline.selectAll('.youtuber')
 				.data(this.youtubers)
-				.enter().append('g')
-				.classed('youtuber', true)
-				.call(this.youtuberVisualization);
+				.enter().insert('g', '.marker')
+					.classed('youtuber', true)
+					.call(this.youtuberVisualization);
 
-			// this.graphVisualization = GraphVisualization()
-			// 	.width(graphWidth).height(graphHeight);
+			this.graphVisualization = GraphVisualization()
+				.width(graphWidth).height(graphHeight);
 			// d3.select('svg').append('g')
 			// 	.classed('graph', true)
 			// 	.call(this.graphVisualization);
@@ -173,13 +174,13 @@ define([
 			// this.prevTop = 0;
 			// var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
 		 //    $(window).scroll(scroll);
-			// var that = this;
-		 //    $(window).scroll(this.timelineVisualization.update);
-		 //    $(window).scroll(function() {
-		 //    	var left = width - graphWidth,
-		 //    		top = top = $(window).scrollTop() + that.timelineVisualization.padding().top;
-		 //    	that.graphVisualization.position(left, top);
-		 //    });
+			var that = this;
+		    $(window).scroll(this.timelineVisualization.update);
+		    $(window).scroll(function() {
+		    	var left = width - graphWidth,
+		    		top = top = $(window).scrollTop() + app.padding.top;
+		    	that.graphVisualization.position(left, top);
+		    });
 			
 		},
 		// calculateTime: function() {
@@ -218,7 +219,7 @@ define([
 			// $('.content').empty();  // TODO: refactor
 
 			var top = $(window).scrollTop() + this.timelineVisualization.padding().top,
-				scale = this.timelineVisualization.timeScale(),
+				scale = this.timeScale,
 				date = scale.invert(top),
 				that = this,
 				youtubers = _.chain(this.youtubersByTime).filter(function(youtubers, time) {

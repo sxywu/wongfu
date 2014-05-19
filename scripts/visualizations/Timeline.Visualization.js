@@ -9,7 +9,7 @@ define([
 ) {
     var width = 800, height = 500, padding = {top: 250, left: 250, right: 25, bottom: 0};
     var youtuber, videos; // data
-    var container, circle, text;
+    var container, marker, circle, text;
     var yScale, timeScale;
     var Timeline = function(selection) {
         container = selection;
@@ -36,16 +36,19 @@ define([
             // .attr("transform", "translate(0," + height + ")")
             .call(yAxis);
 
-        circle = container.append('circle')
+        marker = container.append('g')
             .classed('marker', true)
+            .attr('transform', 'translate(0,' + padding.top + ')');
+        circle = marker.append('circle')
+            .classed('markerCircle', true)
             .attr('r', 5)
             .attr('cx', 0)
-            .attr('cy', padding.top);
+            .attr('cy', 0);
 
-        text = container.append('text')
+        text = marker.append('text')
             .classed('markerDate', true)
             .attr('x', -10)
-            .attr('y', padding.top)
+            .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em');
 
@@ -56,10 +59,9 @@ define([
     Timeline.update = function() {
         var top = $(window).scrollTop() + padding.top,
             date = app.timeFormat(timeScale.invert(top));
-        circle.attr('cy', top);
+        marker.attr('transform', 'translate(0,' + top + ')');
 
-        text.attr('y', top)
-            .text(date);
+        text.text(date);
     }
 
     /*
