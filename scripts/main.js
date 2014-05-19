@@ -50,6 +50,8 @@ require([
     app.d3Colors = d3.scale.category10();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
     app.timeFormat = d3.time.format('%B %d, %Y');
+    app.padding = {top: 250, left: 250, right: 25, bottom: 0};
+    app.videoSize = {min: 10, max: 100};
 
     var appView = new AppView();
 

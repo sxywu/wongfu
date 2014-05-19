@@ -38,9 +38,7 @@ define([
 			this.youtubers = [];
 			this.videos = [];
 			this.fetchData();
-		    this.prevTop = 0;
-			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
-		    $(window).scroll(scroll);
+		    
 		    // this.youtubers.on('reset', calculateTime);
 		    // this.videos.on('reset', calculateTime);
 
@@ -54,12 +52,17 @@ define([
 			// first get all youtubers
 		    d3.json('data/nodes.json', function(response) {
 		    	
-		    	that.youtubers = response;
 		    	that.youtubersByName = {};
-		    	_.each(that.youtubers, function(youtuber) {
-		    		youtuber.joinedDate = new Date(youtuber.joined);
+		    	that.youtubers = _.sortBy(response, function(youtuber) {
 		    		that.youtubersByName[youtuber.youtuber] = youtuber;
+
+		    		youtuber.joinedDate = new Date(youtuber.joined);
+		    		return youtuber.joinedDate;
 		    	});
+
+		    	// _.each(that.youtubers, function(youtuber) {
+		    	// 	that.youtubersByName[youtuber.youtuber] = youtuber;
+		    	// });
 
 		    	console.log(that.youtubersByName)
 
@@ -76,6 +79,8 @@ define([
 			    					return video.associations.length;
 			    				}).sortBy(function(video) {
 			    					_.each(video.associations, function(association) {
+			    						if (!_.contains(_.keys(that.youtubersByName), association)) return;
+
 			    						if (videosByAssociation[association]) {
 			    							videosByAssociation[association].push(video);
 			    						} else {
@@ -83,12 +88,17 @@ define([
 			    						}
 			    					});
 
+			    					video.youtuber = youtuber;
 			    					video.publishedDate = new Date(video.published);
+						    		video.views = parseInt(video.views);
 			    					return video.publishedDate;
 			    				}).value();
 
 
 			    			that.youtubersByName[youtuber].videos = videosByAssociation;
+
+			    			videos = _.chain(videosByAssociation)
+			    				.values().flatten().uniq().value();
 			    			that.videos.push(videos);
 
 			    			calculateTime();
@@ -98,8 +108,22 @@ define([
 		    });
 		},
 		calculateTime: function() {
-			this.videos = _.flatten(this.videos);
-			console.log(this.videos);
+			this.videos = _.chain(this.videos).flatten()
+				.sortBy(function(video) {
+					return video.publishedDate;
+				}).value();
+
+			// var earliestTime = _.first(this.youtubers).joinedDate,
+			// 	latestTime = _.last(this.videos).publishedDate,
+			var earliestTime = new Date(2005, 11, 1),
+				latestTime = new Date(),
+				minVideoViews = _.chain(this.videos).pluck('views').min().value(),
+				maxVideoViews = _.chain(this.videos).pluck('views').max().value(),
+				height = $('svg').height();
+			this.timeScale = d3.time.scale().domain([earliestTime, latestTime]).range([app.padding.top, height + app.padding.top]);
+			this.videoScale = d3.scale.linear().domain([minVideoViews, maxVideoViews]).range([app.videoSize.min, app.videoSize.max]);
+
+			this.render();
 		},
 		render: function() {
 
@@ -110,45 +134,47 @@ define([
 			this.timelineVisualization = TimelineVisualization()
 				// .videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
 				.width(width).height(height)
-				
-				.timeScale(this.youtubers.minJoined(), this.youtubers.maxJoined());
+				.timeScale(this.timeScale);
 			this.timeline = d3.select('svg').append('g')
 				.classed('timeline', true)
 				.call(this.timelineVisualization);
 
 
 			this.videoVisualization = VideoVisualization()
-				.timeScale(this.timelineVisualization.timeScale())
-				.sizeScale(this.videos.minViews(), this.videos.maxViews());
+				.timeScale(this.timeScale)
+				.sizeScale(this.videoScale);
 			this.timeline.selectAll('.video')
-				.data(this.videos.filterByAssociations())
+				.data(this.videos)
 				.enter().append('g').classed('video', true)
 				.call(this.videoVisualization);
 
-			this.youtuberVisualization = YoutuberVisualization()
-				.timeScale(this.timelineVisualization.timeScale())
-				.radiusScale(this.youtubers.minSubscribers(), this.youtubers.maxSubscribers());
-			this.timeline.selectAll('.youtuber')
-				.data(this.youtubers.toJSON())
-				.enter().append('g').classed('youtuber', true)
-				.call(this.youtuberVisualization);
+			// this.youtuberVisualization = YoutuberVisualization()
+			// 	.timeScale(this.timelineVisualization.timeScale())
+			// 	.radiusScale(this.youtubers.minSubscribers(), this.youtubers.maxSubscribers());
+			// this.timeline.selectAll('.youtuber')
+			// 	.data(this.youtubers.toJSON())
+			// 	.enter().append('g').classed('youtuber', true)
+			// 	.call(this.youtuberVisualization);
 
-			this.graphVisualization = GraphVisualization()
-				.width(graphWidth).height(graphHeight);
-			d3.select('svg').append('g')
-				.classed('graph', true)
-				.call(this.graphVisualization);
+			// this.graphVisualization = GraphVisualization()
+			// 	.width(graphWidth).height(graphHeight);
+			// d3.select('svg').append('g')
+			// 	.classed('graph', true)
+			// 	.call(this.graphVisualization);
 
-			this.calculateTime();
-			this.onWindowScroll();
+			// this.calculateTime();
+			// this.onWindowScroll();
 
-			var that = this;
-		    $(window).scroll(this.timelineVisualization.update);
-		    $(window).scroll(function() {
-		    	var left = width - graphWidth,
-		    		top = top = $(window).scrollTop() + that.timelineVisualization.padding().top;
-		    	that.graphVisualization.position(left, top);
-		    });
+			// this.prevTop = 0;
+			// var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
+		 //    $(window).scroll(scroll);
+			// var that = this;
+		 //    $(window).scroll(this.timelineVisualization.update);
+		 //    $(window).scroll(function() {
+		 //    	var left = width - graphWidth,
+		 //    		top = top = $(window).scrollTop() + that.timelineVisualization.padding().top;
+		 //    	that.graphVisualization.position(left, top);
+		 //    });
 			
 		},
 		// calculateTime: function() {

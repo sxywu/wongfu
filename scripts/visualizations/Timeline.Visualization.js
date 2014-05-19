@@ -80,10 +80,10 @@ define([
     //     return Timeline;
     // }
 
-    Timeline.timeScale = function(minDate, maxDate) {
+    Timeline.timeScale = function(value) {
         if (!arguments.length) return timeScale;
-
-        timeScale = d3.time.scale().domain([minDate, maxDate]).range([padding.top, height + padding.top]);
+        timeScale = value;
+        // timeScale = d3.time.scale().domain([minDate, maxDate]).range([padding.top, height + padding.top]);
         return Timeline;
     }
 
