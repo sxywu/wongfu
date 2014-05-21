@@ -128,30 +128,89 @@ define([
 			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoScaleSize.min, app.videoScaleSize.max]);
 			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
 
-			this.nodesByTime = _.groupBy(_.union(this.videos, this.youtubers), function(node) {
-				var date = node.publishedDate || node.joinedDate;
-				return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+			this.nodesByTime = _.chain(_.union(this.videos, this.youtubers))
+				.sortBy(function(node) {
+					return node.publishedDate || node.joinedDate;
+				}).groupBy(function(node) {
+					var date = node.publishedDate || node.joinedDate;
+					return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+				}).value();
+
+			var groupedByTime = {},
+				last,
+				i = 0;
+			_.each(this.nodesByTime, function(nodes, time) {
+				time = parseInt(time);
+				var height = _.reduce(nodes, function(memo, node) {
+					node.y = time;
+					return memo + (node.views ? app.videoSize : app.youtuberSize) + app.nodePadding.top + app.nodePadding.bottom;
+				}, 0),
+					top = time - (height / 2),
+					bottom = time + (height / 2);
+
+				if (!last || top > last.bottom) {
+					var group = {
+						top: top,
+						bottom: bottom,
+						last: last,
+						nodes: nodes,
+						height: height,
+						min: time,
+						max: time
+					};
+					groupedByTime[i] = group;
+					last = group;
+					i += 1;
+				} else if (top < last.bottom) {
+					var stop = false;
+					while (!stop) {
+						height = last.height + height;
+						var middle = (last.min + time) / 2;
+						top = middle - (height / 2);
+						bottom = middle + (height / 2);
+						nodes = _.union(last.nodes, nodes);
+
+						last.top = top;
+						last.bottom = bottom;
+						last.nodes = nodes;
+						last.height = height;
+						last.max = time;
+
+						// i -= 1;
+						if (last.top < last.last.bottom) {
+							last = last.last;
+							i -= 1;
+						} else {
+							stop = true;
+						}
+					}
+					
+				}
+				// before += height / 2;
+
+				// if (nodes.length > 1) {
+				// 	_.each(nodes, function(node, i) {
+				// 		node.x = 0;
+				// 		node.y = time;
+				// 		node.imageY = (height / nodes.length) * (i - (nodes.length - 1) / 2);
+				// 	});
+				// } else {
+				// 	nodes[0].x = 0;
+				// 	nodes[0].y = time;
+				// 	nodes[0].imageY = 0;
+				// }
 			});
 
-			var before = 0;
-			_.each(this.nodesByTime, function(nodes, time) {
-				var height = _.reduce(nodes, function(memo, node) {
-					return memo + (node.views ? app.videoSize : app.youtuberSize) + app.nodePadding.top + app.nodePadding.bottom;
-				}, 0);
-
-				before += height / 2;
-
-				if (nodes.length > 1) {
-					_.each(nodes, function(node, i) {
-						node.x = 0;
-						node.y = time;
-						node.imageY = (height / nodes.length) * (i - (nodes.length - 1) / 2);
-					});
-				} else {
-					nodes[0].x = 0;
-					nodes[0].y = time;
-					nodes[0].imageY = 0;
-				}
+			_.each(groupedByTime, function(group) {
+				var length = group.nodes.length,
+					middle = (group.top + group.bottom) / 2;
+				_.each(group.nodes, function(node, i) {
+					var height = (node.views ? app.videoSize : app.youtuberSize) + app.nodePadding.top + app.nodePadding.bottom;
+					node.x = 0;
+					node.imageY = middle + height * (i - (length - 1) / 2);
+					console.log(node.imageY, node.y, node.imageY - node.y);
+					node.imageY = node.imageY - node.y;
+				});
 			});
 			this.render();
 		},

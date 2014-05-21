@@ -11,7 +11,7 @@ define([
     var youtuber, videos; // data
     var container;
     var sizeScale, timeScale;
-    var rectPadding = 10, minSize = 10, maxSize = 100, borderRadius = 3;
+    var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
     var color;
     var Video = function(selection) {
         container = selection;

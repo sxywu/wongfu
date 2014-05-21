@@ -43,21 +43,6 @@
     "title" : "JustKiddingFilms",
     "youtuber" : "justkiddingfilms"
   },
-  { "author" : "From Jen",
-    "category" : null,
-    "content" : "Vlog, travel, laugh, and go behind the scenes!",
-    "image" : "https://yt3.ggpht.com/-EPAYO1Qerq0/AAAAAAAAAAI/AAAAAAAAAAA/kiQh1PtwMLM/s88-c-k-no/photo.jpg",
-    "index" : 38,
-    "joined" : "2012-08-01T23:23:33.000Z",
-    "statistics" : { "lastWebAccess" : "1970-01-01T00:00:00.000Z",
-        "subscriberCount" : "22975",
-        "totalUploadViews" : "154557",
-        "videoWatchCount" : 0,
-        "viewCount" : "0"
-      },
-    "title" : "From Jen",
-    "youtuber" : "frmjen"
-  },
   { "author" : "ClaraCMusic",
     "category" : "MUSICIAN",
     "content" : "For Business Inquiries please email: BookClara@gmail.com\n\nFor Booking please email: BookClara@gmail.com\n\nFor Fan Mail: BookClara@gmail.com",
@@ -507,21 +492,6 @@
       },
     "title" : "TheNathanMoore",
     "youtuber" : "nathanmoore904"
-  },
-  { "author" : "MsMcKICKASS",
-    "category" : null,
-    "content" : "Hello Ewetoobers!  Welcome to my second channel!  Here you'll find more personal content- behind the scenes videos, more frequent vlogs, blooper reels, and more!  Please make sure to subscribe to my main channel too!  http://www.youtube.com/LanaMcKissack",
-    "image" : "https://yt3.ggpht.com/-pYrvE7jpvcw/AAAAAAAAAAI/AAAAAAAAAAA/5ZBkqiXQ6Sg/s88-c-k-no/photo.jpg",
-    "index" : 12,
-    "joined" : "2013-02-07T07:07:46.000Z",
-    "statistics" : { "lastWebAccess" : "1970-01-01T00:00:00.000Z",
-        "subscriberCount" : "16925",
-        "totalUploadViews" : "330771",
-        "videoWatchCount" : 0,
-        "viewCount" : "0"
-      },
-    "title" : "MsMcKICKASS",
-    "youtuber" : "msmckickass"
   },
   { "author" : "ISAtv",
     "category" : "DIRECTOR",

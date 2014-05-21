@@ -11,7 +11,7 @@ define([
     var youtuber, videos; // data
     var container;
     var radiusScale, timeScale;
-    var circlePadding = 10, minRadius = 30, maxRadius = 80;
+    var circlePadding = 30, minRadius = 30, maxRadius = 80;
     var color;
     var Youtuber = function(selection) {
         container = selection;
@@ -60,7 +60,7 @@ define([
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
             .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
-            .text(function(d) {return d.author})
+            .text(function(d) {return d.author + ' (' + d.youtuber + ')'})
 
         selection.append('line')
             .attr('x1', app.youtuberSize + 5 * circlePadding)
