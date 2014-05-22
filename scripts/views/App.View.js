@@ -71,7 +71,9 @@ define([
 		    	d3.json('youtubers/youtubers.json', function(response) {
 		    		// now get all the videos by that youtuber
 		    		var calculateTime = _.after(response.length, _.bind(that.calculateTime, that));
-		    		_.each(response, function(youtuber) {
+
+		    		app.youtubersWithVideo = response;
+		    		_.each(app.youtubersWithVideo, function(youtuber) {
 		    			d3.json('youtubers/' + youtuber + '.json', function(videos) {
 		    				var videosByAssociation = {};
 		    				videos = _.chain(videos)

@@ -103,21 +103,6 @@
     "title" : "Justin Safaei",
     "youtuber" : "jsafaei"
   },
-  { "author" : "HigaTV",
-    "category" : null,
-    "content" : "My personal channel",
-    "image" : "https://yt3.ggpht.com/-NwMo93yksWc/AAAAAAAAAAI/AAAAAAAAAAA/PtYwMTDovvU/s88-c-k-no/photo.jpg",
-    "index" : 35,
-    "joined" : "2009-04-17T10:35:46.000Z",
-    "statistics" : { "lastWebAccess" : "1970-01-01T00:00:00.000Z",
-        "subscriberCount" : "2042172",
-        "totalUploadViews" : "97196949",
-        "videoWatchCount" : 0,
-        "viewCount" : "0"
-      },
-    "title" : "HigaTV",
-    "youtuber" : "higatv"
-  },
   { "author" : "David Choi",
     "category" : "MUSICIAN",
     "content" : "I make music, sing songs, play shows, and I love you.\n\nEmails: davidchoimusic(a)gmail.com\nCollege Booking: davidchoibooking(a)gmail.com",

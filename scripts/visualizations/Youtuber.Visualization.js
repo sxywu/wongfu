@@ -15,7 +15,9 @@ define([
     var color;
     var Youtuber = function(selection) {
         container = selection;
-        // color = app.colors.blue;
+        color = function(youtuber) {
+            return _.contains(app.youtubersWithVideo, youtuber) ? app.d3Colors(youtuber) : '#999';
+        };
 
         container
             .attr('transform', function(d) {
@@ -41,7 +43,7 @@ define([
             // .attr('x2', 3 * circlePadding)
             // .attr('y1', 0)
             .attr('fill', 'none')
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke', function(d) {return color(d.youtuber)})
             .attr('stroke-width', 2);
 
         var text = selection.filter(function(d) {return app.youtuberSize > 18});
@@ -51,7 +53,7 @@ define([
             .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em')
-            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('fill', function(d) {return color(d.youtuber)})
             .text(function(d) {return app.timeFormat(d.joinedDate)})
 
         text.append('text')
@@ -59,7 +61,7 @@ define([
             .attr('y', function(d) {return d.imageY})
             .attr('text-anchor', 'start')
             .attr('dy', '.35em')
-            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('fill', function(d) {return color(d.youtuber)})
             .text(function(d) {return d.author + ' (' + d.youtuber + ')'})
 
         selection.append('line')
@@ -67,7 +69,7 @@ define([
             .attr('y1', function(d) {return d.imageY + 10})
             .attr('x2', function(d) {return radiusScale(d.subscribers) + app.youtuberSize + 4 * circlePadding})
             .attr('y2', function(d) {return d.imageY + 10})
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke', function(d) {return color(d.youtuber)})
             .attr('stroke-width', 3);
 
         selection.append('circle')
@@ -75,7 +77,7 @@ define([
             .attr('cy', function(d) {return d.imageY})
             .attr('r', function(d) {return app.youtuberSize / 2 + 3})
             .attr('fill', 'white')
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke', function(d) {return color(d.youtuber)})
             .attr('stroke-width', 3);
 
         
