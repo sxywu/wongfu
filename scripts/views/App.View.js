@@ -124,11 +124,19 @@ define([
 				maxViews = _.chain(this.videos).pluck('views').max().value(),
 				minSubscribers = _.chain(this.youtubers).pluck('subscribers').min().value(),
 				maxSubscribers = _.chain(this.youtubers).pluck('subscribers').max().value(),
+				maxAssociations = _.chain(this.youtubers)
+					.filter(function(youtuber) {
+						return youtuber.videos;
+					}).map(function(associations) {
+						return _.chain(associations.videos).map(function(association) {return association.length})
+							.max().value();
+					}).max().value();
 				height = $('svg').height(),
 				that = this;
 			this.timeScale = d3.time.scale().domain([earliestTime, latestTime]).range([app.padding.top, height + app.padding.top]);
 			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoScaleSize.min, app.videoScaleSize.max]);
 			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
+			this.linkScale = d3.scale.log().domain([1, maxAssociations]).range([1, 16]);
 
 			this.nodesByTime = _.chain(_.union(this.videos, this.youtubers))
 				.sortBy(function(node) {
@@ -250,6 +258,7 @@ define([
 					.call(this.youtuberVisualization);
 
 			this.graphVisualization = GraphVisualization()
+				.linkScale(this.linkScale)
 				.width(graphWidth).height(graphHeight);
 			d3.select('svg').append('g')
 				.classed('graph', true)

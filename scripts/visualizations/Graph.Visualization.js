@@ -11,8 +11,12 @@ define([
     var container, node, link, text;
     var nodes = [], links = []; // data
     var nodeScale, linkScale;
+    var color;
     var Graph = function(selection, d) {
         container = selection;
+        color = function(youtuber) {
+            return _.contains(app.youtubersWithVideo, youtuber) ? app.d3Colors(youtuber) : '#999';
+        };
 
         force = d3.layout.force()
             .size([width, height])
@@ -54,13 +58,13 @@ define([
             .attr('height', 20)
             .attr('rx', 3)
             .attr('ry', 3)
-            .attr('fill', app.colors.blue)
+            .attr('fill', function(d) {return color(d.youtuber)})
             .attr('fill-opacity', .5);
 
         node.append('circle')
             .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2 + 3})
             .attr('fill', 'white')
-            .attr('stroke', app.colors.blue)
+            .attr('stroke', function(d) {return color(d.youtuber)})
             .attr('stroke-width', 3);
 
         node.append('defs')
@@ -84,8 +88,8 @@ define([
         selection.enter()
             .insert('line', '.node')
             .classed('link', true)
-            .attr("stroke", app.colors.green)
-            .attr('opacity', .3)
+            .attr("stroke", function(d) {return color(d.source.youtuber)})
+            .attr('opacity', .75)
             .attr("fill", "none");
 
         updateLinks(selection);
@@ -93,7 +97,7 @@ define([
 
     var updateLinks = function(selection) {
         selection.transition().duration(100)
-            .attr('stroke-width', function(d) {return d.weight});
+            .attr('stroke-width', function(d) {return linkScale(d.weight)});
     }
 
     var exitNodes = function(selection) {
@@ -190,10 +194,9 @@ define([
     Graph.links = function(value) {
         if (!arguments.length) return links;
 
-        var max = _.chain(value).pluck('weight').max().value(),
-            min = _.chain(value).pluck('weight').min().value();
-        console.log(min, max)
-        linkScale = d3.scale.log().domain([min, max]).range([1, 12]);
+        // var max = _.chain(value).pluck('weight').max().value(),
+        //     min = _.chain(value).pluck('weight').min().value();
+        // linkScale.domain([min, max]);
         // links = _.chain(value).map(function(link) {
         //     var obj = {};
         //     obj.sourceIndex = link.source;
@@ -207,6 +210,12 @@ define([
         //     return nodes[link.source] && nodes[link.target];
         // }).value();
         links = value;
+        return Graph;
+    }
+
+   Graph.linkScale = function(value) {
+        if (!arguments.length) return linkScale;
+        linkScale = value;
         return Graph;
     }
 
