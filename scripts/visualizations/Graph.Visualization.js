@@ -20,7 +20,13 @@ define([
 
         force = d3.layout.force()
             .size([width, height])
-            .charge(-300).linkDistance(125)
+            .charge(function(d) {
+                console.log(nodeScale(d.subscribers))
+                return -Math.pow(nodeScale(d.subscribers), 2) / 4;
+            })
+            .linkDistance(function(d) {
+                return (1 / linkScale(d.weight)) * 350;
+            })
             .on('tick', forceTick);
 
         Graph.render();
@@ -39,7 +45,7 @@ define([
         text = node.append('g').classed('name', true)
             .classed('hidden', true)
             .attr('transform', function(d) {
-                return 'translate(' + (nodeScale(parseInt(d.statistics.subscriberCount)) / 2 - 3) + ', 0)';
+                return 'translate(' + (nodeScale(d.subscribers) / 2 - 3) + ', 0)';
             });
 
 
@@ -62,7 +68,7 @@ define([
             .attr('fill-opacity', .5);
 
         node.append('circle')
-            .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2 + 3})
+            .attr('r', function(d) {return nodeScale(d.subscribers) / 2 + 3})
             .attr('fill', 'white')
             .attr('stroke', function(d) {return color(d.youtuber)})
             .attr('stroke-width', 3);
@@ -71,12 +77,12 @@ define([
             .append('clipPath').attr('id', function(d) {
                 return 'clipGraphCircle' + d.index;
             }).append('circle')
-            .attr('r', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount)) / 2});
+            .attr('r', function(d) {return nodeScale(d.subscribers) / 2});
         node.append('image')
-            .attr('x', function(d) {return -nodeScale(parseInt(d.statistics.subscriberCount)) / 2})
-            .attr('y', function(d) {return -nodeScale(parseInt(d.statistics.subscriberCount)) / 2})
-            .attr('height', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount))})
-            .attr('width', function(d) {return nodeScale(parseInt(d.statistics.subscriberCount))})
+            .attr('x', function(d) {return -nodeScale(d.subscribers) / 2})
+            .attr('y', function(d) {return -nodeScale(d.subscribers) / 2})
+            .attr('height', function(d) {return nodeScale(d.subscribers)})
+            .attr('width', function(d) {return nodeScale(d.subscribers)})
             .attr('clip-path', function(d) {return 'url(#clipGraphCircle' + d.index + ')'})
             .attr('xlink:href', function(d) {return d.image});
 
@@ -86,7 +92,7 @@ define([
 
     var enterLinks = function(selection) {
         selection.enter()
-            .insert('line', '.node')
+            .insert('path', '.node')
             .classed('link', true)
             .attr("stroke", function(d) {return color(d.source.youtuber)})
             .attr('opacity', .75)
@@ -156,10 +162,36 @@ define([
 
     var forceTick = function() {
         node.attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"});
-        link.attr("x1", function(d) {return d.source.x})
-            .attr("x2", function(d) {return d.target.x})
-            .attr("y1", function(d) {return d.source.y})
-            .attr("y2", function(d) {return d.target.y});
+        link.attr('d', function(d) {
+            var x1 = d.source.x,
+                x2 = d.target.x,
+                y1 = d.source.y,
+                y2 = d.target.y,
+                dx = x2 - x1,
+                dy = y2 - y1,
+                dist = Math.sqrt(dx * dx + dy * dy),
+                c1x = dist / 4,
+                cy = -c1x * (3/4),
+                c2x = dist - c1x;
+
+            return 'M0,0C' + c1x + ',' + cy + ' ' + c2x + ',' + cy + ' ' + dist + ',0';
+        }).attr('transform', function(d) {
+            var x1 = d.source.x,
+                x2 = d.target.x,
+                y1 = d.source.y,
+                y2 = d.target.y,
+                dx = x2 - x1,
+                dy = y2 - y1,
+                angle;
+            angle = Math.atan(dy / dx);
+            angle = angle * (180 / Math.PI);
+
+            if (x1 > x2) {
+                angle = 180 + angle;
+            }
+
+            return 'translate(' + x1 + ' ' + y1 + ')rotate(' + angle + ')';
+        });;
     }
 
     /**
