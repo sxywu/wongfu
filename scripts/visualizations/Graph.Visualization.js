@@ -113,7 +113,7 @@ define([
             .call(enterNodes);
 
         container.selectAll(".link")
-            .data(links, function(d) {return d.sourceIndex + ',' + d.targetIndex;})
+            .data(links, function(d) {return d.source.youtuber + ',' + d.target.youtuber;})
             .call(enterLinks)
             .call(updateLinks)
             .call(exitLinks);
@@ -191,21 +191,22 @@ define([
         if (!arguments.length) return links;
 
         var max = _.chain(value).pluck('weight').max().value(),
-            min = _.chain(value).pluck('weight').min().value(),
-            nodeIndex = _.pluck(nodes, 'index');
+            min = _.chain(value).pluck('weight').min().value();
+        console.log(min, max)
         linkScale = d3.scale.log().domain([min, max]).range([1, 12]);
-        links = _.chain(value).map(function(link) {
-            var obj = {};
-            obj.sourceIndex = link.source;
-            obj.targetIndex = link.target;
-            obj.source = _.indexOf(nodeIndex, link.source);
-            obj.target = _.indexOf(nodeIndex, link.target);
-            obj.weight = linkScale(link.weight);
+        // links = _.chain(value).map(function(link) {
+        //     var obj = {};
+        //     obj.sourceIndex = link.source;
+        //     obj.targetIndex = link.target;
+        //     obj.source = _.indexOf(nodeIndex, link.source);
+        //     obj.target = _.indexOf(nodeIndex, link.target);
+        //     obj.weight = linkScale(link.weight);
 
-            return obj;
-        }).filter(function(link) {
-            return nodes[link.source] && nodes[link.target];
-        }).value();
+        //     return obj;
+        // }).filter(function(link) {
+        //     return nodes[link.source] && nodes[link.target];
+        // }).value();
+        links = value;
         return Graph;
     }
 

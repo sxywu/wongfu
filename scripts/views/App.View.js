@@ -251,16 +251,16 @@ define([
 
 			this.graphVisualization = GraphVisualization()
 				.width(graphWidth).height(graphHeight);
-			// d3.select('svg').append('g')
-			// 	.classed('graph', true)
-			// 	.call(this.graphVisualization);
+			d3.select('svg').append('g')
+				.classed('graph', true)
+				.call(this.graphVisualization);
 
 			// this.calculateTime();
-			// this.onWindowScroll();
+			this.onWindowScroll();
 
-			// this.prevTop = 0;
-			// var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
-		 //    $(window).scroll(scroll);
+			this.prevTop = 0;
+			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
+		    $(window).scroll(scroll);
 			var that = this;
 		    $(window).scroll(this.timelineVisualization.update);
 		    $(window).scroll(function() {
@@ -269,41 +269,6 @@ define([
 		    	that.graphVisualization.position(left, top);
 		    });
 			
-		},
-		timelineForce: function() {
-			var width = $('svg').width(),
-				height = $('svg').height(),
-				nodes = _.union(this.youtubers, this.videos),
-				that = this,
-				force = d3.layout.force()
-					.nodes(nodes)
-					.size([200, height])
-					.charge(function(d) {
-						var radius = (d.views ? that.videoScale(d.views) / 2 : that.youtuberScale(d.subscribers));
-						console.log(radius);
-						return -Math.pow(radius, 2.0) / 4;
-					}).on('tick', function(e) {
-						var k = e.alpha;
-
-						_.each(nodes, function(node) {
-							node.x += (node.ideal.x - node.x) * k;
-							node.y += (node.ideal.y - node.y) * k;
-						});
-						// console.log(nodes);
-					});
-
-			// set initial position
-			_.each(nodes, function(node) {
-				node.ideal = {};
-				node.x = node.ideal.x = 0;
-				node.y = node.ideal.y = that.timeScale(node.publishedDate || node.joinedDate);
-			});
-
-			force.start();
-			for (var i = 100; i > 0; --i) force.tick();
-			force.stop();
-
-
 		},
 		// calculateTime: function() {
 		// 	var scale = this.timelineVisualization.timeScale(),
@@ -340,28 +305,53 @@ define([
 		onWindowScroll: function() {
 			// $('.content').empty();  // TODO: refactor
 
-			var top = $(window).scrollTop() + this.timelineVisualization.padding().top,
+			var top = $(window).scrollTop() + app.padding.top,
 				scale = this.timeScale,
 				date = scale.invert(top),
 				that = this,
-				youtubers = _.chain(this.youtubersByTime).filter(function(youtubers, time) {
-					time = parseInt(time);
-					// if (time < top) {
-					// 	content = '';
-					// 	_.each(youtubers, function(youtuber) {
-					// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
-					// 	});
-					// 	$('.youtuberContent').html(content);
-					// }
-					return time < top;
-				}).flatten().map(function(youtuber) {
-					return youtuber.toJSON();
-				}).value(),
-				links = _.chain(this.linksByTime).filter(function(link, time) {
-					time = parseInt(time);
-					return time < top;
-				}).flatten().clone().value();
-
+				youtubers = [],
+				links = {},
+				that = this;
+			_.some(this.nodesByTime, function(nodes, time) {
+				time = parseInt(time);
+				if (time < top) {
+					_.each(nodes, function(node) {
+						if (node.subscribers) {
+							youtubers.push(node);
+						} else if (node.views) {
+							var youtuber = that.youtubersByName[node.youtuber];
+							_.each(node.associations, function(association) {
+								if (that.youtubersByName[association]) {
+									var name = node.youtuber + ',' + association,
+										link = links[name];
+									if (link) {
+										link.weight += 1;
+									} else {
+										links[name] = {
+											source: youtuber,
+											target: that.youtubersByName[association],
+											weight: 1
+										}
+									}
+								}
+							});
+						}
+					});
+				}
+				// if (time < top) {
+				// 	content = '';
+				// 	_.each(youtubers, function(youtuber) {
+				// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
+				// 	});
+				// 	$('.youtuberContent').html(content);
+				// }
+				return time > top;
+			});
+			links = _.values(links);
+				// = _.chain(this.linksByTime).filter(function(link, time) {
+				// 	time = parseInt(time);
+				// 	return time < top;
+				// }).flatten().clone().value();
 			this.timelineVisualization.update(top, app.timeFormat(date));
 			// $('.date').text(timeFormat(date));
 			// _.each(this.videosByTime, function(videos, time) {
