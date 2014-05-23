@@ -21,7 +21,6 @@ define([
         force = d3.layout.force()
             .size([width, height])
             .charge(function(d) {
-                console.log(nodeScale(d.subscribers))
                 return -Math.pow(nodeScale(d.subscribers), 2) / 4;
             })
             .linkDistance(function(d) {

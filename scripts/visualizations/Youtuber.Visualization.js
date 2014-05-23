@@ -32,49 +32,20 @@ define([
     }
 
     var enter = function(selection) {
-        var diagonal = d3.svg.diagonal()
-            .source(function(d) {return {x: 0, y: 0}})
-            .target(function(d) {return {x: 4 * circlePadding, y: d.imageY}});
-
-        selection.append('path')
-            .attr('d', diagonal)
-            // .attr('x1', 0)
-            // .attr('y1', 0)
-            // .attr('x2', 3 * circlePadding)
-            // .attr('y1', 0)
-            .attr('fill', 'none')
-            .attr('stroke', function(d) {return color(d.youtuber)})
-            .attr('stroke-width', 2);
 
         var text = selection.filter(function(d) {return app.youtuberSize > 18});
-        
-        text.append('text')
-            .attr('x', function(d) {return -circlePadding})
-            .attr('y', 0)
-            .attr('text-anchor', 'end')
-            .attr('dy', '.35em')
-            .attr('fill', function(d) {return color(d.youtuber)})
-            .text(function(d) {return app.timeFormat(d.joinedDate)})
 
-        text.append('text')
-            .attr('x', function(d) {return app.youtuberSize + 5 * circlePadding})
-            .attr('y', function(d) {return d.imageY})
-            .attr('text-anchor', 'start')
-            .attr('dy', '.35em')
-            .attr('fill', function(d) {return color(d.youtuber)})
-            .text(function(d) {return d.author + ' (' + d.youtuber + ')'})
-
-        selection.append('line')
-            .attr('x1', app.youtuberSize + 5 * circlePadding)
-            .attr('y1', function(d) {return d.imageY + 10})
-            .attr('x2', function(d) {return radiusScale(d.subscribers) + app.youtuberSize + 4 * circlePadding})
-            .attr('y2', function(d) {return d.imageY + 10})
-            .attr('stroke', function(d) {return color(d.youtuber)})
-            .attr('stroke-width', 3);
+        // text.append('text')
+        //     .attr('x', function(d) {return app.youtuberSize + 5 * circlePadding})
+        //     .attr('y', function(d) {return d.imageY})
+        //     .attr('text-anchor', 'start')
+        //     .attr('dy', '.35em')
+        //     .attr('fill', function(d) {return color(d.youtuber)})
+        //     .text(function(d) {return d.youtuber;})
 
         selection.append('circle')
-            .attr('cx', function(d) {return 4 * circlePadding + app.youtuberSize / 2})
-            .attr('cy', function(d) {return d.imageY})
+            .attr('cx', 0)
+            .attr('cy', 0)
             .attr('r', function(d) {return app.youtuberSize / 2 + 3})
             .attr('fill', 'white')
             .attr('stroke', function(d) {return color(d.youtuber)})
@@ -86,13 +57,13 @@ define([
             .append('clipPath').attr('id', function(d) {
                 return 'clipTimelineCircle' + d.index;
             }).append('circle')
-            .attr('cx', function(d) {return 4 * circlePadding + app.youtuberSize / 2})
-            .attr('cy', function(d) {return d.imageY})
+            .attr('cx', 0)
+            .attr('cy', 0)
             .attr('r', function(d) {return app.youtuberSize / 2});
         selection.append('image')
-            .attr('y', function(d) {return d.imageY - app.youtuberSize / 2})
-            .attr('x', function(d) {return 4 * circlePadding})
-            .attr('width', function(d) {return app.youtuberSize})
+            .attr('y', -app.youtuberSize / 2)
+            .attr('x', -app.youtuberSize * 4 / 6)
+            .attr('width', function(d) {return app.youtuberSize * 4 / 3})
             .attr('height', function(d) {return app.youtuberSize})
             .attr('clip-path', function(d) {return 'url(#clipTimelineCircle' + d.index + ')'})
             // .attr('opacity', function(d) {return _.isEmpty(d.associations) ? 0 : 1})

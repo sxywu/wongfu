@@ -8,7 +8,7 @@ define([
     d3
 ) {
     var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
-    var youtuber, videos; // data
+    var youtubers, videos; // data
     var container;
     var sizeScale, timeScale;
     var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
@@ -17,85 +17,55 @@ define([
         container = selection;
 
         container
-            .attr('transform', function(d) {
-                return 'translate(' + d.x + ',' + d.y + ')';
-            })
-        // .selectAll('.video')
-        //     .data(videos).enter().append('image')
-        //     .classed('video', true)
+            // .attr('transform', function(d) {
+            //     return 'translate(' + d.x + ',' + d.y + ')';
+            // })
             .call(enter);
 
         return Video;
     }
 
     var enter = function(selection) {
-        // selection.append('defs')
-        //     .append('clipPath').attr('id', function(d) {
-        //         return 'clipRect' + d.views;
-        //     }).append('rect')
-        //     .attr('y', function(d) {return -app.videoSize / 2})
-        //     .attr('x', function(d) {return -app.videoSize / 8 * 3})
-        //     .attr('width', function(d) {return app.videoSize / 4 * 3})
-        //     .attr('height', function(d) {return app.videoSize / 4 * 3})
-        //     .attr('rx', borderRadius)
-        //     .attr('ry', borderRadius);
-        var diagonal = d3.svg.diagonal()
-            .source(function(d) {return {x: 0, y: 0}})
-            .target(function(d) {return {x: 4 * rectPadding, y: d.imageY}});
+        var diagonal = d3.svg.diagonal(),
+            gap = 75;
         selection.append('path')
-            // .attr('x1', 0)
-            // .attr('y1', 0)
-            // .attr('x2', 2 * rectPadding)
-            // .attr('y1', 0)
-            .attr('d', diagonal)
-            .attr('fill', 'none')
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
-            .attr('stroke-width', 2)
-            .attr('stroke-dasharray', '2,2');
-
-        var text = selection.filter(function(d) {return app.videoSize > 18});
-        
-        // text.append('text')
-        //     .attr('x', function(d) {return -rectPadding})
-        //     .attr('y', 0)
-        //     .attr('text-anchor', 'end')
-        //     .attr('dy', '.35em')
-        //     .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
-        //     .text(function(d) {return app.timeFormat(d.publishedDate)})
-
-        selection.append('text')
-            .attr('x', function(d) {return app.videoSize + 5 * rectPadding})
-            .attr('y', function(d) {return d.imageY})
-            .attr('text-anchor', 'start')
-            .attr('dy', '.35em')
-            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
-            .text(function(d) {return d.title});
-
-        selection.append('line')
-            .attr('x1', app.videoSize + 5 * rectPadding)
-            .attr('y1', function(d) {return d.imageY + 10})
-            .attr('x2', function(d) {return sizeScale(d.views) + app.youtuberSize + 5 * rectPadding})
-            .attr('y2', function(d) {return d.imageY + 10})
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
-            .attr('stroke-width', 3);
-
-        selection.append('image')
-            .attr('y', function(d) {return d.imageY - app.videoSize / 8 * 3})
-            .attr('x', function(d) {return 4 * rectPadding})
-            .attr('width', function(d) {return app.videoSize})
-            .attr('height', function(d) {return app.videoSize / 4 * 3})
-            // .attr('clip-path', function(d) {return 'url(#clipRect' + d.views + ')'})
-            // .attr('opacity', function(d) {return _.isEmpty(d.associations) ? 0 : 1})
-            .attr('xlink:href', function(d) {return d.images[0]});
-
-        selection.append('rect')
-            .attr('y', function(d) {return d.imageY - app.videoSize / 8 * 3})
-            .attr('x', function(d) {return 4 * rectPadding})
-            .attr('width', function(d) {return app.videoSize})
-            .attr('height', function(d) {return app.videoSize / 4 * 3})
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
-            .attr('fill', 'none')
-            .attr('stroke-width', 2);
+            .attr('d', function(d) {
+                var path = "",
+                    source;
+                _.each(d.videos, function(target, i) {
+                    if (source) {
+                        if (source.y > target.y - gap) {
+                            path += diagonal({
+                                source: {x: source.youtuberObj.x, y: source.y},
+                                target: {x: target.youtuberObj.x, y: target.y}
+                            });
+                        } else {
+                            path += diagonal({
+                                source: {x: source.youtuberObj.x, y: source.y},
+                                target: {x: d.youtuber.x, y: source.y + gap / 3}
+                            })
+                            path += 'L' + d.youtuber.x + ',' + (target.y - gap / 3);
+                            path += diagonal({
+                                source: {x: d.youtuber.x, y: target.y - gap / 3},
+                                target: {x: target.youtuberObj.x, y: target.y}
+                            })
+                        }
+                        
+                    } else if (d.youtuber.x === target.x) {
+                        path += 'L' + d.youtuber.x + ',' + target.y;
+                    } else {
+                        path += 'L' + d.youtuber.x + ',' + (target.y - gap / 3);
+                        path += diagonal({
+                                source: {x: d.youtuber.x, y: target.y - gap / 3},
+                                target: {x: target.youtuberObj.x, y: target.y}
+                            })
+                    }
+                    source = target;
+                });
+                return 'M' + d.youtuber.x + ',' + d.youtuber.y + ' ' + path.replace(/M[0-9\,.]*/gi, '');
+            }).attr('fill', 'none')
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber.youtuber)})
+            .attr('stroke-width', 4);
     }
 
     var exit = function(selection) {
@@ -116,10 +86,10 @@ define([
     /*
     getter setters
     */
-    Video.youtuber = function(value) {
-        if (!arguments.length) return youtuber;
+    Video.youtubers = function(value) {
+        if (!arguments.length) return youtubers;
 
-        youtuber = value;
+        youtubers = value;
         return Video;
     }
 

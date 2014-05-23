@@ -7,7 +7,7 @@ define([
     _,
     d3
 ) {
-    var width = 800, height = 500, padding = {top: 250, left: 250, right: 25, bottom: 0};
+    var width = 800, height = 500, padding = {top: 250, left: 500, right: 25, bottom: 0};
     var youtuber, videos; // data
     var container, marker, circle, text;
     var yScale, timeScale;
@@ -31,10 +31,10 @@ define([
         //         d3.select(this).call(vis);
         //     });
 
-        container.append("g")
-            .classed('xAxis', true)
-            // .attr("transform", "translate(0," + height + ")")
-            .call(yAxis);
+        // container.append("g")
+        //     .classed('xAxis', true)
+        //     // .attr("transform", "translate(0," + height + ")")
+        //     .call(yAxis);
 
         marker = container.append('g')
             .classed('marker', true)

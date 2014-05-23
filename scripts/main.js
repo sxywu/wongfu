@@ -50,10 +50,10 @@ require([
     app.d3Colors = d3.scale.category20();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
     app.timeFormat = d3.time.format('%B %d, %Y');
-    app.padding = {top: 250, left: 250, right: 25, bottom: 0};
-    app.nodePadding = {top: 0, left: 5, right: 5, bottom: 0};
+    app.padding = {top: 250, left: 500, right: 25, bottom: 0};
+    app.nodePadding = {top: 0, left: 50, right: 5, bottom: 0};
     app.videoSize = 30;
-    app.youtuberSize = 30;
+    app.youtuberSize = 40;
     app.videoScaleSize = {min: 100, max: 800};
     app.youtuberScaleSize = {min: 100, max: 800};
 
