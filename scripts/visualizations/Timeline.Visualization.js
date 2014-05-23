@@ -39,15 +39,24 @@ define([
         marker = container.append('g')
             .classed('marker', true)
             .attr('transform', 'translate(0,' + padding.top + ')');
+
+        marker.append('line')
+            .attr('x1', -app.nodePadding.right * 4)
+            .attr('y1', 0)
+            .attr('x2', width)
+            .attr('y1', 0)
+            .attr('stroke', '#000')
+            .attr('fill', 'none');
+
         circle = marker.append('circle')
             .classed('markerCircle', true)
             .attr('r', 5)
-            .attr('cx', 0)
+            .attr('cx', -app.nodePadding.right * 4)
             .attr('cy', 0);
 
         text = marker.append('text')
             .classed('markerDate', true)
-            .attr('x', -10)
+            .attr('x', -app.nodePadding.right * 6)
             .attr('y', 0)
             .attr('text-anchor', 'end')
             .attr('dy', '.35em');

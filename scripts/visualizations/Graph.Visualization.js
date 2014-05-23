@@ -24,7 +24,7 @@ define([
                 return -Math.pow(nodeScale(d.subscribers), 2) / 4;
             })
             .linkDistance(function(d) {
-                return (1 / linkScale(d.weight)) * 350;
+                return (1 / linkScale(d.weight)) * 250;
             })
             .on('tick', forceTick);
 
@@ -217,7 +217,7 @@ define([
             .map(function(d) {return parseInt(d)}).max().value(),
             min = _.chain(value).pluck('statistics').pluck('subscriberCount')
             .map(function(d) {return parseInt(d)}).min().value();
-        nodeScale = d3.scale.linear().domain([min, max]).range([30, 80]);
+        nodeScale = d3.scale.linear().domain([min, max]).range([25, 60]);
         nodes = value;
         return Graph;
     }

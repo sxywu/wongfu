@@ -188,6 +188,15 @@ define([
 				graphWidth = width / 2,
 				graphHeight = $(window).height(),
 				that = this;
+
+			this.graphVisualization = GraphVisualization()
+				.linkScale(this.linkScale)
+				.width(graphWidth).height(graphHeight);
+			d3.select('svg').append('g')
+				.classed('graph', true)
+				.call(this.graphVisualization);
+
+
 			this.timelineVisualization = TimelineVisualization()
 				// .videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
 				.width(width).height(height)
@@ -223,13 +232,6 @@ define([
 					.attr('cy', function(d) {return d.y})
 					.attr('r', 6)
 					.attr('fill', function(d) {return app.d3Colors(d.youtuber)});
-
-			this.graphVisualization = GraphVisualization()
-				.linkScale(this.linkScale)
-				.width(graphWidth).height(graphHeight);
-			d3.select('svg').append('g')
-				.classed('graph', true)
-				.call(this.graphVisualization);
 
 			// this.calculateTime();
 			this.onWindowScroll();
