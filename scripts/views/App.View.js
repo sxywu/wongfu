@@ -7,8 +7,9 @@ define([
     // "app/collections/Videos.Collection",
     "app/visualizations/Timeline.Visualization",
     "app/visualizations/Graph.Visualization",
-    "app/visualizations/Video.Visualization",
-    "app/visualizations/Youtuber.Visualization"
+    "app/visualizations/Line.Visualization",
+    "app/visualizations/Youtuber.Visualization",
+    "app/visualizations/Video.Visualization"
 ], function(
 	$,
 	_,
@@ -18,8 +19,9 @@ define([
 	// VideosCollection,
 	TimelineVisualization,
 	GraphVisualization,
-	VideoVisualization,
-	YoutuberVisualization
+	LineVisualization,
+	YoutuberVisualization,
+	VideoVisualization
 ) {
 	return Backbone.View.extend({
 		initialize: function() {
@@ -186,16 +188,8 @@ define([
 			var width = $('svg').width(),
 				height = $('svg').height(),
 				graphWidth = width / 2,
-				graphHeight = $(window).height(),
+				graphHeight = $(window).height() / 3 * 2,
 				that = this;
-
-			this.graphVisualization = GraphVisualization()
-				.linkScale(this.linkScale)
-				.width(graphWidth).height(graphHeight);
-			d3.select('svg').append('g')
-				.classed('graph', true)
-				.call(this.graphVisualization);
-
 
 			this.timelineVisualization = TimelineVisualization()
 				// .videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
@@ -205,15 +199,21 @@ define([
 				.classed('timeline', true)
 				.call(this.timelineVisualization);
 
+			this.graphVisualization = GraphVisualization()
+				.linkScale(this.linkScale)
+				.width(graphWidth).height(graphHeight);
+			d3.select('svg').append('g')
+				.classed('graph', true)
+				.call(this.graphVisualization);
 
-			this.videoVisualization = VideoVisualization()
+			this.lineVisualization = LineVisualization()
 				.timeScale(this.timeScale)
 				.sizeScale(this.videoScale);
 			this.timeline.selectAll('.videoLine')
 				.data(this.youtuberVideos)
-				.enter().insert('g', '.marker')
+				.enter().insert('path', '.marker')
 					.classed('videoLine', true)
-					.call(this.videoVisualization);
+					.call(this.lineVisualization);
 
 			this.youtuberVisualization = YoutuberVisualization()
 				.timeScale(this.timeScale)
@@ -224,14 +224,12 @@ define([
 					.classed('youtuber', true)
 					.call(this.youtuberVisualization);
 
+			this.videoVisualization = VideoVisualization();
 			this.timeline.selectAll('.video')
-				.data(this.videos)
-				.enter().insert('circle', '.marker')
-					.classed('.video', true)
-					.attr('cx', function(d) {return d.youtuberObj.x})
-					.attr('cy', function(d) {return d.y})
-					.attr('r', 6)
-					.attr('fill', function(d) {return app.d3Colors(d.youtuber)});
+                .data(this.videos)
+                .enter().insert('circle', '.marker')
+                    .classed('.video', true)
+                    .call(this.videoVisualization);
 
 			// this.calculateTime();
 			this.onWindowScroll();

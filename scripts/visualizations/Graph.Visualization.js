@@ -24,7 +24,7 @@ define([
                 return -Math.pow(nodeScale(d.subscribers), 2) / 4;
             })
             .linkDistance(function(d) {
-                return (1 / linkScale(d.weight)) * 250;
+                return (1 / linkScale(d.weight)) * 300;
             })
             .on('tick', forceTick);
 
@@ -37,6 +37,9 @@ define([
     var enterNodes = function(selection) {
         node = selection.enter()
             .append('g').classed('node', true)
+            .classed('fade', function(d) {return d.clicked || app.clicked})
+            .classed('solid', function(d) {return d.clicked})
+            .attr('id', function(d) {return d.youtuber})
             .call(force.drag)
             .on('mouseover', mouseover)
             .on('mouseleave', mouseleave);
@@ -93,7 +96,10 @@ define([
         selection.enter()
             .insert('path', '.node')
             .classed('link', true)
+            .classed('fade', function(d) {return d.source.clicked || app.clicked})
+            // .classed('solid', function(d) {return d.source.clicked})
             .attr("stroke", function(d) {return color(d.source.youtuber)})
+            .attr('stroke-linecap', 'round')
             .attr('opacity', .75)
             .attr("fill", "none");
 
@@ -197,15 +203,23 @@ define([
     events
     */
     var mouseover = function() {
+
+    }
+
+    var mouseleave = function() {
+
+    }
+
+    var showName = function() {
         d3.select(this).select('.name').classed('active', true);
         d3.select(this).select('.name').classed('hidden', false);
     }
 
-    var mouseleave = function() {
+    var hideName = function() {
         d3.select(this).select('.name').classed('hidden', true);
         d3.select(this).select('.name').classed('active', false);
     }
-
+    
     /*
     getter setters
     */

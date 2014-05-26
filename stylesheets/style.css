@@ -21,8 +21,8 @@ svg {
     shape-rendering: crispEdges;
 }
 
-.xAxis text, .marker .date, .video text {
-    /*font-size: 16px;*/
+.xAxis text, .markerDate, .video text {
+    font-size: 24px;
     color: #666;
 }
 
@@ -45,6 +45,14 @@ svg {
 	fill: none;
 	stroke: #666;
 }*/
+
+.fade {
+	opacity: .2;
+}
+
+.solid {
+	opacity: 1;
+}
 
 /*******************
 * HTML

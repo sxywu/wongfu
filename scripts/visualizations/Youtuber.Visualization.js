@@ -20,6 +20,7 @@ define([
         };
 
         container
+            .attr('id', function(d) {return d.youtuber.youtuber})
             .attr('transform', function(d) {
                 return 'translate(' + d.x + ',' + d.y + ')';
             })
