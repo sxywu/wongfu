@@ -58,6 +58,14 @@ svg {
 * HTML
 */
 
+.description {
+	position: fixed;
+	width: 480px;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(255, 253, 251, .5);
+}
+
 .marker {
 	position: fixed;
 }

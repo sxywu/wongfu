@@ -46,7 +46,7 @@ define([
             .on('click', clickNode);
 
         text = node.append('g').classed('name', true)
-            .classed('hidden', true)
+            .classed('hidden', function(d) {return !d.clicked})
             .attr('transform', function(d) {
                 return 'translate(' + (nodeScale(d.subscribers) / 2 - 3) + ', 0)';
             });
@@ -96,6 +96,7 @@ define([
             .classed('link', true)
             .classed('fade', function(d) {return d.source.clicked || app.clicked})
             // .classed('solid', function(d) {return d.source.clicked})
+            .attr('id', function(d) {return d.source.youtuber + d.target.youtuber})
             .attr("stroke", function(d) {return color(d.source.youtuber)})
             .attr('stroke-linecap', 'round')
             .attr('opacity', .75)

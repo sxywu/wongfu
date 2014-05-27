@@ -228,7 +228,7 @@ define([
 			this.timeline.selectAll('.video')
                 .data(this.videos)
                 .enter().insert('circle', '.marker')
-                    .classed('.video', true)
+                    .classed('video', true)
                     .call(this.videoVisualization);
 
 			// this.calculateTime();

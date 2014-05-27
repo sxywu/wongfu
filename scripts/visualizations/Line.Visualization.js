@@ -85,6 +85,8 @@ define([
             }).attr('fill', 'none')
             .attr('stroke', function(d) {return app.d3Colors(d.youtuber.youtuber)})
             .attr('stroke-width', lineWidth)
+            .attr('stroke-linecap', 'round')
+            .attr('stroke-linejoin', 'round')
             .attr('opacity', .75)
             .on('mouseover', mouseover)
             .on('mouseleave', mouseleave)

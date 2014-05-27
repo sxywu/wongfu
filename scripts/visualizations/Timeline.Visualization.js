@@ -38,7 +38,7 @@ define([
 
         marker = container.append('g')
             .classed('marker', true)
-            .attr('transform', 'translate(0,' + padding.top + ')');
+            .attr('transform', 'translate(0,' + app.padding.top + ')');
 
         marker.append('line')
             .attr('x1', -app.nodePadding.right * 4)
@@ -66,7 +66,7 @@ define([
     }
 
     Timeline.update = function() {
-        var top = $(window).scrollTop() + padding.top,
+        var top = $(window).scrollTop() + app.padding.top,
             date = app.timeFormat(timeScale.invert(top));
         marker.attr('transform', 'translate(0,' + top + ')');
 
@@ -106,7 +106,7 @@ define([
 
     Timeline.height = function(value) {
         if (!arguments.length) return height;
-        height = value - (padding.top + padding.bottom);
+        height = value - (app.padding.top + app.padding.bottom);
         return Timeline;
     }
 
