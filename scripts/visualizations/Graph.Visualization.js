@@ -42,7 +42,8 @@ define([
             .attr('id', function(d) {return d.youtuber})
             .call(force.drag)
             .on('mouseover', mouseover)
-            .on('mouseleave', mouseleave);
+            .on('mouseleave', mouseleave)
+            .on('click', clickNode);
 
         text = node.append('g').classed('name', true)
             .classed('hidden', true)
@@ -66,8 +67,7 @@ define([
             .attr('height', 20)
             .attr('rx', 3)
             .attr('ry', 3)
-            .attr('fill', function(d) {return color(d.youtuber)})
-            .attr('fill-opacity', .5);
+            .attr('fill', function(d) {return color(d.youtuber)});
 
         node.append('circle')
             .attr('r', function(d) {return nodeScale(d.subscribers) / 2 + 3})
@@ -87,8 +87,6 @@ define([
             .attr('width', function(d) {return nodeScale(d.subscribers)})
             .attr('clip-path', function(d) {return 'url(#clipGraphCircle' + d.index + ')'})
             .attr('xlink:href', function(d) {return d.image});
-
-        
 
     }
 
@@ -210,16 +208,47 @@ define([
 
     }
 
-    var showName = function() {
-        d3.select(this).select('.name').classed('active', true);
-        d3.select(this).select('.name').classed('hidden', false);
+    var clickNode = function(d) {
+        if (app.clicked) {
+            d3.select('.node.solid').call(Graph.hideName);
+            d3.selectAll('.solid').classed('fade', true)
+                .classed('solid', false);
+        } else if (!app.clicked) {
+            d3.selectAll('.node, .link, .videoLine').classed('fade', true)
+                .classed('solid', false);
+        }
+
+        if (app.clicked === d) {
+            d3.selectAll('.fade').classed('fade', false)
+                .classed('solid', false);
+            d.youtuber.clicked = false;
+            app.clicked = false;
+        } else {
+            d3.selectAll('#' + d.youtuber).classed('fade', false)
+                .classed('solid', true);
+            d3.select('.node#' + d.youtuber)
+                .call(Graph.showName);
+
+            d.youtuber.clicked = true;
+            if (app.clicked) app.clicked.clicked = false;
+            app.clicked = d;
+        }
     }
 
-    var hideName = function() {
-        d3.select(this).select('.name').classed('hidden', true);
-        d3.select(this).select('.name').classed('active', false);
+    Graph.showName = function(node) {
+        node.select('.name')
+            .classed('active', true)
+            .classed('hidden', false)
+            .classed('solid', true);
     }
-    
+
+    Graph.hideName = function(node) {
+        node.select('.name')
+            .classed('hidden', true)
+            .classed('active', false)
+            .classed('solid', false);
+    }
+
     /*
     getter setters
     */
