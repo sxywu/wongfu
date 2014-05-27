@@ -28,14 +28,15 @@ define([
     }
 
     var enter = function(selection) {
-        selection.attr('cx', function(d) {return d.youtuberObj.x})
+        selection.attr('id', function(d) {return d.id = _.uniqueId('video')})
+            .attr('cx', function(d) {return d.youtuberObj.x})
             .attr('cy', function(d) {return d.y})
             .attr('r', 5)
             .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
             .attr('stroke', '#fff')
             .on('mouseover', mouseover)
             .on('mouseleave', mouseleave)
-            .on('click', click);
+            .on('click', Video.click);
 
     }
 
@@ -52,13 +53,21 @@ define([
     var mouseleave = function() {
     }
 
-    var click = function(d) {
+    Video.click = function(d, type) {
+        var video;
+        if (type === 'timeline') {
+            d = d.datum();
+            video = this;
+        } else {
+            video = d3.select(this);
+        }
+
         var template = _.template(VideoTemplate, {video: d});
         $('.description').html(template);
 
         d3.selectAll('.video, .videoLine, .node, .link').classed('fade', true)
             .classed('solid', false);
-        d3.select(this).classed('fade', false);
+        video.classed('fade', false);
         d3.selectAll('#' + d.youtuber).classed('fade', false)
             .classed('solid', true);
 

@@ -23,6 +23,7 @@ define([
 	YoutuberVisualization,
 	VideoVisualization
 ) {
+	var videoVisualization = VideoVisualization();
 	return Backbone.View.extend({
 		initialize: function() {
 			// this.youtubers = new YoutubersCollection();
@@ -236,7 +237,8 @@ define([
 
 			this.prevTop = 0;
 			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
-		    $(window).scroll(scroll);
+		    $(window).scroll(_.bind(this.onWindowScroll, this));
+		    // $(window).scroll(scroll);
 		    $(window).scroll(this.timelineVisualization.update);
 		    $(window).scroll(function() {
 		    	var left = 0,
@@ -289,6 +291,18 @@ define([
 				that = this;
 			_.some(this.nodesByTime, function(nodes, time) {
 				time = parseInt(time);
+				if (top < time && time < (top + 10)) {
+					console.log(nodes);
+					_.each(nodes, function(node) {
+						if (!node.id) return;
+						d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
+					})
+				} 
+				// else {
+				// 	d3.selectAll('.videoLine, .node, .video, .link')
+				// 		.classed('fade', false)
+				// 		.classed('solid', false);
+				// }
 				if (time < top) {
 					_.each(nodes, function(node) {
 						if (node.subscribers) {
