@@ -14,7 +14,7 @@ define([
     var container;
     var sizeScale, timeScale;
     var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
-    var lineWidth = 12;
+    var lineWidth = 4;
     var color;
     var graphVisualization = GraphVisualization();
     var Line = function(selection) {

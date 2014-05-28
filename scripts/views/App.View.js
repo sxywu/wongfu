@@ -40,6 +40,12 @@ define([
 
 			this.youtubers = [];
 			this.videos = [];
+
+			this.last = 0;
+			this.graphYoutubers = [];
+			this.graphLinks = {};
+			this.graphLast = -1;
+
 			this.fetchData();
 		    
 		    // this.youtubers.on('reset', calculateTime);
@@ -140,12 +146,18 @@ define([
 			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
 			this.linkScale = d3.scale.log().domain([1, maxAssociations]).range([1, 16]);
 
-			this.nodesByTime = _.chain(_.union(this.videos, this.youtubers))
+			// this.nodesByTime = _.chain(_.union(this.videos, this.youtubers))
+			// 	.sortBy(function(node) {
+			// 		return node.publishedDate || node.joinedDate;
+			// 	}).groupBy(function(node) {
+			// 		var date = node.publishedDate || node.joinedDate;
+			// 		return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+			// 	}).value();
+
+			this.nodes = _.chain(this.videos)
+				.union(this.youtubers)
 				.sortBy(function(node) {
 					return node.publishedDate || node.joinedDate;
-				}).groupBy(function(node) {
-					var date = node.publishedDate || node.joinedDate;
-					return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
 				}).value();
 
 			this.youtuberVideos = {};
@@ -233,7 +245,7 @@ define([
                     .call(this.videoVisualization);
 
 			// this.calculateTime();
-			this.onWindowScroll();
+			// this.onWindowScroll();
 
 			this.prevTop = 0;
 			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
@@ -285,58 +297,160 @@ define([
 			var top = $(window).scrollTop() + app.padding.top,
 				scale = this.timeScale,
 				date = scale.invert(top),
-				that = this,
-				youtubers = [],
-				links = {},
 				that = this;
-			_.some(this.nodesByTime, function(nodes, time) {
-				time = parseInt(time);
-				if (top < time && time < (top + 10)) {
-					console.log(nodes);
-					_.each(nodes, function(node) {
-						if (!node.id) return;
-						d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
-					})
-				} 
-				// else {
-				// 	d3.selectAll('.videoLine, .node, .video, .link')
-				// 		.classed('fade', false)
-				// 		.classed('solid', false);
-				// }
-				if (time < top) {
-					_.each(nodes, function(node) {
-						if (node.subscribers) {
-							youtubers.push(node);
-						} else if (node.views) {
-							var youtuber = that.youtubersByName[node.youtuber];
-							_.each(node.associations, function(association) {
-								if (that.youtubersByName[association]) {
-									var name = node.youtuber + ',' + association,
-										link = links[name];
-									if (link) {
-										link.weight += 1;
-									} else {
-										links[name] = {
-											source: youtuber,
-											target: that.youtubersByName[association],
-											weight: 1
-										}
+
+			// if our current scrolltop is greater than our last
+			// we're going down so we should be adding nodes
+			if (top > this.last) {
+				while (this.graphLast < this.nodes.length) {
+					var node = this.nodes[this.graphLast + 1],
+						time = this.timeScale(node.joinedDate || node.publishedDate);
+
+					if (time >= top) break;
+
+					if (node.subscribers) {
+						// if it's a youtuber
+						this.graphYoutubers.push(node);
+					} else if (node.views) {
+						// else it's a video
+						var youtuber = this.youtubersByName[node.youtuber];
+						_.each(node.associations, function(association) {
+							if (that.youtubersByName[association]) {
+								var name = node.youtuber + ',' + association,
+									link = that.graphLinks[name];
+								if (link) {
+									link.weight += 1;
+								} else {
+									that.graphLinks[name] = {
+										source: youtuber,
+										target: that.youtubersByName[association],
+										weight: 1
 									}
 								}
-							});
-						}
-					});
+							}
+						});
+					}
+					this.graphLast += 1;
 				}
-				// if (time < top) {
-				// 	content = '';
-				// 	_.each(youtubers, function(youtuber) {
-				// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
-				// 	});
-				// 	$('.youtuberContent').html(content);
-				// }
-				return time > top;
-			});
-			links = _.values(links);
+
+				
+
+
+			} else {
+				// otherwise it's scrolling back up so we should remove nodes
+				while (this.graphLast >= 0) {
+
+					var node = this.nodes[this.graphLast],
+						time = this.timeScale(node.joinedDate || node.publishedDate);
+
+					if (time <= top) break;
+
+					if (node.subscribers) {
+						this.graphYoutubers.pop();
+					} else if (node.views) {
+						var youtuber = this.youtubersByName[node.youtuber];
+						_.each(node.associations, function(association) {
+							if (that.youtubersByName[association]) {
+								var name = node.youtuber + ',' + association,
+									link = that.graphLinks[name];
+								if (link && (link.weight >= 1)) {
+									delete that.graphLinks[name];
+								} else if (link) {
+									link.weight -= 1;
+								}
+							}
+						});
+					}
+
+					this.graphLast -= 1;
+				}
+			}
+
+			this.last = top;
+			var node = this.nodes[this.graphLast];
+			if (node && node.id) {
+				d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
+			} else if (node && node.subscribers) {
+				
+			}
+			// if (!this.graphLast) {
+			// 	_.some(this.nodesByTime, function(nodes, time) {
+			// 		time = parseInt(time);
+			// 		if (time < top) {
+			// 		_.each(nodes, function(node) {
+			// 			if (node.subscribers) {
+			// 				that.graphYoutubers.push(node);
+			// 			} else if (node.views) {
+			// 				var youtuber = that.youtubersByName[node.youtuber];
+			// 				_.each(node.associations, function(association) {
+			// 					if (that.youtubersByName[association]) {
+			// 						var name = node.youtuber + ',' + association,
+			// 							link = that.graphLinks[name];
+			// 						if (link) {
+			// 							link.weight += 1;
+			// 						} else {
+			// 							that.graphLinks[name] = {
+			// 								source: youtuber,
+			// 								target: that.youtubersByName[association],
+			// 								weight: 1
+			// 							}
+			// 						}
+			// 					}
+			// 				});
+			// 			}
+			// 		});
+			// 	}
+			// 	});
+			// }
+			// _.some(this.nodesByTime, function(nodes, time) {
+			// 	time = parseInt(time);
+			// 	if ((time - 2) < top && top < (time + 2)) {
+			// 		console.log(nodes);
+			// 		_.each(nodes, function(node) {
+			// 			if (!node.id) return;
+			// 			d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
+			// 		})
+			// 	} 
+
+			// 	// else {
+			// 	// 	d3.selectAll('.videoLine, .node, .video, .link')
+			// 	// 		.classed('fade', false)
+			// 	// 		.classed('solid', false);
+			// 	// }
+			// 	if (time < top) {
+			// 		_.each(nodes, function(node) {
+			// 			if (node.subscribers) {
+			// 				youtubers.push(node);
+			// 			} else if (node.views) {
+			// 				var youtuber = that.youtubersByName[node.youtuber];
+			// 				_.each(node.associations, function(association) {
+			// 					if (that.youtubersByName[association]) {
+			// 						var name = node.youtuber + ',' + association,
+			// 							link = links[name];
+			// 						if (link) {
+			// 							link.weight += 1;
+			// 						} else {
+			// 							links[name] = {
+			// 								source: youtuber,
+			// 								target: that.youtubersByName[association],
+			// 								weight: 1
+			// 							}
+			// 						}
+			// 					}
+			// 				});
+			// 			}
+			// 		});
+			// 	}
+			// 	// if (time < top) {
+			// 	// 	content = '';
+			// 	// 	_.each(youtubers, function(youtuber) {
+			// 	// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
+			// 	// 	});
+			// 	// 	$('.youtuberContent').html(content);
+			// 	// }
+			// 	return time > top;
+			// });
+			var links = _.values(this.graphLinks);
 				// = _.chain(this.linksByTime).filter(function(link, time) {
 				// 	time = parseInt(time);
 				// 	return time < top;
@@ -369,7 +483,7 @@ define([
 			// });
 
 			this.graphVisualization
-				.nodes(youtubers).links(links).render();
+				.nodes(this.graphYoutubers).links(links).render();
 
 			this.prevTop = top;
 

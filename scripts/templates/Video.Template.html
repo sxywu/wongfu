@@ -1,2 +1,5 @@
 <img src='<%= video.images[0] %>' width='100'></img>
+<div><%= app.timeFormat(video.publishedDate) %></div>
 <div><%= video.title %></div>
+<div><%= video.youtuber %></div>
+<div><%= video.associations.join(', ') %></div>
