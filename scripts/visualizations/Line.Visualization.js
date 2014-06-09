@@ -88,9 +88,7 @@ define([
             .attr('stroke-linecap', 'round')
             .attr('stroke-linejoin', 'round')
             .attr('opacity', .75)
-            .on('mouseover', mouseover)
-            .on('mouseleave', mouseleave)
-            .on('click', click);
+            .on('click', Line.click);
     }
 
     var exit = function(selection) {
@@ -112,7 +110,11 @@ define([
             // .classed('solid', false);
     }
 
-    var click = function(d) {
+    Line.click = function(d, type) {
+        if (type === 'timeline') {
+            d = d.datum();
+        }
+
         if (app.clicked) {
             d3.select('.node.solid').call(graphVisualization.hideName);
             d3.selectAll('.solid').classed('fade', true)

@@ -18,7 +18,7 @@ define([
             .orient("left")
             .scale(timeScale);
 
-        container.attr('transform', 'translate(' + padding.left + ',0)');
+        container.attr('transform', 'translate(' + app.padding.left + ',0)');
         // container.selectAll('.youtuber')
         //     .data(videos).enter().append('g')
         //     .classed('youtuber', true)

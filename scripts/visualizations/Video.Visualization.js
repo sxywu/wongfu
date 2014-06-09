@@ -62,19 +62,30 @@ define([
             video = d3.select(this);
         }
 
-        // if (app.clicked === d) {
-        // //     d3.selectAll('.video, .videoLine, .node, .link').classed('fade', false)
-        // //         .classed('solid', true);
-        //     app.clicked = false;
-        //     d.youtuberObj.clicked = false;
-        // } else {
-            console.log(d);
+        if (!app.clicked) {
+            // if nothing is clicked, fade everything
+            d3.selectAll('.video, .videoLine, .node, .link').classed('fade', true)
+                .classed('solid', false);
+        } else {
+            // if something has already been clicked, hide the shown names
+            d3.selectAll('.node.solid').call(graphVisualization.hideName);
+            // all the previously highlighted videos and youtubers should also be faded.
+            d3.selectAll('.solid').classed('fade', true)
+                .classed('solid', false);
+        }
+
+        if (type !== 'timeline' && app.clicked === d) {
+            app.clicked = false;
+            d.youtuberObj.clicked = false;
+            d3.selectAll('.fade').classed('fade', false)
+                .classed('solid', false);
+        } else {
             var template = _.template(VideoTemplate, {video: d});
             $('.description').html(template);
 
-            d3.selectAll('.video, .videoLine, .node, .link').classed('fade', true)
-                .classed('solid', false);
-            video.classed('fade', false);
+            // the clicked video and associated youtubers shouldn't be faded
+            video.classed('fade', false)
+                .classed('solid', true);
             d3.selectAll('#' + d.youtuber).classed('fade', false)
                 .classed('solid', true);
 
@@ -87,11 +98,20 @@ define([
 
             d3.selectAll('.node.solid').call(graphVisualization.showName);
 
-        //     app.clicked = d;
-        //     d.youtuberObj.clicked = true;
-        // }
+            app.clicked = d;
+            d.youtuberObj.clicked = true;
+        }
         
         
+    }
+
+    Video.unclick = function(d) {
+        app.clicked = false;
+        d.youtuberObj.clicked = false;
+
+        $('.description').html();
+        d3.selectAll('.video, .videoLine, .node, .link').classed('fade', false)
+                .classed('solid', false);
     }
 
     return function() {

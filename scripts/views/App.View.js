@@ -23,7 +23,8 @@ define([
 	YoutuberVisualization,
 	VideoVisualization
 ) {
-	var videoVisualization = VideoVisualization();
+	var videoVisualization = VideoVisualization(),
+		lineVisualization = LineVisualization();
 	return Backbone.View.extend({
 		initialize: function() {
 			// this.youtubers = new YoutubersCollection();
@@ -301,7 +302,7 @@ define([
 
 			// if our current scrolltop is greater than our last
 			// we're going down so we should be adding nodes
-			if (top > this.last) {
+			if (top >= this.last) {
 				while (this.graphLast < this.nodes.length) {
 					var node = this.nodes[this.graphLast + 1],
 						time = this.timeScale(node.joinedDate || node.publishedDate);
@@ -333,8 +334,9 @@ define([
 					this.graphLast += 1;
 				}
 
-				
-
+				if (node && node.id) {
+					d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
+				}
 
 			} else {
 				// otherwise it's scrolling back up so we should remove nodes
@@ -364,15 +366,16 @@ define([
 
 					this.graphLast -= 1;
 				}
+
+				
 			}
 
 			this.last = top;
 			var node = this.nodes[this.graphLast];
 			if (node && node.id) {
-				d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
-			} else if (node && node.subscribers) {
-				
+				d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
 			}
+			
 			// if (!this.graphLast) {
 			// 	_.some(this.nodesByTime, function(nodes, time) {
 			// 		time = parseInt(time);
