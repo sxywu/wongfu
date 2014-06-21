@@ -27,17 +27,6 @@ define([
 		lineVisualization = LineVisualization();
 	return Backbone.View.extend({
 		initialize: function() {
-			// this.youtubers = new YoutubersCollection();
-		 //    this.videos = new VideosCollection([], {youtuber: "wongfuproductions"});
-		    
-		    // var processData = _.after(2, _.bind(this.processData, this));
-		    // this.videos.fetch({success: render});
-		    // this.youtubers.fetch({success: render});
-		    
-		    // d3.json('data/links.json', function(response) {
-		    // 	that.links = response;
-		    // 	render();
-		    // });
 
 			this.youtubers = [];
 			this.videos = [];
@@ -48,13 +37,7 @@ define([
 			this.graphLast = -1;
 
 			this.fetchData();
-		    
-		    // this.youtubers.on('reset', calculateTime);
-		    // this.videos.on('reset', calculateTime);
-
-		    // this.videos.on('reset', function() {console.log('hi')});
-
-		    
+		  
 		},
 		fetchData: function() {
 			// this nested shiz gone get uglyyyyyy
@@ -143,6 +126,7 @@ define([
 				height = $('svg').height(),
 				that = this;
 			this.timeScale = d3.time.scale().domain([earliestTime, latestTime]).range([app.padding.top, height + app.padding.top]);
+			this.viewScale = d3.scale.linear().domain([minViews, maxViews]).range([app.padding.top, height + app.padding.top]);
 			this.videoScale = d3.scale.linear().domain([minViews, maxViews]).range([app.videoScaleSize.min, app.videoScaleSize.max]);
 			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
 			this.linkScale = d3.scale.log().domain([1, maxAssociations]).range([1, 16]);
@@ -260,38 +244,6 @@ define([
 		    });
 			
 		},
-		// calculateTime: function() {
-		// 	var scale = this.timelineVisualization.timeScale(),
-		// 		videos = this.videos.groupBy(function(video) {
-		// 			return scale(new Date(video.get('publishedDate').getFullYear(), video.get('publishedDate').getMonth(),
-		// 				video.get('publishedDate').getDate()));
-		// 		}),
-		// 		youtubers = this.youtubers.groupBy(function(youtuber) {
-		// 			return scale(new Date(youtuber.get('joinedDate').getFullYear(), youtuber.get('joinedDate').getMonth(),
-		// 				youtuber.get('joinedDate').getDate()));
-		// 		}),
-		// 		links = _.chain(this.links)
-		// 		// .map(function(link) {
-		// 		// 	return _.chain(link.weight).sortBy(function(date) {
-		// 		// 			return date;
-		// 		// 		}).map(function(date, i) {
-		// 		// 			if (link.source < 0 || _.isObject(link.target)) {
-
-		// 		// 			console.log(link, i, date);
-		// 		// 			}
-		// 		// 			return {source: link.source, target: link.target, weight: i + 1, date: new Date(date)};
-		// 		// 		}).value();
-		// 		// 	}).flatten()
-		// 		.groupBy(function(link) {
-		// 				var date = new Date(link.date);
-		// 				return scale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
-		// 			}).value();
-
-		// 	this.youtubersByTime = youtubers;
-		// 	this.videosByTime = videos;
-		// 	this.linksByTime = links;
-		// 	console.log(links);
-		// },
 		onWindowScroll: function() {
 			// $('.content').empty();  // TODO: refactor
 
@@ -376,115 +328,13 @@ define([
 				d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
 			}
 			
-			// if (!this.graphLast) {
-			// 	_.some(this.nodesByTime, function(nodes, time) {
-			// 		time = parseInt(time);
-			// 		if (time < top) {
-			// 		_.each(nodes, function(node) {
-			// 			if (node.subscribers) {
-			// 				that.graphYoutubers.push(node);
-			// 			} else if (node.views) {
-			// 				var youtuber = that.youtubersByName[node.youtuber];
-			// 				_.each(node.associations, function(association) {
-			// 					if (that.youtubersByName[association]) {
-			// 						var name = node.youtuber + ',' + association,
-			// 							link = that.graphLinks[name];
-			// 						if (link) {
-			// 							link.weight += 1;
-			// 						} else {
-			// 							that.graphLinks[name] = {
-			// 								source: youtuber,
-			// 								target: that.youtubersByName[association],
-			// 								weight: 1
-			// 							}
-			// 						}
-			// 					}
-			// 				});
-			// 			}
-			// 		});
-			// 	}
-			// 	});
-			// }
-			// _.some(this.nodesByTime, function(nodes, time) {
-			// 	time = parseInt(time);
-			// 	if ((time - 2) < top && top < (time + 2)) {
-			// 		console.log(nodes);
-			// 		_.each(nodes, function(node) {
-			// 			if (!node.id) return;
-			// 			d3.select('#' + node.id).call(videoVisualization.click, 'timeline');
-			// 		})
-			// 	} 
-
-			// 	// else {
-			// 	// 	d3.selectAll('.videoLine, .node, .video, .link')
-			// 	// 		.classed('fade', false)
-			// 	// 		.classed('solid', false);
-			// 	// }
-			// 	if (time < top) {
-			// 		_.each(nodes, function(node) {
-			// 			if (node.subscribers) {
-			// 				youtubers.push(node);
-			// 			} else if (node.views) {
-			// 				var youtuber = that.youtubersByName[node.youtuber];
-			// 				_.each(node.associations, function(association) {
-			// 					if (that.youtubersByName[association]) {
-			// 						var name = node.youtuber + ',' + association,
-			// 							link = links[name];
-			// 						if (link) {
-			// 							link.weight += 1;
-			// 						} else {
-			// 							links[name] = {
-			// 								source: youtuber,
-			// 								target: that.youtubersByName[association],
-			// 								weight: 1
-			// 							}
-			// 						}
-			// 					}
-			// 				});
-			// 			}
-			// 		});
-			// 	}
-			// 	// if (time < top) {
-			// 	// 	content = '';
-			// 	// 	_.each(youtubers, function(youtuber) {
-			// 	// 		content += youtuber.get('joinedDate').toDateString() + ': ' + youtuber.get('author') + ' joined<br>';
-			// 	// 	});
-			// 	// 	$('.youtuberContent').html(content);
-			// 	// }
-			// 	return time > top;
-			// });
 			var links = _.values(this.graphLinks);
 				// = _.chain(this.linksByTime).filter(function(link, time) {
 				// 	time = parseInt(time);
 				// 	return time < top;
 				// }).flatten().clone().value();
 			this.timelineVisualization.update(top, app.timeFormat(date));
-			// $('.date').text(timeFormat(date));
-			// _.each(this.videosByTime, function(videos, time) {
-			// 	time = parseInt(time);
-			// 	if (time < top) {
-			// 		content = '';
-			// 		_.each(videos, function(video) {
-			// 			content += video.get('publishedDate').toDateString() + ': ' + video.get('title') + '<br>';
-			// 			if (!_.isEmpty(video.get('associations'))) {
-			// 				content += '<div class="associations">';
-			// 				_.chain(video.get('associations'))
-			// 					.filter(function(association) {
-			// 						return association !== "wongfuproductions";
-			// 					})
-			// 					.each(function(association, i, list) {
-			// 						content += association;
-			// 						if (i < list.length - 1) {
-			// 							content += ', ';
-			// 						}
-			// 					}).value();
-			// 				content += '</div>';
-			// 			}
-			// 		});
-			// 		$('.videoContent').html(content);
-			// 	}
-			// });
-
+			
 			this.graphVisualization
 				.nodes(this.graphYoutubers).links(links).render();
 

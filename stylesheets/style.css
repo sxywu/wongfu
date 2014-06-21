@@ -26,25 +26,11 @@ svg {
     color: #666;
 }
 
-
-/*svg#graphSVG {
-	width: 100%;
-	height: 100%;
-	margin:auto;
-	position: fixed;
-}*/
-
 .youtuber {
 	position:fixed;
 	margin: 50px;
 	bottom: 35%;
 }
-
-/*.video line, 
-.youtuber line {
-	fill: none;
-	stroke: #666;
-}*/
 
 .fade {
 	opacity: .15;
@@ -58,71 +44,43 @@ svg {
 * HTML
 */
 
+.settings {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	margin: 20px;
+}
+
 .description {
 	position: fixed;
-	width: 480px;
+	width: 500px;
 	bottom: 0;
 	left: 0;
-	background-color: rgba(255, 253, 251, .5);
+	margin: 20px;
+	background-color: rgba(255, 253, 251, 1);
+	border: 1px solid #fff;
+	border-radius: 5px;
+
+	box-shadow: 0 0 5px #999;
 }
 
-.marker {
-	position: fixed;
-}
-/*.marker {
-	position:fixed;
-	width: 30%;
-	left: 150px;
-	height: 100%;
-	top: 200px;
+.videoDesc {
+	float: left;
 }
 
-.marker .date {
-	position: absolute;
-	left: -125px;
-	top: -10px;
-}
-*/
-
-.marker .circle {
-	top: -4px;
-	position: absolute;
-	background-color: #666;
-	width: 8px;
-	height: 8px;
-	border-radius: 8px;
-	left: -4px;
-	/*bottom: 25;
-	height: 70%;
-	width: 75%;
-	border-left: 0px solid;
-	border-top: 1px solid;
-	border-right: 0px solid;
-	border-bottom: 0px solid;
-	border-color: #999;
-	position: absolute;
-	color: #666;*/
-}
-/*
-.videos .date {
-	position: absolute;
-	font-size: 2em;
-	top: -36px;
-	margin-left: 20px
+.videoImage {
+	width: 80px;
+	margin: 10px;
 }
 
-.videos .youtuberContent, .videos .videoContent {
-	width: 200%;
-	margin: 25px 15px;
+.videoDate {
 	font-size: .85em;
 }
 
-.videos .associations {
-	margin-left: 20px;
-	color: #3B8686;
-	font-weight: 600;
+.videoTitle {
+	font-size: 1.25em;
 }
-*/
+
 /*******************
 * General
 */

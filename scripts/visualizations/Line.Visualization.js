@@ -22,9 +22,6 @@ define([
 
         container
             .attr('id', function(d) {return d.youtuber.youtuber})
-            // .attr('transform', function(d) {
-            //     return 'translate(' + d.x + ',' + d.y + ')';
-            // })
             .call(enter);
 
         return Line;
@@ -41,17 +38,7 @@ define([
                     if (source) {
                         var sourceX = source.youtuberObj.x,
                             targetX = target.youtuberObj.x,
-                            // youtuberX = d.youtuber.x,
                             index;
-                        // if (d.youtuber !== target.youtuberObj) {
-                        //     index = _.chain(target.associationsByTime)
-                        //         .filter(function(youtuber) {
-                        //             return _.contains(app.youtubersWithLine, youtuber);
-                        //         }).indexOf(d.youtuber.youtuber).value() + 1;
-                        //     // sourceX += index * lineWidth;  
-                        //     // youtuberX += index * lineWidth;
-                        //     targetX += index * lineWidth;
-                        // };
 
                         if (source.y > target.y - gap) {
                             path += diagonal({
