@@ -12,9 +12,8 @@ define([
     var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
     var youtubers, videos; // data
     var container;
-    var sizeScale, timeScale;
-    var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
-    var lineWidth = 4;
+    var timeScale;
+    var lineWidth = 2;
     var color;
     var graphVisualization = GraphVisualization();
     var Line = function(selection) {
@@ -103,7 +102,7 @@ define([
         }
 
         if (app.clicked) {
-            d3.select('.node.solid').call(graphVisualization.hideName);
+            // d3.select('.node.solid').call(graphVisualization.hideName);
             d3.selectAll('.solid').classed('fade', true)
                 .classed('solid', false);
         } else if (!app.clicked) {
@@ -158,17 +157,6 @@ define([
         if (!arguments.length) return color;
 
         color = value;
-        return Line;
-    }
-
-    Line.sizeScale = function(minViews, maxViews) {
-        if (!arguments.length) return sizeScale;
-
-        if (arguments.length > 1) {
-            sizeScale = d3.scale.linear().domain([minViews, maxViews]).range([minSize, maxSize]);
-        } else {
-            sizeScale = minViews;
-        }
         return Line;
     }
 

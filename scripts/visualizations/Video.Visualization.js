@@ -31,9 +31,10 @@ define([
         selection.attr('id', function(d) {return d.id = _.uniqueId('video')})
             .attr('cx', function(d) {return d.youtuberObj.x})
             .attr('cy', function(d) {return d.y})
-            .attr('r', 6)
-            .attr('fill', function(d) {return app.d3Colors(d.youtuber)})
-            .attr('stroke', '#fff')
+            .attr('r', 4)
+            .attr('fill', "#fff")
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke-width', 2)
             .on('mouseover', mouseover)
             .on('mouseleave', mouseleave)
             .on('click', Video.click);

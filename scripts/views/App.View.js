@@ -197,30 +197,30 @@ define([
 				.classed('timeline', true)
 				.call(this.timelineVisualization);
 
-			this.graphVisualization = GraphVisualization()
-				.linkScale(this.linkScale)
-				.width(graphWidth).height(graphHeight);
-			d3.select('svg').append('g')
-				.classed('graph', true)
-				.call(this.graphVisualization);
+			// this.graphVisualization = GraphVisualization()
+			// 	.linkScale(this.linkScale)
+			// 	.width(graphWidth).height(graphHeight);
+			// d3.select('svg').append('g')
+			// 	.classed('graph', true)
+			// 	.call(this.graphVisualization);
 
 			this.lineVisualization = LineVisualization()
-				.timeScale(this.timeScale)
-				.sizeScale(this.videoScale);
+				.timeScale(this.timeScale);
+				// .sizeScale(this.videoScale);
 			this.timeline.selectAll('.videoLine')
 				.data(this.youtuberVideos)
 				.enter().insert('path', '.marker')
 					.classed('videoLine', true)
 					.call(this.lineVisualization);
 
-			this.youtuberVisualization = YoutuberVisualization()
-				.timeScale(this.timeScale)
-				.radiusScale(this.youtuberScale);
-			this.timeline.selectAll('.youtuber')
-				.data(this.youtubersWithVideo)
-				.enter().insert('g', '.marker')
-					.classed('youtuber', true)
-					.call(this.youtuberVisualization);
+			// this.youtuberVisualization = YoutuberVisualization()
+			// 	.timeScale(this.timeScale)
+			// 	.radiusScale(this.youtuberScale);
+			// this.timeline.selectAll('.youtuber')
+			// 	.data(this.youtubersWithVideo)
+			// 	.enter().insert('g', '.marker')
+			// 		.classed('youtuber', true)
+			// 		.call(this.youtuberVisualization);
 
 			this.videoVisualization = VideoVisualization();
 			this.timeline.selectAll('.video')
@@ -240,7 +240,7 @@ define([
 		    $(window).scroll(function() {
 		    	var left = 0,
 		    		top = top = $(window).scrollTop();
-		    	that.graphVisualization.position(left, top);
+		    	// that.graphVisualization.position(left, top);
 		    });
 			
 		},
@@ -254,79 +254,79 @@ define([
 
 			// if our current scrolltop is greater than our last
 			// we're going down so we should be adding nodes
-			if (top >= this.last) {
-				while (this.graphLast < this.nodes.length) {
-					var node = this.nodes[this.graphLast + 1],
-						time = this.timeScale(node.joinedDate || node.publishedDate);
+			// if (top >= this.last) {
+			// 	while (this.graphLast < this.nodes.length) {
+			// 		var node = this.nodes[this.graphLast + 1],
+			// 			time = this.timeScale(node.joinedDate || node.publishedDate);
 
-					if (time >= top) break;
+			// 		if (time >= top) break;
 
-					if (node.subscribers) {
-						// if it's a youtuber
-						this.graphYoutubers.push(node);
-					} else if (node.views) {
-						// else it's a video
-						var youtuber = this.youtubersByName[node.youtuber];
-						_.each(node.associations, function(association) {
-							if (that.youtubersByName[association]) {
-								var name = node.youtuber + ',' + association,
-									link = that.graphLinks[name];
-								if (link) {
-									link.weight += 1;
-								} else {
-									that.graphLinks[name] = {
-										source: youtuber,
-										target: that.youtubersByName[association],
-										weight: 1
-									}
-								}
-							}
-						});
-					}
-					this.graphLast += 1;
-				}
+			// 		if (node.subscribers) {
+			// 			// if it's a youtuber
+			// 			this.graphYoutubers.push(node);
+			// 		} else if (node.views) {
+			// 			// else it's a video
+			// 			var youtuber = this.youtubersByName[node.youtuber];
+			// 			_.each(node.associations, function(association) {
+			// 				if (that.youtubersByName[association]) {
+			// 					var name = node.youtuber + ',' + association,
+			// 						link = that.graphLinks[name];
+			// 					if (link) {
+			// 						link.weight += 1;
+			// 					} else {
+			// 						that.graphLinks[name] = {
+			// 							source: youtuber,
+			// 							target: that.youtubersByName[association],
+			// 							weight: 1
+			// 						}
+			// 					}
+			// 				}
+			// 			});
+			// 		}
+			// 		this.graphLast += 1;
+			// 	}
 
-				if (node && node.id) {
-					d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
-				}
+			// 	if (node && node.id) {
+			// 		d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
+			// 	}
 
-			} else {
-				// otherwise it's scrolling back up so we should remove nodes
-				while (this.graphLast >= 0) {
+			// } else {
+			// 	// otherwise it's scrolling back up so we should remove nodes
+			// 	while (this.graphLast >= 0) {
 
-					var node = this.nodes[this.graphLast],
-						time = this.timeScale(node.joinedDate || node.publishedDate);
+			// 		var node = this.nodes[this.graphLast],
+			// 			time = this.timeScale(node.joinedDate || node.publishedDate);
 
-					if (time <= top) break;
+			// 		if (time <= top) break;
 
-					if (node.subscribers) {
-						this.graphYoutubers.pop();
-					} else if (node.views) {
-						var youtuber = this.youtubersByName[node.youtuber];
-						_.each(node.associations, function(association) {
-							if (that.youtubersByName[association]) {
-								var name = node.youtuber + ',' + association,
-									link = that.graphLinks[name];
-								if (link && (link.weight >= 1)) {
-									delete that.graphLinks[name];
-								} else if (link) {
-									link.weight -= 1;
-								}
-							}
-						});
-					}
+			// 		if (node.subscribers) {
+			// 			this.graphYoutubers.pop();
+			// 		} else if (node.views) {
+			// 			var youtuber = this.youtubersByName[node.youtuber];
+			// 			_.each(node.associations, function(association) {
+			// 				if (that.youtubersByName[association]) {
+			// 					var name = node.youtuber + ',' + association,
+			// 						link = that.graphLinks[name];
+			// 					if (link && (link.weight >= 1)) {
+			// 						delete that.graphLinks[name];
+			// 					} else if (link) {
+			// 						link.weight -= 1;
+			// 					}
+			// 				}
+			// 			});
+			// 		}
 
-					this.graphLast -= 1;
-				}
+			// 		this.graphLast -= 1;
+			// 	}
 
 				
-			}
+			// }
 
-			this.last = top;
-			var node = this.nodes[this.graphLast];
-			if (node && node.id) {
-				d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
-			}
+			// this.last = top;
+			// var node = this.nodes[this.graphLast];
+			// if (node && node.id) {
+			// 	d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
+			// }
 			
 			var links = _.values(this.graphLinks);
 				// = _.chain(this.linksByTime).filter(function(link, time) {
@@ -334,9 +334,6 @@ define([
 				// 	return time < top;
 				// }).flatten().clone().value();
 			this.timelineVisualization.update(top, app.timeFormat(date));
-			
-			this.graphVisualization
-				.nodes(this.graphYoutubers).links(links).render();
 
 			this.prevTop = top;
 
