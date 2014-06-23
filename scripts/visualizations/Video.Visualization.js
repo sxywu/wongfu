@@ -84,6 +84,8 @@ define([
         if (type !== 'timeline' && app.clicked === d) {
             Video.unclick(d);
         } else {
+            // get a event system...
+            $(this).trigger('summarize', d);
 
             // the clicked video and its publisher shouldn't be faded
             video.classed('solid', true)

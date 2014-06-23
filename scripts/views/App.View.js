@@ -3,25 +3,21 @@ define([
 	"underscore",
 	"backbone",
 	"d3",
-    // "app/collections/Youtubers.Collection",
-    // "app/collections/Videos.Collection",
     "app/visualizations/Timeline.Visualization",
-    "app/visualizations/Graph.Visualization",
     "app/visualizations/Line.Visualization",
     "app/visualizations/Youtuber.Visualization",
-    "app/visualizations/Video.Visualization"
+    "app/visualizations/Video.Visualization",
+    "app/visualizations/Summary.Visualization"
 ], function(
 	$,
 	_,
 	Backbone,
 	d3,
-	// YoutubersCollection,
-	// VideosCollection,
 	TimelineVisualization,
-	GraphVisualization,
 	LineVisualization,
 	YoutuberVisualization,
-	VideoVisualization
+	VideoVisualization,
+	SummaryVisualization
 ) {
 	var videoVisualization = VideoVisualization(),
 		lineVisualization = LineVisualization();
@@ -53,10 +49,6 @@ define([
 		    		youtuber.subscribers = parseInt(youtuber.statistics.subscriberCount);
 		    		return youtuber.joinedDate;
 		    	});
-
-		    	// _.each(that.youtubers, function(youtuber) {
-		    	// 	that.youtubersByName[youtuber.youtuber] = youtuber;
-		    	// });
 
 		    	// get list of youtubers with video data
 		    	d3.json('youtubers/youtubers.json', function(response) {
@@ -108,8 +100,6 @@ define([
 					return video.publishedDate;
 				}).value();
 
-			// var earliestTime = _.first(this.youtubers).joinedDate,
-			// 	latestTime = _.last(this.videos).publishedDate,
 			var earliestTime = new Date(2005, 10, 1),
 				latestTime = new Date(),
 				minViews = _.chain(this.videos).pluck('views').min().value(),
@@ -215,6 +205,11 @@ define([
             var timelineWidth = (this.youtubersWithVideo.length - 1) * app.nodePadding.left
             	+ app.padding.left + app.padding.right;
             $('.timelineBG').css('width', timelineWidth);
+
+            this.summaryVisualization = SummaryVisualization();
+            d3.select('svg').append('g')
+            	.classed('summary', true)
+            	.call(this.summaryVisualization);
 
 			this.scrollEvents();
 			
@@ -322,6 +317,12 @@ define([
 
 			this.prevTop = top;
 
+		},
+		events: {
+			'summarize .video': 'summarizeVideo'
+		},
+		summarizeVideo: function(e, video) {
+			console.log(video);
 		}
 	});
 })
