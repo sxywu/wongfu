@@ -36,41 +36,41 @@ define([
         //     // .attr("transform", "translate(0," + height + ")")
         //     .call(yAxis);
 
-        marker = container.append('g')
-            .classed('marker', true)
-            .attr('transform', 'translate(0,' + app.padding.top + ')');
+        // marker = container.append('g')
+        //     .classed('marker', true)
+        //     .attr('transform', 'translate(0,' + app.padding.top + ')');
 
-        marker.append('line')
-            .attr('x1', -app.nodePadding.right * 4)
-            .attr('y1', 0)
-            .attr('x2', width)
-            .attr('y1', 0)
-            .attr('stroke', '#000')
-            .attr('fill', 'none');
+        // marker.append('line')
+        //     .attr('x1', -app.nodePadding.right * 4)
+        //     .attr('y1', 0)
+        //     .attr('x2', width)
+        //     .attr('y1', 0)
+        //     .attr('stroke', '#000')
+        //     .attr('fill', 'none');
 
-        circle = marker.append('circle')
-            .classed('markerCircle', true)
-            .attr('r', 5)
-            .attr('cx', -app.nodePadding.right * 4)
-            .attr('cy', 0);
+        // circle = marker.append('circle')
+        //     .classed('markerCircle', true)
+        //     .attr('r', 5)
+        //     .attr('cx', -app.nodePadding.right * 4)
+        //     .attr('cy', 0);
 
-        text = marker.append('text')
-            .classed('markerDate', true)
-            .attr('x', -app.nodePadding.right * 6)
-            .attr('y', 0)
-            .attr('text-anchor', 'end')
-            .attr('dy', '.35em');
+        // text = marker.append('text')
+        //     .classed('markerDate', true)
+        //     .attr('x', -app.nodePadding.right * 6)
+        //     .attr('y', 0)
+        //     .attr('text-anchor', 'end')
+        //     .attr('dy', '.35em');
 
 
         return Timeline;
     }
 
     Timeline.update = function() {
-        var top = $(window).scrollTop() + app.padding.top,
-            date = app.timeFormat(timeScale.invert(top));
-        marker.attr('transform', 'translate(0,' + top + ')');
+        // var top = $(window).scrollTop() + app.padding.top,
+        //     date = app.timeFormat(timeScale.invert(top));
+        // marker.attr('transform', 'translate(0,' + top + ')');
 
-        text.text(date);
+        // text.text(date);
     }
 
     /*

@@ -67,7 +67,7 @@ define([
                     }
                     source = target;
                 });
-                return 'M' + d.youtuber.x + ',' + d.youtuber.y + ' ' + path.replace(/M[0-9\,.]*/gi, '');
+                return 'M' + d.youtuber.x + ',' + app.padding.top + ' ' + path.replace(/M[0-9\,.]*/gi, '');
             }).attr('fill', 'none')
             .attr('stroke', function(d) {return app.d3Colors(d.youtuber.youtuber)})
             .attr('stroke-width', lineWidth)

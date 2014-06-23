@@ -15,7 +15,7 @@ define([
     var youtubers, videos; // data
     var container;
     var sizeScale, timeScale;
-    var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
+    var rectPadding = 30, minSize = 10, maxSize = 100, radius = 5;
     var color;
     var graphVisualization = GraphVisualization();
     var Video = function(selection) {
@@ -29,12 +29,14 @@ define([
 
     var enter = function(selection) {
         selection.attr('id', function(d) {return d.id = _.uniqueId('video')})
-            .attr('cx', function(d) {return d.youtuberObj.x})
-            .attr('cy', function(d) {return d.y})
-            .attr('r', 4)
-            .attr('fill', "#fff")
-            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('x', function(d) {return d.youtuberObj.x - radius})
+            .attr('y', function(d) {return d.y - radius})
+            .attr('width', radius * 2)
+            .attr('height', radius * 2)
             .attr('stroke-width', 2)
+            .attr('rx', 2)
+            .attr('ry', 2)
+            .call(solidVideo)
             .on('mouseover', mouseover)
             .on('mouseleave', mouseleave)
             .on('click', Video.click);
@@ -65,39 +67,36 @@ define([
 
         if (!app.clicked) {
             // if nothing is clicked, fade everything
-            d3.selectAll('.video, .videoLine, .node, .link').classed('fade', true)
+            d3.selectAll('.videoLine').classed('fade', true)
                 .classed('solid', false);
+            d3.selectAll('.video')
+                .call(fadedVideo);
         } else {
-            // if something has already been clicked, hide the shown names
-            d3.selectAll('.node.solid').call(graphVisualization.hideName);
-            // all the previously highlighted videos and youtubers should also be faded.
-            d3.selectAll('.solid').classed('fade', true)
-                .classed('solid', false);
+            // all the previously highlighted video lines should be faded
+            // and their stroke should go back to solid
+            d3.selectAll('.videoLine.solid').classed('fade', true)
+                .classed('solid', false)
+                .call(solidLine);
+            d3.selectAll('.video.solid').classed('solid', false)
+                .call(fadedVideo);
         }
 
         if (type !== 'timeline' && app.clicked === d) {
-            app.clicked = false;
-            d.youtuberObj.clicked = false;
-            d3.selectAll('.fade').classed('fade', false)
-                .classed('solid', false);
+            Video.unclick(d);
         } else {
-            var template = _.template(VideoTemplate, {video: d});
-            $('.description').html(template);
 
-            // the clicked video and associated youtubers shouldn't be faded
-            video.classed('fade', false)
-                .classed('solid', true);
-            d3.selectAll('#' + d.youtuber).classed('fade', false)
+            // the clicked video and its publisher shouldn't be faded
+            video.classed('solid', true)
+                .call(filledVideo);
+            d3.selectAll('.videoLine#' + d.youtuber).classed('fade', false)
                 .classed('solid', true);
 
             _.each(d.associations, function(youtuber) {
-                    d3.selectAll('#' + youtuber).classed('fade', false)
-                        .classed('solid', true);
-                    d3.selectAll('#' + d.youtuber + youtuber).classed('fade', false)
-                        .classed('solid', true);
+                    // associated youtubers should get dashed lines
+                    d3.selectAll('.videoLine#' + youtuber).classed('fade', false)
+                        .classed('solid', true)
+                        .call(dashedLine);
                 })
-
-            d3.selectAll('.node.solid').call(graphVisualization.showName);
 
             app.clicked = d;
             d.youtuberObj.clicked = true;
@@ -111,8 +110,40 @@ define([
         d.youtuberObj.clicked = false;
 
         $('.description').html();
-        d3.selectAll('.video, .videoLine, .node, .link').classed('fade', false)
-                .classed('solid', false);
+        d3.selectAll('.videoLine').classed('fade', false)
+            .classed('solid', false)
+            .call(solidLine);
+        d3.selectAll('.video')
+            .classed('solid', false)
+            .call(solidVideo);
+    }
+
+    // helper for clicking and unclicking video
+    solidLine = function(selection) {
+        selection.attr('stroke-dasharray', 'none');
+    }
+
+    dashedLine = function(selection) {
+        selection.attr('stroke-dasharray', '5, 5');
+    }
+
+    filledVideo = function(selection) {
+        selection.attr('fill', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke-opacity', 1);
+    }
+
+    solidVideo = function(selection) {
+        selection
+            .attr('fill', "#fff")
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke-opacity', 1);
+    }
+
+    fadedVideo = function(selection) {
+        selection.attr('fill', '#fff')
+            .attr('stroke', function(d) {return app.d3Colors(d.youtuber)})
+            .attr('stroke-opacity', .05);
     }
 
     return function() {

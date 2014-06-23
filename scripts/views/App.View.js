@@ -225,7 +225,7 @@ define([
 			this.videoVisualization = VideoVisualization();
 			this.timeline.selectAll('.video')
                 .data(this.videos)
-                .enter().insert('circle', '.marker')
+                .enter().insert('rect', '.marker')
                     .classed('video', true)
                     .call(this.videoVisualization);
 
