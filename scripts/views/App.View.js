@@ -131,14 +131,6 @@ define([
 			this.youtuberScale = d3.scale.linear().domain([minSubscribers, maxSubscribers]).range([app.youtuberScaleSize.min, app.youtuberScaleSize.max]);
 			this.linkScale = d3.scale.log().domain([1, maxAssociations]).range([1, 16]);
 
-			// this.nodesByTime = _.chain(_.union(this.videos, this.youtubers))
-			// 	.sortBy(function(node) {
-			// 		return node.publishedDate || node.joinedDate;
-			// 	}).groupBy(function(node) {
-			// 		var date = node.publishedDate || node.joinedDate;
-			// 		return that.timeScale(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
-			// 	}).value();
-
 			this.nodes = _.chain(this.videos)
 				.union(this.youtubers)
 				.sortBy(function(node) {
@@ -190,19 +182,11 @@ define([
 				that = this;
 
 			this.timelineVisualization = TimelineVisualization()
-				// .videos([{videos: this.videos.toJSON(), youtuber: "wongfuproductions"}])
 				.width(width).height(height)
 				.timeScale(this.timeScale);
 			this.timeline = d3.select('svg').append('g')
 				.classed('timeline', true)
 				.call(this.timelineVisualization);
-
-			// this.graphVisualization = GraphVisualization()
-			// 	.linkScale(this.linkScale)
-			// 	.width(graphWidth).height(graphHeight);
-			// d3.select('svg').append('g')
-			// 	.classed('graph', true)
-			// 	.call(this.graphVisualization);
 
 			this.lineVisualization = LineVisualization()
 				.timeScale(this.timeScale);
@@ -228,20 +212,22 @@ define([
                     .classed('video', true)
                     .call(this.videoVisualization);
 
-			// this.calculateTime();
-			// this.onWindowScroll();
+            var timelineWidth = (this.youtubersWithVideo.length - 1) * app.nodePadding.left
+            	+ app.padding.left + app.padding.right;
+            $('.timelineBG').css('width', timelineWidth);
 
+			this.scrollEvents();
+			
+		},
+		scrollEvents: function() {
 			this.prevTop = 0;
-			var scroll = _.throttle(_.bind(this.onWindowScroll, this), 200);
 		    $(window).scroll(_.bind(this.onWindowScroll, this));
-		    // $(window).scroll(scroll);
 		    $(window).scroll(this.timelineVisualization.update);
 		    $(window).scroll(function() {
 		    	var left = 0,
 		    		top = top = $(window).scrollTop();
 		    	// that.graphVisualization.position(left, top);
 		    });
-			
 		},
 		onWindowScroll: function() {
 			// $('.content').empty();  // TODO: refactor
