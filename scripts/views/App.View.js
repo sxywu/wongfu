@@ -213,14 +213,13 @@ define([
 					.classed('videoLine', true)
 					.call(this.lineVisualization);
 
-			// this.youtuberVisualization = YoutuberVisualization()
-			// 	.timeScale(this.timeScale)
-			// 	.radiusScale(this.youtuberScale);
-			// this.timeline.selectAll('.youtuber')
-			// 	.data(this.youtubersWithVideo)
-			// 	.enter().insert('g', '.marker')
-			// 		.classed('youtuber', true)
-			// 		.call(this.youtuberVisualization);
+			this.youtuberVisualization = YoutuberVisualization()
+				.timeScale(this.timeScale);
+			this.timeline.selectAll('.youtuber')
+				.data(this.youtubersWithVideo)
+				.enter().insert('circle', '.marker')
+					.classed('youtuber', true)
+					.call(this.youtuberVisualization);
 
 			this.videoVisualization = VideoVisualization();
 			this.timeline.selectAll('.video')
