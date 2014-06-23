@@ -73,8 +73,7 @@ define([
             .attr('stroke-width', lineWidth)
             .attr('stroke-linecap', 'round')
             .attr('stroke-linejoin', 'round')
-            .attr('opacity', .75)
-            .on('click', Line.click);
+            .attr('opacity', .75);
     }
 
     var exit = function(selection) {
@@ -84,57 +83,6 @@ define([
     /**
     events
     */
-    var mouseover = function(d) {
-        // d3.selectAll('.node, .link, .videoLine').classed('fade', true)
-        //     .classed('solid', false);
-        // d3.selectAll('#' + d.youtuber.youtuber).classed('fade', false)
-        //     .classed('solid', true);
-    }
-
-    var mouseleave = function() {
-        // d3.selectAll('.node, .link, .videoLine').classed('fade', false)
-            // .classed('solid', false);
-    }
-
-    Line.click = function(d, type) {
-        if (type === 'timeline') {
-            d = d.datum();
-        }
-
-        if (app.clicked) {
-            // d3.select('.node.solid').call(graphVisualization.hideName);
-            d3.selectAll('.solid').classed('fade', true)
-                .classed('solid', false);
-        } else if (!app.clicked) {
-            d3.selectAll('.node, .link, .videoLine').classed('fade', true)
-                .classed('solid', false);
-        }
-
-        if (app.clicked === d.youtuber) {
-            d3.selectAll('.fade').classed('fade', false)
-                .classed('solid', false);
-            d.youtuber.clicked = false;
-            app.clicked = false;
-        } else {
-            d3.selectAll('#' + d.youtuber.youtuber).classed('fade', false)
-                .classed('solid', true);
-            d3.select('.node#' + d.youtuber.youtuber)
-                .call(graphVisualization.showName);
-
-            d.youtuber.clicked = true;
-            if (app.clicked) app.clicked.clicked = false;
-            app.clicked = d.youtuber;
-        }
-        
-    }
-
-    var showName = function() {
-
-    }
-
-    var hideName = function() {
-
-    }
 
     /*
     getter setters
