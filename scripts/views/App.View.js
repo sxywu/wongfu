@@ -41,7 +41,7 @@ define([
 			// first get all youtubers
 		    d3.json('data/nodes.json', function(response) {
 		    	
-		    	that.youtubersByName = {};
+		    	app.youtubersByName = that.youtubersByName = {};
 		    	that.youtubers = _.sortBy(response, function(youtuber) {
 		    		that.youtubersByName[youtuber.youtuber] = youtuber;
 
@@ -87,6 +87,7 @@ define([
 			    			videos = _.chain(videosByAssociation)
 			    				.values().flatten().uniq().value();
 			    			that.videos.push(videos);
+			    			that.youtubersByName[youtuber].allVideos = videos;
 
 			    			calculateTime();
 		    			});
