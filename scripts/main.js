@@ -6,7 +6,8 @@ require.config({
         "backbone": "backbone",
         "bootstrap": "bootstrap",
         "d3": "d3.v3",
-        "d3.tip": "d3.tip"
+        "d3.tip": "d3.tip",
+        "mediator": "mediator"
     },
     shim: {
         "underscore": {
@@ -34,12 +35,14 @@ require([
     "underscore",
     "backbone",
     "d3",
+    "mediator",
     "app/views/App.View"
 ], function(
     $,
     _,
     Backbone,
     d3,
+    Mediator,
     AppView
 ) {
     app = {};
@@ -48,12 +51,14 @@ require([
     app.d3Colors = d3.scale.category20();
     app.youtubers = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis"];
     app.timeFormat = d3.time.format('%B %d, %Y');
-    app.padding = {top: 100, left: 45, right: 45, bottom: 0};
+    app.padding = {top: 75, left: 45, right: 45, bottom: 0};
     app.nodePadding = {top: 0, left: 45, right: 5, bottom: 0};
     app.videoSize = 30;
     app.youtuberSize = 40;
     app.videoScaleSize = {min: 100, max: 800};
     app.youtuberScaleSize = {min: 100, max: 800};
+
+    app.mediator = new Mediator();
 
     var appView = new AppView();
 

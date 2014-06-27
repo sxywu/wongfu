@@ -172,7 +172,6 @@ define([
 				that = this;
 
 			this.timelineVisualization = TimelineVisualization()
-				.width(width).height(height)
 				.timeScale(this.timeScale);
 			this.timeline = d3.select('svg').append('g')
 				.classed('timeline', true)
@@ -202,9 +201,10 @@ define([
                     .classed('video', true)
                     .call(this.videoVisualization);
 
-            var timelineWidth = (this.youtubersWithVideo.length - 1) * app.nodePadding.left
+            var timelineWidth = this.timelineWidth = (this.youtubersWithVideo.length - 1) * app.nodePadding.left
             	+ app.padding.left + app.padding.right;
             $('.timelineBG').css('width', timelineWidth);
+            this.timelineVisualization.width(timelineWidth);
 
             this.summaryVisualization = SummaryVisualization();
             d3.select('svg').append('g')
@@ -216,13 +216,14 @@ define([
 		},
 		scrollEvents: function() {
 			this.prevTop = 0;
+			var that = this;
 		    $(window).scroll(_.bind(this.onWindowScroll, this));
 		    $(window).scroll(this.timelineVisualization.update);
 		    $(window).scroll(function() {
-		    	var left = 0,
-		    		top = top = $(window).scrollTop();
-		    	// that.graphVisualization.position(left, top);
+		    	var top = $(window).scrollTop();
+		    	that.summaryVisualization.position(that.timelineWidth, top);
 		    });
+		    this.summaryVisualization.position(this.timelineWidth, $(window).scrollTop());
 		},
 		onWindowScroll: function() {
 			// $('.content').empty();  // TODO: refactor
@@ -308,21 +309,15 @@ define([
 			// 	d3.select('.video#' + node.id).call(videoVisualization.click, 'timeline');
 			// }
 			
-			var links = _.values(this.graphLinks);
+			// var links = _.values(this.graphLinks);
 				// = _.chain(this.linksByTime).filter(function(link, time) {
 				// 	time = parseInt(time);
 				// 	return time < top;
 				// }).flatten().clone().value();
-			this.timelineVisualization.update(top, app.timeFormat(date));
+			// this.timelineVisualization.update(top, app.timeFormat(date));
 
 			this.prevTop = top;
 
-		},
-		events: {
-			'summarize .video': 'summarizeVideo'
-		},
-		summarizeVideo: function(e, video) {
-			console.log(video);
 		}
 	});
 })

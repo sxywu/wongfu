@@ -70,21 +70,8 @@ svg {
 	box-shadow: 0 0 5px #999;
 }
 
-.videoDesc {
-	float: left;
-}
-
-.videoImage {
-	width: 80px;
-	margin: 10px;
-}
-
-.videoDate {
-	font-size: .85em;
-}
-
 .videoTitle {
-	font-size: 1.25em;
+	font-weight: 700;
 }
 
 /*******************
