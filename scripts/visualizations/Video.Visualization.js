@@ -2,13 +2,11 @@ define([
     "jquery",
     "underscore",
     "d3",
-    'app/visualizations/Graph.Visualization',
     "text!app/templates/Video.Template.html"
 ], function(
     $,
     _,
     d3,
-    GraphVisualization,
     VideoTemplate
 ) {
     var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
@@ -17,7 +15,6 @@ define([
     var sizeScale, timeScale;
     var rectPadding = 30, minSize = 10, maxSize = 100, radius = 5;
     var color;
-    var graphVisualization = GraphVisualization();
     var Video = function(selection) {
         container = selection;
 

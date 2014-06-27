@@ -1,13 +1,11 @@
 define([
     "jquery",
     "underscore",
-    "d3",
-    "app/visualizations/Graph.Visualization"
+    "d3"
 ], function(
     $,
     _,
-    d3,
-    GraphVisualization
+    d3
 ) {
     var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
     var youtubers, videos; // data
@@ -15,7 +13,6 @@ define([
     var timeScale;
     var lineWidth = 2;
     var color;
-    var graphVisualization = GraphVisualization();
     var Line = function(selection) {
         container = selection;
 

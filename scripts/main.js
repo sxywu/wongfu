@@ -34,15 +34,13 @@ require([
     "underscore",
     "backbone",
     "d3",
-    "app/views/App.View",
-    "app/visualizations/Graph.Visualization"
+    "app/views/App.View"
 ], function(
     $,
     _,
     Backbone,
     d3,
-    AppView,
-    GraphVisualization
+    AppView
 ) {
     app = {};
     // http://www.colourlovers.com/palette/3318893/S_i_r_e_n_s_S_o_n_g?widths=1
