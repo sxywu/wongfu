@@ -11,10 +11,10 @@ define([
     var videoPadding = {top: 0, left: 15, right: 0, bottom: 8};
     var videoWidth = 80, cornerRadius = 3, dateSize = 14, titleSize = 18;
     var youtuberPadding = {top: 10, left: 15, right: 0, bottom: 0};
-    var youtuberHeight = 100, youtuberSize = 30, barWidth = 3;
+    var youtuberHeight = 80, youtuberSize = 30, barWidth = 3;
     var fontColor = "#073642";
     var arrowObj, diagonal = d3.svg.diagonal()
-    var timeScale = d3.time.scale().range([0, 400]), viewScale = d3.scale.linear().range([0, youtuberSize * 2]);
+    var timeScale = d3.time.scale().range([0, 500]), viewScale = d3.scale.linear().range([0, youtuberSize * 2]);
 
     var Summary = function(selection) {
         container = selection;
@@ -32,7 +32,7 @@ define([
         arrow = d3.select('svg').insert('path', '.timeline')
             .attr('fill', 'none')
             .attr('stroke', fontColor)
-            .attr('stroke-width', 2);
+            .attr('stroke-width', 1);
     }
 
     var updateArrow = function(data) {
@@ -110,7 +110,9 @@ define([
             .attr('height', youtuberSize * 2);
 
         selection.append('g')
-            .selectAll('bar')
+            .classed('timeline', true)
+            .attr('transform', 'translate(' + (videoWidth + youtuberSize * 2) + ',0)')
+            .selectAll('.bar')
             .data(function(d) {return d.videos})
             .call(enterTimeline);
 
@@ -122,6 +124,14 @@ define([
             .attr('xlink:href', function(d) {
                 return d.youtuber.image;
             })
+
+        selection.select('.timeline')
+            .selectAll('.bar')
+            .data(function(d) {return d.videos})
+            .call(enterTimeline)
+            .call(updateTimeline)
+            .call(exitTimeline);
+
     }
 
     var exitYoutuber = function(selection) {
@@ -129,11 +139,40 @@ define([
     }
 
     var enterTimeline = function(selection) {
-        selection.enter().append('rect')
+        selection = selection.enter().append('rect')
             .classed('bar', true)
             .attr('x', function(d) {return timeScale(d.publishedDate)})
+            .attr('y', youtuberHeight)
             .attr('width', barWidth)
-            .attr('height', function(d) {return viewScale(d.views)});
+            .attr('height', 0)
+            .attr('fill', '#fff')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', function(d) {
+                var parent = $(this).parent()[0],
+                    type = d3.select(parent).datum().type;
+               
+                return (type === 'publisher' ? 'none' : '5,2');
+            });
+
+    }
+
+    var updateTimeline = function(selection) {
+        selection.transition().duration(750)
+            .attr('stroke', function(d) {
+                var parent = $(this).parent()[0],
+                    youtuber = d3.select(parent).datum().youtuber;
+               
+                return app.d3Colors(youtuber.youtuber)
+            })
+            .attr('x', function(d) {return timeScale(d.publishedDate)})
+            .attr('y', function(d) {return youtuberHeight - viewScale(d.views)})
+            .attr('height', function(d) {return viewScale(d.views)})
+
+    }
+
+    var exitTimeline = function(selection) {
+        selection.exit().remove();
     }
 
     var update = function(data) {
