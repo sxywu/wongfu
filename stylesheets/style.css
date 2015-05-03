@@ -1,5 +1,5 @@
 body {
-	background-color: #FFFBF9;
+	background-color: #f4e4e4;
 	font-family: 'Quicksand', 'sans-serif';
 }
 
@@ -45,7 +45,6 @@ svg {
 */
 
 .timelineBG {
-	background-color: #fff;
 	height: 100%;
 	position: fixed;
 }
