@@ -16,7 +16,6 @@ function setYoutubers(rawYoutubers) {
     if (!_.contains(youtuberNames, youtuberObj.youtuber)) return;
     youtubers[youtuberObj.youtuber] = youtuberObj;
   });
-  console.log(youtubers)
 }
 
 // store information about the graph

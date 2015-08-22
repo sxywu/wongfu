@@ -56,6 +56,12 @@ var VideoStore = assign({}, EventEmitter.prototype, {
   },
   getVideos() {
     return allVideos;
+  },
+  getVideosByYoutuber(youtuber) {
+    return videosByYoutuber[youtuber];
+  },
+  getVideosByAssociation(association) {
+    return videosByAssociation[association];
   }
 });
 
@@ -63,7 +69,6 @@ VideoStore.dispatchToken = AppDispatcher.register((action) => {
   switch (action.actionType) {
     case Constants.GET_VIDEO_SUCCESS:
       setVideosByYoutuber(action.data.youtuber, action.data.response);
-      console.log(allVideos, videosByYoutuber, videosByAssociation);
       break;
 
     default:

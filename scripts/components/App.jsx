@@ -5,10 +5,17 @@ var d3 = require('d3/d3');
 
 var VideoStore = require('../stores/VideoStore');
 var YoutuberStore = require('../stores/YoutuberStore');
+var GraphStore = require('../stores/GraphStore');
 
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
 var App = React.createClass({
+  getInitialState() {
+    return {
+      lines: []
+    }
+  },
+
   componentWillMount() {
     var youtubers = YoutuberStore.getYoutuberNames();
     ServerActionCreators.getYoutubers();
@@ -16,6 +23,17 @@ var App = React.createClass({
       ServerActionCreators.getVideoForYoutuber(youtuber);
     });
     
+    GraphStore.addChangeListener(this.onChange);
+  },
+
+  componentWillUnmount() {
+    GraphStore.removeChangeListener(this.onChange);
+  },
+ 
+  onChange() {
+    this.setState({
+      lines: GraphStore.getLines()
+    });
   },
 
   render() {
