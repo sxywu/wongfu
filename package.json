@@ -18,16 +18,12 @@
   },
   "scripts": {
     "start": "watchify -o scripts/bundle.js -v -d .",
-    "build": "NODE_ENV=production browserify . | uglifyjs -cm > scripts/bundle.min.js",
-    "test": "jest"
+    "build": "NODE_ENV=production browserify . | uglifyjs -cm > scripts/bundle.min.js"
   },
   "browserify": {
     "transform": [
       ["reactify", {"es6": true}],
       "envify"
     ]
-  },
-  "jest": {
-    "rootDir": "./scripts"
   }
 }
