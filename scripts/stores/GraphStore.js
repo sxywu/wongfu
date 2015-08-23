@@ -15,26 +15,31 @@ var lines = [];
 var xPadding = 50;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
-var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([500, 10000]);
+var colorScale = d3.scale.category10();
+var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 19500]);
 function calculateLines() {
   // first set x-positions for each youtuber
   _.each(YoutuberStore.getYoutuberNames(), (youtuberName, i) => {
     youtubers[youtuberName] = {
       name: youtuberName,
-      x: (i + 1) * xPadding
+      x: (i + 1) * xPadding,
+      fill: colorScale(youtuberName)
     };
   });
 
   // set x and y on each video
   lines = _.map(youtubers, (youtuberObj) => {
-    var videos = _.map(VideoStore.getVideosByAssociation(youtuberObj.name), (video) => {
-      return {
-        x: youtubers[video.youtuber].x,
-        y: yScale(video.publishedDate)
-      };
-    });
+    var videos = _.chain(VideoStore.getVideosByAssociation(youtuberObj.name))
+      .sortBy((video) => video.publishedDate)
+      .map((video) => {
+        return {
+          x: youtubers[video.youtuber].x,
+          y: yScale(video.publishedDate)
+        };
+      }).value();
 
     return {
+      fill: youtuberObj.fill,
       name: youtuberObj.name,
       categoryX: youtuberObj.x,
       points: videos

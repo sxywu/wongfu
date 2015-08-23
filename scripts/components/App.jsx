@@ -2,12 +2,14 @@ var React = require('react/addons');
 var cx = React.addons.classSet;
 var _ = require('lodash');
 var d3 = require('d3/d3');
-
+// stores
 var VideoStore = require('../stores/VideoStore');
 var YoutuberStore = require('../stores/YoutuberStore');
 var GraphStore = require('../stores/GraphStore');
-
+// actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
+// components
+var LineComponent = require('./Line.jsx');
 
 var App = React.createClass({
   getInitialState() {
@@ -37,8 +39,19 @@ var App = React.createClass({
   },
 
   render() {
+    var distancePathStyle = {
+      fill: 'none',
+      stroke: 'none'
+    };
+    var lines = _.map(this.state.lines, (line) => {
+      return <LineComponent data={line} />
+    });
+
     return (
-      <div />
+      <svg>
+        <path className="distancePath" style={distancePathStyle} />
+        {lines}
+      </svg>
     );
   }
 });

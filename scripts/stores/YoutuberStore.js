@@ -14,6 +14,7 @@ var youtubers = {};
 function setYoutubers(rawYoutubers) {
   _.each(rawYoutubers, (youtuberObj) => {
     if (!_.contains(youtuberNames, youtuberObj.youtuber)) return;
+    youtuberObj.joinedDate = new Date(youtuberObj.joined);
     youtubers[youtuberObj.youtuber] = youtuberObj;
   });
 }
