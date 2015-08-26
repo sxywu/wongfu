@@ -28,7 +28,8 @@ function calculateYoutubers() {
       youtubers[youtuberObj.youtuber] = {
         name: youtuberObj.youtuber,
         x: (i + 1) * xPadding,
-        fill: colorScale(youtuberObj.youtuber)
+        fill: colorScale(youtuberObj.youtuber),
+        data: youtuberObj
       };
     }).value();
 }
@@ -36,13 +37,18 @@ function calculateYoutubers() {
 function calculateLines() {
   // set x and y on each video
   lines = _.map(youtubers, (youtuberObj) => {
-    var videos = _.chain(VideoStore.getVideosByAssociation(youtuberObj.name))
+    var videos = [{
+      x: youtubers[youtuberObj.name].x,
+      y: yScale(youtuberObj.data.joinedDate)
+    }];
+
+    _.chain(VideoStore.getVideosByAssociation(youtuberObj.name))
       .sortBy((video) => video.publishedDate)
-      .map((video) => {
-        return {
+      .each((video) => {
+        videos.push({
           x: youtubers[video.youtuber].x,
           y: yScale(video.publishedDate)
-        };
+        });
       }).value();
 
     return {
