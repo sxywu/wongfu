@@ -68,61 +68,6 @@ function calculateDistance(data, distancePath) {
   return {points, totalDistance};
 }
 
-var duration = 200;
-var onWindowScroll;
-function windowScroll(points, totalDistance) {
-  var top = scrollY + 400;
-  var source;
-  var target = _.find(points, function(point) {
-    if (point.y >= top) {
-      return true;
-    }
-    source = point;
-    return false;
-  });
-  if (source && target) {
-    var distance = 0;
-    var distanceFromSource = top - source.y;
-    if (!target.interpolate1) {
-      // if there's no interpolate1
-      if (!target.interpolate2) {
-        // and there's no interpolate2, must mean it's a straight line
-        distance = distanceFromSource + source.totalDistance;
-      } else {
-        // if there's a interpolate2, must mean there's a straight line
-        // and then a curve at the end, so figure out if we're in straight line or curve part
-        if (distanceFromSource <= target.y2) {
-          // it's in straight line part
-          distance = distanceFromSource + source.totalDistance;
-        } else {
-          // if it's in last curve part, first interpolate the curve
-          // and then add that back to the straight part and the previous total distance
-          var partialDistance = (distanceFromSource - target.y2) / target.y3;
-          distance = target.interpolate2(partialDistance) + target.y2 + source.totalDistance;
-        }
-      }
-    } else {
-      // if there's interpolate1, must mean there's a first curve
-      if (distanceFromSource <= target.y1) {
-        // so if it's within the first curve, interpolate that and add it to total distance
-        var partialDistance = distanceFromSource / target.y1;
-        distance = target.interpolate1(partialDistance) + source.totalDistance;
-      } else if (distanceFromSource <= (target.y1 + target.y2)) {
-        // if we're in line part, add curve to it
-        distance = target.interpolate1(1) + (distanceFromSource - target.y1) + source.totalDistance;
-      } else if (interpolate2) {
-        var partialDistance = (distanceFromSource - target.y2 - target.y1) / target.y3;
-        distance = target.interpolate1(1) + target.y2 + target.interpolate2(partialDistance);
-      }
-    }
-
-    // var partialDistance = (top - source.y) / (target.y - source.y);
-    // var distance = target.interpolater(partialDistance) + source.totalDistance;
-    this.d3Wrapper.transition().duration(duration)
-      .attr('stroke-dashoffset', totalDistance - (distance || 0));
-  }
-};
-
 function drawLine(x, y) {
   return 'L' + x.toFixed(2) + ',' + y.toFixed(2);
 }
@@ -139,6 +84,8 @@ function setDistance(source, target) {
   target.distance = parseFloat(distancePath.getTotalLength().toFixed(2));
 }
 
+var duration = 200;
+var onWindowScroll;
 var Line = React.createClass({
   getInitialState() {
     return {
@@ -164,7 +111,7 @@ var Line = React.createClass({
     var state = calculateDistance(nextProps.data);
     this.setState(state);
 
-    onWindowScroll = _.throttle(windowScroll.bind(this, state.points, state.totalDistance), duration);
+    onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
   },
 
@@ -177,6 +124,59 @@ var Line = React.createClass({
 
   componentWillUnmount() {
     window.removeEventListener('scroll', onWindowScroll);
+  },
+
+  windowScroll() {
+    var top = scrollY + 800;
+    var source;
+    var target = _.find(this.state.points, function(point) {
+      if (point.y >= top) {
+        return true;
+      }
+      source = point;
+      return false;
+    });
+    var distance = 0;
+    if (source && target) {
+      var distanceFromSource = top - source.y;
+      if (!target.interpolate1) {
+        // if there's no interpolate1
+        if (!target.interpolate2) {
+          // and there's no interpolate2, must mean it's a straight line
+          distance = distanceFromSource + source.totalDistance;
+        } else {
+          // if there's a interpolate2, must mean there's a straight line
+          // and then a curve at the end, so figure out if we're in straight line or curve part
+          if (distanceFromSource <= target.y2) {
+            // it's in straight line part
+            distance = distanceFromSource + source.totalDistance;
+          } else {
+            // if it's in last curve part, first interpolate the curve
+            // and then add that back to the straight part and the previous total distance
+            var partialDistance = (distanceFromSource - target.y2) / target.y3;
+            distance = target.interpolate2(partialDistance) + target.y2 + source.totalDistance;
+          }
+        }
+      } else {
+        // if there's interpolate1, must mean there's a first curve
+        if (distanceFromSource <= target.y1) {
+          // so if it's within the first curve, interpolate that and add it to total distance
+          var partialDistance = distanceFromSource / target.y1;
+          distance = target.interpolate1(partialDistance) + source.totalDistance;
+        } else if (distanceFromSource <= (target.y1 + target.y2)) {
+          // if we're in line part, add curve to it
+          distance = target.interpolate1(1) + (distanceFromSource - target.y1) + source.totalDistance;
+        } else if (interpolate2) {
+          var partialDistance = (distanceFromSource - target.y2 - target.y1) / target.y3;
+          distance = target.interpolate1(1) + target.y2 + target.interpolate2(partialDistance);
+        }
+      }
+    } else if (source && !target) {
+      distance = this.state.totalDistance;
+    }
+
+    this.d3Wrapper.transition().duration(duration)
+      .attr('stroke-dashoffset', this.state.totalDistance - distance);
   },
 
   render() {
