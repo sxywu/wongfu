@@ -10,11 +10,13 @@ var GraphStore = require('../stores/GraphStore');
 var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
 var LineComponent = require('./Line.jsx');
+var VideosComponent = require('./Videos.jsx');
 
 var App = React.createClass({
   getInitialState() {
     return {
-      lines: []
+      lines: [],
+      videos: []
     }
   },
 
@@ -35,7 +37,8 @@ var App = React.createClass({
  
   onChange() {
     this.setState({
-      lines: GraphStore.getLines()
+      lines: GraphStore.getLines(),
+      videos: GraphStore.getVideos()
     });
   },
 
@@ -47,11 +50,13 @@ var App = React.createClass({
     var lines = _.map(this.state.lines, (line) => {
       return <LineComponent data={line} />
     });
+    var videos = (<VideosComponent data={this.state.videos} />);
 
     return (
       <svg>
         <path className="distancePath" style={distancePathStyle} />
         {lines}
+        {videos}
       </svg>
     );
   }

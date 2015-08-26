@@ -11,14 +11,16 @@ var VideoStore = require('./VideoStore');
 var CHANGE_EVENT = 'change';
 var youtubers = {};
 var lines = [];
+var videos = [];
 
 var xPadding = 50;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
 var colorScale = d3.scale.category10();
 var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 19500]);
-function calculateLines() {
-  // first set x-positions for each youtuber
+
+function calculateYoutubers() {
+  // set x-positions for each youtuber
   _.chain(YoutuberStore.getYoutubers())
     .sortBy((youtuberObj) => {
       return youtuberObj.joinedDate;
@@ -29,7 +31,9 @@ function calculateLines() {
         fill: colorScale(youtuberObj.youtuber)
       };
     }).value();
+}
 
+function calculateLines() {
   // set x and y on each video
   lines = _.map(youtubers, (youtuberObj) => {
     var videos = _.chain(VideoStore.getVideosByAssociation(youtuberObj.name))
@@ -50,6 +54,17 @@ function calculateLines() {
   });
 };
 
+function calculateVideos() {
+  videos = _.map(VideoStore.getVideos(), (video) => {
+    var youtuberObj = youtubers[video.youtuber];
+    return {
+      x: youtuberObj.x,
+      y: yScale(video.publishedDate),
+      fill: youtuberObj.fill
+    };
+  });
+}
+
 // store information about the graph
 // such as pan/zoom level or position of nodes
 var GraphStore = assign({}, EventEmitter.prototype, {
@@ -64,6 +79,9 @@ var GraphStore = assign({}, EventEmitter.prototype, {
   },
   getLines() {
     return lines;
+  },
+  getVideos() {
+    return videos;
   }
 });
 
@@ -71,7 +89,9 @@ GraphStore.dispatchToken = AppDispatcher.register((action) => {
   switch (action.actionType) {
     case Constants.GET_VIDEO_SUCCESS:
       AppDispatcher.waitFor([VideoStore.dispatchToken]);
+      calculateYoutubers();
       calculateLines();
+      calculateVideos();
       break;
 
     default:
