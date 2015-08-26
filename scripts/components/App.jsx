@@ -20,11 +20,12 @@ var App = React.createClass({
 
   componentWillMount() {
     var youtubers = YoutuberStore.getYoutuberNames();
-    ServerActionCreators.getYoutubers();
-    _.each(youtubers, (youtuber) => {
-      ServerActionCreators.getVideoForYoutuber(youtuber);
+    ServerActionCreators.getYoutubers(() => {
+      _.each(youtubers, (youtuber) => {
+        ServerActionCreators.getVideoForYoutuber(youtuber);
+      });
     });
-    
+
     GraphStore.addChangeListener(this.onChange);
   },
 

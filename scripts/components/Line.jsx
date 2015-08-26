@@ -116,10 +116,6 @@ function windowScroll(points, totalDistance) {
       }
     }
 
-    if (!distance) {
-    console.log(top, distance)
-      debugger
-    }
     // var partialDistance = (top - source.y) / (target.y - source.y);
     // var distance = target.interpolater(partialDistance) + source.totalDistance;
     this.d3Wrapper.transition().duration(duration)

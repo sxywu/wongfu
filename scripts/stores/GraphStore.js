@@ -19,13 +19,16 @@ var colorScale = d3.scale.category10();
 var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 19500]);
 function calculateLines() {
   // first set x-positions for each youtuber
-  _.each(YoutuberStore.getYoutuberNames(), (youtuberName, i) => {
-    youtubers[youtuberName] = {
-      name: youtuberName,
-      x: (i + 1) * xPadding,
-      fill: colorScale(youtuberName)
-    };
-  });
+  _.chain(YoutuberStore.getYoutubers())
+    .sortBy((youtuberObj) => {
+      return youtuberObj.joinedDate;
+    }).each((youtuberObj, i) => {
+      youtubers[youtuberObj.youtuber] = {
+        name: youtuberObj.youtuber,
+        x: (i + 1) * xPadding,
+        fill: colorScale(youtuberObj.youtuber)
+      };
+    }).value();
 
   // set x and y on each video
   lines = _.map(youtubers, (youtuberObj) => {

@@ -33,6 +33,9 @@ var YoutuberStore = assign({}, EventEmitter.prototype, {
   },
   getYoutuberNames() {
     return youtuberNames;
+  },
+  getYoutubers() {
+    return _.values(youtubers);
   }
 });
 
