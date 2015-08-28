@@ -49,7 +49,7 @@ function setVideoIds() {
   allVideos = _.chain(allVideos)
     .sortBy((video) => video.publishedDate)
     .map((video, id) => {
-      video.id = id;
+      video.id = id + 1;
       return video;
     }).value();
 }

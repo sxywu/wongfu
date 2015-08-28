@@ -13,11 +13,20 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
 
+var onWindowScroll;
+var duration = 200;
+function calculateTop() {
+  return scrollY + (window.innerHeight * .75);
+}
+
 var App = React.createClass({
   getInitialState() {
     return {
+      youtubers: [],
       lines: [],
-      videos: []
+      videos: [],
+      videoId: 0,
+      top: calculateTop()
     }
   },
 
@@ -30,10 +39,13 @@ var App = React.createClass({
     });
 
     VideoStore.addChangeListener(this.onChange);
+    onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
+    window.addEventListener('scroll', onWindowScroll);
   },
 
   componentWillUnmount() {
     VideoStore.removeChangeListener(this.onChange);
+    window.removeEventListener('scroll', onWindowScroll);
   },
  
   onChange() {
@@ -41,6 +53,25 @@ var App = React.createClass({
     var lines = GraphUtils.calculateLines(youtubers);
     var videos = GraphUtils.calculateVideos(youtubers);
     this.setState({youtubers, lines, videos});
+  },
+
+  windowScroll() {
+    var top = calculateTop();
+    var video = _.find(this.state.videos, (video) => video.y >= top);
+    var videoId = 0;
+    var firstVideo = _.first(this.state.videos);
+    var lastVideo = _.last(this.state.videos);
+
+    if (top < firstVideo.y) {
+      // if we're past the last video
+      videoId = 0;
+    } else if (video) {
+      videoId = video.id;
+    } else if (top > lastVideo.y) {
+      videoId = lastVideo.id;
+    }
+
+    this.setState({top, videoId});
   },
 
   render() {

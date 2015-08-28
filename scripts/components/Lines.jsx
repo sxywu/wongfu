@@ -5,6 +5,7 @@ var d3 = require('d3/d3');
 
 var distancePath;
 var gap = 100;
+var duration = 200;
 function calculateDistance(selection) {
   selection.each((data) => {
     var source;
@@ -79,7 +80,6 @@ function updateLines(selection) {
 }
 
 function windowScroll(selection) {
-  var top = scrollY + 400;
   var source;
   var target = _.find(this.state.points, function(point) {
     if (point.y >= top) {
@@ -147,7 +147,6 @@ function setDistance(source, target) {
   target.distance = parseFloat(distancePath.getTotalLength().toFixed(2));
 }
 
-var duration = 200;
 var Lines = React.createClass({
   componentWillMount() {
     distancePath = d3.select('path.distancePath').node();
