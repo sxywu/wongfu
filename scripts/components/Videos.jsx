@@ -5,7 +5,6 @@ var d3 = require('d3/d3');
 // stores
 var VideoStore = require('../stores/VideoStore');
 var YoutuberStore = require('../stores/YoutuberStore');
-var GraphStore = require('../stores/GraphStore');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 

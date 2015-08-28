@@ -5,7 +5,8 @@ var d3 = require('d3/d3');
 // stores
 var VideoStore = require('../stores/VideoStore');
 var YoutuberStore = require('../stores/YoutuberStore');
-var GraphStore = require('../stores/GraphStore');
+// utils
+var GraphUtils = require('../utils/GraphUtils');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
@@ -28,18 +29,18 @@ var App = React.createClass({
       });
     });
 
-    GraphStore.addChangeListener(this.onChange);
+    VideoStore.addChangeListener(this.onChange);
   },
 
   componentWillUnmount() {
-    GraphStore.removeChangeListener(this.onChange);
+    VideoStore.removeChangeListener(this.onChange);
   },
  
   onChange() {
-    this.setState({
-      lines: GraphStore.getLines(),
-      videos: GraphStore.getVideos()
-    });
+    var youtubers = GraphUtils.calculateYoutubers();
+    var lines = GraphUtils.calculateLines(youtubers);
+    var videos = GraphUtils.calculateVideos(youtubers);
+    this.setState({youtubers, lines, videos});
   },
 
   render() {

@@ -7,7 +7,6 @@ var distancePath;
 var gap = 100;
 function calculateDistance(selection) {
   selection.each((data) => {
-    console.log(data.name, data.points.length)
     var source;
     var target;
     var totalDistance = 0;
@@ -66,14 +65,13 @@ function calculateDistance(selection) {
     });
 
     data.totalDistance = totalDistance;
-    console.log(data.points.length)
   });
 }
 
 function updateLines(selection) {
   selection.attr('fill-opacity', 0)
     .attr('stroke', (data) => data.fill)
-    .attr('stroke-width', 4)
+    .attr('stroke-width', 3)
     .attr('stroke-linecap', 'round')
     .attr('d', (data) => _.pluck(data.points, 'd').join(' '))
     .attr('stroke-dasharray', (data) => data.totalDistance)
@@ -150,7 +148,6 @@ function setDistance(source, target) {
 }
 
 var duration = 200;
-var onWindowScroll;
 var Lines = React.createClass({
   componentWillMount() {
     distancePath = d3.select('path.distancePath').node();
@@ -162,19 +159,11 @@ var Lines = React.createClass({
 
     this.d3Selection.enter().append('path');
     
-    this.d3Selection.call(calculateDistance)
+    this.d3Selection
+      .call(calculateDistance)
       .call(updateLines);
 
-    if (!onWindowScroll) {
-      // onWindowScroll = _.throttle(windowScroll.bind(this, this.d3Selection), duration);
-      // window.addEventListener('scroll', onWindowScroll);
-    }
-
     return false;
-  },
-
-  componentWillUnmount() {
-    window.removeEventListener('scroll', onWindowScroll);
   },
 
   render() {

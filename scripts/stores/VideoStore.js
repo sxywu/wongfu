@@ -10,11 +10,14 @@ var YoutuberStore = require('./YoutuberStore');
 var CHANGE_EVENT = 'change';
 
 var allYoutubers = YoutuberStore.getYoutuberNames();
+var allYoutubersBack = [];
 var allVideos = [];
 var videosByYoutuber = {};
 var videosByAssociation = {};
 
 function setVideosByYoutuber(youtuber, rawVideos) {
+  allYoutubersBack.push(youtuber);
+
   videosByYoutuber[youtuber] = _.chain(rawVideos)
     .filter(function(video) {
       // only keep those videos that have at least one other youtuber
@@ -39,6 +42,15 @@ function setVideosByYoutuber(youtuber, rawVideos) {
       video.views = parseInt(video.views);
 
       return video.publishedDate;
+    }).value();
+}
+
+function setVideoIds() {
+  allVideos = _.chain(allVideos)
+    .sortBy((video) => video.publishedDate)
+    .map((video, id) => {
+      video.id = id;
+      return video;
     }).value();
 }
 
@@ -75,7 +87,11 @@ VideoStore.dispatchToken = AppDispatcher.register((action) => {
       return true;
   };
 
-  VideoStore.emitChange();
+  // only emit change if all videos are back
+  if (allYoutubers.length === allYoutubersBack.length) {
+    setVideoIds();
+    VideoStore.emitChange(); 
+  }
 });
 
 module.exports = VideoStore; 
