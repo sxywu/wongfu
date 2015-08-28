@@ -9,7 +9,7 @@ var GraphStore = require('../stores/GraphStore');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
-var LineComponent = require('./Line.jsx');
+var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
 
 var App = React.createClass({
@@ -43,18 +43,11 @@ var App = React.createClass({
   },
 
   render() {
-    var distancePathStyle = {
-      fill: 'none',
-      stroke: 'none'
-    };
-    var lines = _.map(this.state.lines, (line) => {
-      return <LineComponent data={line} />
-    });
+    var lines = (<LinesComponent data={this.state.lines} />);
     var videos = (<VideosComponent data={this.state.videos} />);
 
     return (
       <svg>
-        <path className="distancePath" style={distancePathStyle} />
         {lines}
         {videos}
       </svg>
