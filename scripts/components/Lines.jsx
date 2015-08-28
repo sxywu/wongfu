@@ -60,12 +60,20 @@ function calculateDistance(selection) {
           }
         }
         target.totalDistance = (totalDistance += target.distance);
-        target.source = source;
+        source.target = target;
       }
       source = target;
     });
 
     data.totalDistance = totalDistance;
+    data.pointsById = {};
+    _.chain(data.points)
+      .groupBy((point) => Math.floor(point.id / 100) * 100)
+      .each((points, key) => {
+        data.pointsById[key] = _.groupBy(points, (point) => {
+          return Math.floor((point.id - parseInt(key)) / 10) * 10;
+        });
+      }).value();
   });
 }
 
@@ -75,60 +83,104 @@ function updateLines(selection) {
     .attr('stroke-width', 3)
     .attr('stroke-linecap', 'round')
     .attr('d', (data) => _.pluck(data.points, 'd').join(' '))
-    .attr('stroke-dasharray', (data) => data.totalDistance)
-    // .attr('stroke-dashoffset', (data) => data.totalDistance);
+    .attr('stroke-dasharray', (data) => data.totalDistance);
 }
 
-function windowScroll(selection) {
-  var source;
-  var target = _.find(this.state.points, function(point) {
-    if (point.y >= top) {
-      return true;
-    }
-    source = point;
-    return false;
-  });
-  var distance = 0;
-  if (source && target) {
-    var distanceFromSource = top - source.y;
-    if (!target.interpolate1) {
-      // if there's no interpolate1
-      if (!target.interpolate2) {
-        // and there's no interpolate2, must mean it's a straight line
-        distance = distanceFromSource + source.totalDistance;
-      } else {
-        // if there's a interpolate2, must mean there's a straight line
-        // and then a curve at the end, so figure out if we're in straight line or curve part
-        if (distanceFromSource <= target.y2) {
-          // it's in straight line part
-          distance = distanceFromSource + source.totalDistance;
+function windowScroll(selection, top, pointId) {
+  selection.transition().duration(duration)
+    .attr('stroke-dashoffset', (data) => {
+      var {source, target} = findPoint(pointId, data);
+      var distance = 0;
+      if (source && target) {
+        var distanceFromSource = top - source.y;
+        if (!target.interpolate1) {
+          // if there's no interpolate1
+          if (!target.interpolate2) {
+            // and there's no interpolate2, must mean it's a straight line
+            distance = distanceFromSource + source.totalDistance;
+          } else {
+            // if there's a interpolate2, must mean there's a straight line
+            // and then a curve at the end, so figure out if we're in straight line or curve part
+            if (distanceFromSource <= target.y2) {
+              // it's in straight line part
+              distance = distanceFromSource + source.totalDistance;
+            } else {
+              // if it's in last curve part, first interpolate the curve
+              // and then add that back to the straight part and the previous total distance
+              var partialDistance = (distanceFromSource - target.y2) / target.y3;
+              distance = target.interpolate2(partialDistance) + target.y2 + source.totalDistance;
+            }
+          }
         } else {
-          // if it's in last curve part, first interpolate the curve
-          // and then add that back to the straight part and the previous total distance
-          var partialDistance = (distanceFromSource - target.y2) / target.y3;
-          distance = target.interpolate2(partialDistance) + target.y2 + source.totalDistance;
+          // if there's interpolate1, must mean there's a first curve
+          if (distanceFromSource <= target.y1) {
+            // so if it's within the first curve, interpolate that and add it to total distance
+            var partialDistance = distanceFromSource / target.y1;
+            distance = target.interpolate1(partialDistance) + source.totalDistance;
+          } else if (distanceFromSource <= (target.y1 + target.y2)) {
+            // if we're in line part, add curve to it
+            distance = target.interpolate1(1) + (distanceFromSource - target.y1) + source.totalDistance;
+          } else if (target.interpolate2) {
+            var partialDistance = (distanceFromSource - target.y2 - target.y1) / target.y3;
+            distance = target.interpolate1(1) + target.y2 + target.interpolate2(partialDistance);
+          }
+        }
+      } else if (source && !target) {
+        distance = data.totalDistance;
+      }
+
+      if (source && target && !distance) {
+        console.log(pointId, data.pointsById, source.id, target.id, distance)
+        debugger
+      }
+
+      return data.totalDistance - distance;
+    });
+}
+
+function findPoint(pointId, data) {
+  var source, target;
+  var floor100 = Math.floor(pointId / 100) * 100;
+  var floor10 = Math.floor((pointId - floor100) / 10) * 10;
+  // if there's no direct match, then keep subtracting down til we find one
+  while (!source) {
+    if (data.pointsById[floor100]) {
+      if (data.pointsById[floor100][floor10]) {
+        _.some(data.pointsById[floor100][floor10], function(point) {
+          if (point.id >= pointId) {
+            source = point;
+          }
+        });
+      }
+      if (source) break;
+
+      // if the 100's match, then i should count down the 10's
+      while (floor10 >= 0) {
+        if (data.pointsById[floor100][floor10]) {
+          source = _.last(data.pointsById[floor100][floor10]);
+          break;
+        } else {
+          floor10 -= 10;
         }
       }
-    } else {
-      // if there's interpolate1, must mean there's a first curve
-      if (distanceFromSource <= target.y1) {
-        // so if it's within the first curve, interpolate that and add it to total distance
-        var partialDistance = distanceFromSource / target.y1;
-        distance = target.interpolate1(partialDistance) + source.totalDistance;
-      } else if (distanceFromSource <= (target.y1 + target.y2)) {
-        // if we're in line part, add curve to it
-        distance = target.interpolate1(1) + (distanceFromSource - target.y1) + source.totalDistance;
-      } else if (interpolate2) {
-        var partialDistance = (distanceFromSource - target.y2 - target.y1) / target.y3;
-        distance = target.interpolate1(1) + target.y2 + target.interpolate2(partialDistance);
+      // if floor10 is 0, reset floor10 and subtract 100 from floor100
+      // but only if floor100 isn't 0
+      if (floor100 > 0) {
+        floor10 = 90;
+        floor100 -= 100;
+      } else {
+        // else return the first point
+        source = _.first(data.points);
       }
+    } else if (floor100 > 0) {
+      floor10 = 90;
+      floor100 -= 100;
+    } else {
+      source = _.first(data.points);
     }
-  } else if (source && !target) {
-    distance = this.state.totalDistance;
   }
-
-  this.d3Wrapper.transition().duration(duration)
-    .attr('stroke-dashoffset', this.state.totalDistance - distance);
+  target = source && source.target;
+  return {source, target};
 }
 
 function drawLine(x, y) {
@@ -153,15 +205,16 @@ var Lines = React.createClass({
   },
 
   shouldComponentUpdate(nextProps) {
-    this.d3Selection = d3.select(this.getDOMNode())
-      .selectAll('path').data(nextProps.data);
-
-    this.d3Selection.enter().append('path');
+    if (!this.d3Selection) {
+      this.d3Selection = d3.select(this.getDOMNode())
+        .selectAll('path').data(nextProps.data);
+      this.d3Selection.enter().append('path');
+      this.d3Selection
+        .call(calculateDistance)
+        .call(updateLines);
+    }
     
-    this.d3Selection
-      .call(calculateDistance)
-      .call(updateLines);
-
+    this.d3Selection.call(windowScroll, nextProps.top, nextProps.videoId);
     return false;
   },
 

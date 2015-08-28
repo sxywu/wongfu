@@ -25,7 +25,7 @@ var App = React.createClass({
       youtubers: [],
       lines: [],
       videos: [],
-      videoId: 0,
+      videoId: 1,
       top: calculateTop()
     }
   },
@@ -39,6 +39,8 @@ var App = React.createClass({
     });
 
     VideoStore.addChangeListener(this.onChange);
+
+    this.windowScroll();
     onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
   },
@@ -56,6 +58,8 @@ var App = React.createClass({
   },
 
   windowScroll() {
+    if (!this.state.videos.length) return;
+
     var top = calculateTop();
     var video = _.find(this.state.videos, (video) => video.y >= top);
     var videoId = 0;
@@ -75,7 +79,8 @@ var App = React.createClass({
   },
 
   render() {
-    var lines = (<LinesComponent data={this.state.lines} />);
+    var lines = (<LinesComponent data={this.state.lines}
+      top={this.state.top} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos} />);
 
     return (

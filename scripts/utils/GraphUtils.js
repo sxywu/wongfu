@@ -42,6 +42,7 @@ GraphUtils.calculateLines = (youtubers) => {
   // set x and y on each video
   return _.map(youtubers, (youtuberObj) => {
     var videos = [{
+      id: 0,
       x: youtubers[youtuberObj.name].x,
       y: yScale(youtuberObj.data.joinedDate)
     }];
