@@ -87,9 +87,16 @@ function updateLines(selection) {
 }
 
 function windowScroll(selection, top, pointId) {
-  selection.transition().duration(duration)
-    .attr('stroke-dashoffset', (data) => {
+  selection
+    .each((data) => {
       var {source, target} = findPoint(top, data);
+      data.source = source;
+      data.target = target;
+    }).attr('stroke-opacity', (data) => data.source && data.source.id === pointId ? 1 : .25)
+    .transition().duration(duration)
+    .attr('stroke-dashoffset', (data) => {
+      var source = data.source;
+      var target = data.target;
       var distance = 0;
       if (source && target) {
         var distanceFromSource = top - source.y;
@@ -154,51 +161,6 @@ function findPoint(top, data) {
   } else {
     return findNextLowest(data, floor100, floor10);
   }
-
-  // // if there's no direct match, then keep subtracting down til we find one
-  // while (!source) {
-  //   if (data.pointsById[floor100]) {
-  //     if (data.pointsById[floor100][floor10]) {
-  //       _.some(data.pointsById[floor100][floor10], function(point) {
-  //         // the source should be less than pointId, and target is more
-  //         // or it's the last point
-  //         if (!point.target || (point.id < pointId && pointId <= point.target.id)) {
-  //           source = point;
-  //           return true;
-  //         }
-  //       });
-  //       if (!source && floor10 > 0) {
-  //         floor10 -= 10;
-  //       }
-  //     }
-  //     if (source) break;
-
-  //     // if the 100's match, then i should count down the 10's
-  //     while (floor10 > 0) {
-  //       if (data.pointsById[floor100][floor10]) {
-  //         source = _.last(data.pointsById[floor100][floor10]);
-  //         break;
-  //       } else {
-  //         floor10 -= 10;
-  //       }
-  //     }
-  //     // if floor10 is 0, reset floor10 and subtract 100 from floor100
-  //     // but only if floor100 isn't 0
-  //     if (floor100 > 0) {
-  //       floor10 = 90;
-  //       floor100 -= 100;
-  //     } else {
-  //       // else return the first point
-  //       source = _.first(data.points);
-  //     }
-  //   } else if (floor100 > 0) {
-  //     floor10 = 90;
-  //     floor100 -= 100;
-  //   } else {
-  //     source = _.first(data.points);
-  //   }
-  // }
-  // target = source && source.target;
   return {source, target};
 }
 

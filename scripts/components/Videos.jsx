@@ -13,7 +13,7 @@ function updateVideos(selection, videoId) {
   selection
     .attr('cx', (data) => data.x)
     .attr('cy', (data) => data.y)
-    .attr('r', (data) => data.id === videoId ? (size * 3) / 2 : size)
+    .attr('r', size)
     .attr('stroke', (data) => data.fill)
     .attr('stroke-width', size / 2)
     .attr('fill', (data) => data.id === videoId ? data.fill : '#fff');
