@@ -8,7 +8,7 @@ var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 
-var youtuberNames = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "kinagrannis", "lilcdawg", "funemployed", "frmheadtotoe", "lanamckissack", "victorvictorkim", "nigahiga"];
+var youtuberNames = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "nigahiga", "kinagrannis", "lilcdawg", "funemployed"];
 var youtubers = {};
 
 function setYoutubers(rawYoutubers) {

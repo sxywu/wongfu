@@ -15,6 +15,7 @@ var allVideos = [];
 var videosByYoutuber = {};
 var videosByAssociation = {};
 
+var minViews = 100000;
 function setVideosByYoutuber(youtuber, rawVideos) {
   allYoutubersBack.push(youtuber);
 
@@ -22,7 +23,8 @@ function setVideosByYoutuber(youtuber, rawVideos) {
     .filter(function(video) {
       // only keep those videos that have at least one other youtuber
       video.associations = _.without(video.associations, youtuber);
-      return video.associations.length;
+      video.views = parseInt(video.views);
+      return video.associations.length && video.views >= minViews;
     }).sortBy(function(video) {
       // first push this video into allVideos
       allVideos.push(video);
@@ -39,7 +41,6 @@ function setVideosByYoutuber(youtuber, rawVideos) {
 
       video.youtuber = youtuber;
       video.publishedDate = new Date(video.published);
-      video.views = parseInt(video.views);
 
       return video.publishedDate;
     }).value();

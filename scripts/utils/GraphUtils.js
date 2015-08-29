@@ -12,7 +12,7 @@ var VideoStore = require('../stores/VideoStore');
 // var lines = [];
 // var videos = [];
 
-var xPadding = 50;
+var xPadding = 75;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
 var colorScale = d3.scale.category10();
