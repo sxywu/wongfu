@@ -12,6 +12,7 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
 var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
+var YoutubersComponent = require('./Youtubers.jsx');
 
 var onWindowScroll;
 var duration = 200;
@@ -86,16 +87,29 @@ var App = React.createClass({
   },
 
   render() {
+    var svgWidth = window.innerWidth * .6;
+    var boxShadow = '0 0 ' + window.innerHeight * .05 + 'px #fff';
+    var lineSVGStyle = {width: svgWidth, height: 20000,
+      position: 'absolute', top: 0, left: 0};
+    var youtuberSVGStyle = {width: svgWidth, height: window.innerHeight * .35,
+      position: 'fixed', bottom: 0, left: 0,
+      backgroundColor: 'rgba(255, 255, 255, .5)', boxShadow};
     var lines = (<LinesComponent data={this.state.lines}
       top={this.state.top} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos}
       videoId={this.state.videoId} />);
+    var youtubers = (<YoutubersComponent nodes={_.values(this.state.youtubers)} />);
 
     return (
-      <svg>
-        {lines}
-        {videos}
-      </svg>
+      <div>
+        <svg style={lineSVGStyle}>
+          {lines}
+          {videos}
+        </svg>
+        <svg style={youtuberSVGStyle}>
+          {youtubers}
+        </svg>
+      </div>
     );
   }
 });
