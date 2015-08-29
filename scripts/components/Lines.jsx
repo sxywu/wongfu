@@ -129,11 +129,6 @@ function windowScroll(selection, top, pointId) {
         distance = data.totalDistance;
       }
 
-      if (source && target && !distance) {
-        console.log(pointId, data.pointsById, source.id, target.id, distance)
-        debugger
-      }
-
       return data.totalDistance - distance;
     });
 }
@@ -147,12 +142,20 @@ function findPoint(pointId, data) {
     if (data.pointsById[floor100]) {
       if (data.pointsById[floor100][floor10]) {
         _.some(data.pointsById[floor100][floor10], function(point) {
-          if (point.id >= pointId) {
+          // the source should be less than pointId, and target is more
+          // or it's the last point
+          if (!point.target || (point.id < pointId && pointId <= point.target.id)) {
             source = point;
+            return true;
           }
         });
       }
-      if (source) break;
+      if (source) {
+        break;
+      } else {
+        // if we didn't find a source, then we should subtract 10 from floor10
+        floor10 -= 10;
+      }
 
       // if the 100's match, then i should count down the 10's
       while (floor10 >= 0) {
