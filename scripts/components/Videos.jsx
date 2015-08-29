@@ -8,15 +8,15 @@ var YoutuberStore = require('../stores/YoutuberStore');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-function updateVideos(selection) {
+function updateVideos(selection, videoId) {
   var size = 4;
   selection
     .attr('cx', (data) => data.x)
     .attr('cy', (data) => data.y)
-    .attr('r', size)
+    .attr('r', (data) => data.id === videoId ? (size * 3) / 2 : size)
     .attr('stroke', (data) => data.fill)
     .attr('stroke-width', size / 2)
-    .attr('fill', '#fff');
+    .attr('fill', (data) => data.id === videoId ? data.fill : '#fff');
 }
 
 var Videos = React.createClass({
@@ -28,7 +28,7 @@ var Videos = React.createClass({
 
     this.d3Selection.enter().append('circle');
     this.d3Selection.exit().remove();
-    this.d3Selection.call(updateVideos);
+    this.d3Selection.call(updateVideos, nextProps.videoId);
 
     return false;
   },
