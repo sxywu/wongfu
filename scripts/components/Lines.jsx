@@ -82,6 +82,7 @@ function updateLines(selection) {
     .attr('stroke', (data) => data.fill)
     .attr('stroke-width', 3)
     .attr('stroke-linecap', 'round')
+    .attr('stroke-opacity', .5)
     .attr('d', (data) => _.pluck(data.points, 'd').join(' '))
     .attr('stroke-dasharray', (data) => data.totalDistance);
 }
@@ -92,8 +93,7 @@ function windowScroll(selection, top, pointId) {
       var {source, target} = findPoint(top, data);
       data.source = source;
       data.target = target;
-    }).attr('stroke-opacity', (data) => data.source && data.source.id === pointId ? 1 : .25)
-    .transition().duration(duration)
+    }).transition().duration(duration)
     .attr('stroke-dashoffset', (data) => {
       var source = data.source;
       var target = data.target;
