@@ -88,17 +88,21 @@ var App = React.createClass({
 
   render() {
     var svgWidth = window.innerWidth * .6;
-    var boxShadow = '0 0 ' + window.innerHeight * .05 + 'px #fff';
     var lineSVGStyle = {width: svgWidth, height: 20000,
       position: 'absolute', top: 0, left: 0};
-    var youtuberSVGStyle = {width: svgWidth, height: window.innerHeight * .35,
+
+    var boxShadow = '0 0 ' + window.innerHeight * .05 + 'px #fff';
+    var youtuberSVGHeight = window.innerHeight * .35;
+    var youtuberSVGStyle = {width: svgWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0,
       backgroundColor: 'rgba(255, 255, 255, .5)', boxShadow};
+
     var lines = (<LinesComponent data={this.state.lines}
       top={this.state.top} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos}
       videoId={this.state.videoId} />);
-    var youtubers = (<YoutubersComponent nodes={_.values(this.state.youtubers)} />);
+    var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
+      videos={this.state.videos} videoId={this.state.videoId} />);
 
     return (
       <div>

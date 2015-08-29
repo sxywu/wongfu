@@ -75,7 +75,8 @@ GraphUtils.calculateVideos = (youtubers) => {
       x: youtuberObj.x,
       y: yScale(video.publishedDate),
       fill: youtuberObj.fill,
-      size: videoScale(video.views)
+      size: videoScale(video.views),
+      data: video
     };
   });
 }
