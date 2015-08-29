@@ -61,10 +61,17 @@ var App = React.createClass({
     if (!this.state.videos.length) return;
 
     var top = calculateTop();
-    var video = _.find(this.state.videos, (video) => video.y >= top);
+    var video;
     var videoId = 0;
     var firstVideo = _.first(this.state.videos);
     var lastVideo = _.last(this.state.videos);
+
+    _.some(this.state.videos, (v) => {
+      if (v.y >= top) {
+        return true;
+      }
+      video = v;
+    });
 
     if (top < firstVideo.y) {
       // if we're past the last video

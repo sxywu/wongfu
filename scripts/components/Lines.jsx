@@ -68,10 +68,10 @@ function calculateDistance(selection) {
     data.totalDistance = totalDistance;
     data.pointsById = {};
     _.chain(data.points)
-      .groupBy((point) => Math.floor(point.id / 100) * 100)
+      .groupBy((point) => Math.floor(point.y / 100) * 100)
       .each((points, key) => {
         data.pointsById[key] = _.groupBy(points, (point) => {
-          return Math.floor((point.id - parseInt(key)) / 10) * 10;
+          return Math.floor((point.y - parseInt(key)) / 10) * 10;
         });
       }).value();
   });
@@ -89,7 +89,7 @@ function updateLines(selection) {
 function windowScroll(selection, top, pointId) {
   selection.transition().duration(duration)
     .attr('stroke-dashoffset', (data) => {
-      var {source, target} = findPoint(pointId, data);
+      var {source, target} = findPoint(top, data);
       var distance = 0;
       if (source && target) {
         var distanceFromSource = top - source.y;
@@ -133,57 +133,100 @@ function windowScroll(selection, top, pointId) {
     });
 }
 
-function findPoint(pointId, data) {
+function findPoint(top, data) {
   var source, target;
-  var floor100 = Math.floor(pointId / 100) * 100;
-  var floor10 = Math.floor((pointId - floor100) / 10) * 10;
-  // if there's no direct match, then keep subtracting down til we find one
-  while (!source) {
-    if (data.pointsById[floor100]) {
-      if (data.pointsById[floor100][floor10]) {
-        _.some(data.pointsById[floor100][floor10], function(point) {
-          // the source should be less than pointId, and target is more
-          // or it's the last point
-          if (!point.target || (point.id < pointId && pointId <= point.target.id)) {
-            source = point;
-            return true;
-          }
-        });
+  var floor100 = Math.floor(top / 100) * 100;
+  var floor10 = Math.floor((top - floor100) / 10) * 10;
+
+  if (data.pointsById[floor100] && data.pointsById[floor100][floor10]) {
+    _.some(data.pointsById[floor100][floor10], function(point) {
+      // if there's that entry, then see if it's in that entry
+      if (!point.target || (point.y < top && top <= point.target.y)) {
+        source = point;
+        target = source.target;
+        return true;
       }
-      if (source) {
+    });
+
+    if (source) return {source, target};
+    // if it wasn't in there, find next lowest
+    return findNextLowest(data, floor100, floor10 - 10);
+  } else {
+    return findNextLowest(data, floor100, floor10);
+  }
+
+  // // if there's no direct match, then keep subtracting down til we find one
+  // while (!source) {
+  //   if (data.pointsById[floor100]) {
+  //     if (data.pointsById[floor100][floor10]) {
+  //       _.some(data.pointsById[floor100][floor10], function(point) {
+  //         // the source should be less than pointId, and target is more
+  //         // or it's the last point
+  //         if (!point.target || (point.id < pointId && pointId <= point.target.id)) {
+  //           source = point;
+  //           return true;
+  //         }
+  //       });
+  //       if (!source && floor10 > 0) {
+  //         floor10 -= 10;
+  //       }
+  //     }
+  //     if (source) break;
+
+  //     // if the 100's match, then i should count down the 10's
+  //     while (floor10 > 0) {
+  //       if (data.pointsById[floor100][floor10]) {
+  //         source = _.last(data.pointsById[floor100][floor10]);
+  //         break;
+  //       } else {
+  //         floor10 -= 10;
+  //       }
+  //     }
+  //     // if floor10 is 0, reset floor10 and subtract 100 from floor100
+  //     // but only if floor100 isn't 0
+  //     if (floor100 > 0) {
+  //       floor10 = 90;
+  //       floor100 -= 100;
+  //     } else {
+  //       // else return the first point
+  //       source = _.first(data.points);
+  //     }
+  //   } else if (floor100 > 0) {
+  //     floor10 = 90;
+  //     floor100 -= 100;
+  //   } else {
+  //     source = _.first(data.points);
+  //   }
+  // }
+  // target = source && source.target;
+  return {source, target};
+}
+
+function findNextLowest(data, floor100, floor10) {
+  var source, target;
+  if (data.pointsById[floor100]) {
+    // if floor10 is more than 0, can loop it down
+    while (floor10 >= 0) {
+      if (data.pointsById[floor100][floor10]) {
+        source = _.last(data.pointsById[floor100][floor10]);
+        target = source.target;
         break;
       } else {
-        // if we didn't find a source, then we should subtract 10 from floor10
         floor10 -= 10;
       }
-
-      // if the 100's match, then i should count down the 10's
-      while (floor10 >= 0) {
-        if (data.pointsById[floor100][floor10]) {
-          source = _.last(data.pointsById[floor100][floor10]);
-          break;
-        } else {
-          floor10 -= 10;
-        }
-      }
-      // if floor10 is 0, reset floor10 and subtract 100 from floor100
-      // but only if floor100 isn't 0
-      if (floor100 > 0) {
-        floor10 = 90;
-        floor100 -= 100;
-      } else {
-        // else return the first point
-        source = _.first(data.points);
-      }
-    } else if (floor100 > 0) {
-      floor10 = 90;
-      floor100 -= 100;
-    } else {
-      source = _.first(data.points);
     }
+
+    if (source) return {source, target}; 
   }
-  target = source && source.target;
-  return {source, target};
+
+  if (floor100 <= 0 && floor100 <= 0) {
+    target = _.first(data.points);
+    return {source, target};
+  }
+
+  // if we didn't find a source, means we didn't find it in this 100
+  // or if there wasn't this 100 to begin with, then subtract
+  return findNextLowest(data, floor100 - 100, 90);
 }
 
 function drawLine(x, y) {
