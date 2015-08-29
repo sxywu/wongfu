@@ -8,19 +8,34 @@ var YoutuberStore = require('../stores/YoutuberStore');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-var Videos = React.createClass({
-  render() {
-    var size = 4;
-    var videos = _.map(this.props.data, (video) => {
-      return (
-        <circle cx={video.x} cy={video.y} r={size} stroke={video.fill} strokeWidth="2" fill="#fff" />
-      );
-    });
+function updateVideos(selection) {
+  var size = 4;
+  selection
+    .attr('cx', (data) => data.x)
+    .attr('cy', (data) => data.y)
+    .attr('r', size)
+    .attr('stroke', (data) => data.fill)
+    .attr('stroke-width', size / 2)
+    .attr('fill', '#fff');
+}
 
+var Videos = React.createClass({
+
+  shouldComponentUpdate(nextProps) {
+    var videos = _.slice(nextProps.data, 0, nextProps.videoId);
+    this.d3Selection = d3.select(this.getDOMNode())
+      .selectAll('circle').data(videos, (data) => data.id);
+
+    this.d3Selection.enter().append('circle');
+    this.d3Selection.exit().remove();
+    this.d3Selection.call(updateVideos);
+
+    return false;
+  },
+
+  render() {
     return (
-      <g>
-        {videos}
-      </g>
+      <g />
     );
   }
 });

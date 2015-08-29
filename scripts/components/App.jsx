@@ -16,7 +16,7 @@ var VideosComponent = require('./Videos.jsx');
 var onWindowScroll;
 var duration = 200;
 function calculateTop() {
-  return scrollY + (window.innerHeight * .75);
+  return scrollY + (window.innerHeight * .6);
 }
 
 var App = React.createClass({
@@ -81,7 +81,8 @@ var App = React.createClass({
   render() {
     var lines = (<LinesComponent data={this.state.lines}
       top={this.state.top} videoId={this.state.videoId} />);
-    var videos = (<VideosComponent data={this.state.videos} />);
+    var videos = (<VideosComponent data={this.state.videos}
+      videoId={this.state.videoId} />);
 
     return (
       <svg>
