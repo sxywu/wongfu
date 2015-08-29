@@ -8,10 +8,6 @@ var assign = require('object-assign');
 var YoutuberStore = require('../stores/YoutuberStore');
 var VideoStore = require('../stores/VideoStore');
 
-// var youtubers = {};
-// var lines = [];
-// var videos = [];
-
 var xPadding = 75;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
@@ -66,14 +62,20 @@ GraphUtils.calculateLines = (youtubers) => {
   });
 };
 
+var videoScale = d3.scale.linear().range([8, 75]);
 GraphUtils.calculateVideos = (youtubers) => {
+  var minViews = _.min(VideoStore.getVideos(), (video) => video.views).views;
+  var maxViews = _.max(VideoStore.getVideos(), (video) => video.views).views;
+  videoScale.domain([minViews, maxViews]);
+
   return _.map(VideoStore.getVideos(), (video) => {
     var youtuberObj = youtubers[video.youtuber];
     return {
       id: video.id,
       x: youtuberObj.x,
       y: yScale(video.publishedDate),
-      fill: youtuberObj.fill
+      fill: youtuberObj.fill,
+      size: videoScale(video.views)
     };
   });
 }
