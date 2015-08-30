@@ -14,13 +14,13 @@ function enterVideos(selection) {
   selection
     .attr('cx', (data) => data.x)
     .attr('cy', (data) => data.y)
-    .attr('r', 0);
+    .attr('r', 0)
+    .attr('stroke-width', 2);
 }
 
 function updateVideos(selection, videoId) {
   var size = 4;
   selection
-    .attr('stroke-width', (data) => data.id === videoId ? 1 : size / 2)
     .attr('stroke', (data) => data.id === videoId ? '#fff' : data.fill)
     .attr('fill', (data) => data.id === videoId ? data.fill : '#fff')
     .transition().duration(duration)
