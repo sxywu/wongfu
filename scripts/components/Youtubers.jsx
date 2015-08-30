@@ -7,25 +7,27 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 
 var duration = 350;
 var nodeSize = 20;
-var nodeY = 150;
+var nodeY = 50;
 var nodePadding = 50;
 var linksByVideoId = {};
-var widthScale = d3.scale.linear().range([2, 8]);
+var widthScale = d3.scale.linear().range([2, 12]);
 
 function calculateLinksByVideoId(youtubers, videos) {
   var prevLinks = [];
   _.each(videos, (video) => {
     var links = linksByVideoId[video.id] = [];
-    var source = youtubers[video.data.youtuber];
+    var target = youtubers[video.data.youtuber];
     _.each(video.data.associations, (association) => {
       // if association not one of the nodes, don't add link
       if (!youtubers[association]) return;
 
-      var target = youtubers[association];
+      var source = youtubers[association];
       var prevLink = _.find(prevLinks, (prevLink) =>
-        prevLink.source.name === source.name && prevLink.target.name === target.name);
+        (prevLink.source.name === source.name && prevLink.target.name === target.name) ||
+        (prevLink.source.name === target.name && prevLink.target.name === source.name));
       links.push({
-        source, target,
+        source: prevLink ? prevLink.source : source,
+        target: prevLink ? prevLink.target : target,
         count: prevLink ? (prevLink.count + 1) : 1
       })
     });
@@ -33,7 +35,8 @@ function calculateLinksByVideoId(youtubers, videos) {
     // now that we've pushed in new links, add the old ones back in
     _.each(prevLinks, (prevLink) => {
       var currentLink = _.find(links, (link) =>
-        prevLink.source === link.source.name && prevLink.target.name === link.target.name);
+        (prevLink.source.name === link.source.name && prevLink.target.name === link.target.name) ||
+        (prevLink.source.name === link.target.name && prevLink.target.name === link.source.name));
 
       if (currentLink) return;
       // if we haven't taken care of it, push in a clone of it
@@ -71,23 +74,18 @@ function enterNodes(selection) {
   selection.attr('transform', (data) => 'translate(' + data.x + ',' + nodeY + ')');
 }
 
-function enterDots(selection) {
-  selection
-    .attr('r', 3)
-    .attr('fill', (data) => data.fill)
-    .attr('cy', nodeSize + nodePadding)
-    .attr('transform', (data) => 'translate(' + data.x + ',' + nodeY + ')');
-}
-
 function enterLinks(selection) {
   selection.attr('d', linkArc)
     .attr('fill', 'none')
-    .attr('stroke', (data) => data.source.fill)
+    .attr('stroke', (data) => data.target.fill)
+    .attr('stroke-linecap', 'round')
     .attr('stroke-opacity', .5)
     .attr('stroke-dasharray', function(data) {
       return this.getTotalLength();
     }).attr('stroke-dashoffset', function(data) {
-      return this.getTotalLength();
+      // if target is to the right of source, then make dashoffset negative
+      // so that it will still animate from source to target
+      return this.getTotalLength() * (data.target.x > data.source.x ? -1 : 1);
     });
 }
 
@@ -112,20 +110,26 @@ function updateLinks(selection) {
 function exitLinks(selection) {
   selection.transition().duration(duration)
     .attr('stroke-dashoffset', function(data) {
-      return this.getTotalLength();
+      // if target is to the right of source, then make dashoffset negative
+      // so that it will still animate from source to target
+      return this.getTotalLength() * (data.target.x > data.source.x ? -1 : 1);
     }).attr('stroke-width', 0)
     .remove();
 }
 
-// taken from http://bl.ocks.org/mbostock/1153292
+// modified from http://bl.ocks.org/mbostock/1153292
 function linkArc(d) {
   d.source.y = nodeY + nodeSize + nodePadding;
   d.target.y = nodeY + nodeSize + nodePadding;
-  var dx = d.target.x - d.source.x,
-      dy = d.target.y - d.source.y,
+  // if target is to left of source, flip them so that the link
+  // will still draw an arc below the nodes
+  var source = (d.target.x > d.source.x) ? d.target : d.source;
+  var target = (d.target.x > d.source.x) ? d.source : d.target;
+  var dx = target.x - source.x,
+      dy = target.y - source.y,
       dr = (Math.sqrt(dx * dx + dy * dy) * 2) / 3;
-  return "M" + d.source.x + "," + d.source.y +
-    "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+  return "M" + source.x + "," + source.y +
+    "A" + dr + "," + dr + " 0 0,1 " + target.x + "," + target.y;
 }
 
 var Youtubers = React.createClass({
@@ -145,8 +149,6 @@ var Youtubers = React.createClass({
 
     this.d3Nodes = d3.select(this.refs.nodes.getDOMNode())
       .selectAll('g').data(_.values(nextProps.youtubers), (node) => node.name);
-    this.d3Dots = d3.select(this.refs.dots.getDOMNode())
-      .selectAll('circle').data(_.values(nextProps.youtubers), (node) => node.name);
 
     // var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
     //   return {
@@ -161,7 +163,6 @@ var Youtubers = React.createClass({
 
     this.d3Nodes.enter().append('g').call(enterNodes);
     this.d3Nodes.call(updateNodes, nextProps.videos[nextProps.videoId - 1]);
-    this.d3Dots.enter().append('circle').call(enterDots);
 
     this.d3Links.enter().append('path').call(enterLinks);
     this.d3Links.exit().call(exitLinks);
