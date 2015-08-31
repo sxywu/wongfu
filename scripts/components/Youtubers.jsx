@@ -16,15 +16,15 @@ function calculateLinksByVideoId(youtubers, videos) {
   var prevLinks = [];
   _.each(videos, (video) => {
     var links = linksByVideoId[video.id] = [];
-    var target = youtubers[video.data.youtuber];
+    var target = video.data.youtuber;
     _.each(video.data.associations, (association) => {
       // if association not one of the nodes, don't add link
       if (!youtubers[association]) return;
 
-      var source = youtubers[association];
+      var source = association;
       var prevLink = _.find(prevLinks, (prevLink) =>
-        (prevLink.source.name === source.name && prevLink.target.name === target.name) ||
-        (prevLink.source.name === target.name && prevLink.target.name === source.name));
+        (prevLink.source === source && prevLink.target === target) ||
+        (prevLink.source === target && prevLink.target === source));
       links.push({
         source: prevLink ? prevLink.source : source,
         target: prevLink ? prevLink.target : target,
@@ -35,8 +35,8 @@ function calculateLinksByVideoId(youtubers, videos) {
     // now that we've pushed in new links, add the old ones back in
     _.each(prevLinks, (prevLink) => {
       var currentLink = _.find(links, (link) =>
-        (prevLink.source.name === link.source.name && prevLink.target.name === link.target.name) ||
-        (prevLink.source.name === link.target.name && prevLink.target.name === link.source.name));
+        (prevLink.source === link.source && prevLink.target === link.target) ||
+        (prevLink.source === link.target && prevLink.target === link.source));
 
       if (currentLink) return;
       // if we haven't taken care of it, push in a clone of it
@@ -80,9 +80,7 @@ function enterLinks(selection) {
     .attr('stroke', (data) => data.target.fill)
     .attr('stroke-linecap', 'round')
     .attr('stroke-opacity', .5)
-    .attr('stroke-dasharray', function(data) {
-      return this.getTotalLength();
-    }).attr('stroke-dashoffset', function(data) {
+    .attr('stroke-dashoffset', function(data) {
       // if target is to the right of source, then make dashoffset negative
       // so that it will still animate from source to target
       return this.getTotalLength() * (data.target.x > data.source.x ? -1 : 1);
@@ -92,18 +90,20 @@ function enterLinks(selection) {
 function updateNodes(selection, video) {
   selection
     .transition().duration(duration)
-    .attr('opacity', (data) => video && (data.name === video.data.youtuber) ? 1 : .75)
     .attr('transform', (data) => {
-      var inVideo = video && ((data.name === video.data.youtuber) ||
-        _.find(video.data.associations, (association) => data.name === association));
-      data.y = inVideo ? nodeSize + 5 : nodeY;
+      var madeVideo = video && (data.name === video.data.youtuber);
+      var inVideo = video && _.find(video.data.associations, (association) => data.name === association);
+      data.y = (madeVideo ? nodeSize : (inVideo ? nodeSize * 2 : nodeSize * 3)) + 10;
       return 'translate(' + data.x + ',' + data.y + ')'
     });
 }
 
 function updateLinks(selection) {
   selection.transition().duration(duration)
-    .attr('stroke-dashoffset', 0)
+    .attr('d', linkArc)
+    .attr('stroke-dasharray', function(data) {
+      return this.getTotalLength();
+    }).attr('stroke-dashoffset', 0)
     .attr('stroke-width', (data) => widthScale(data.count));
 }
 
@@ -119,8 +119,6 @@ function exitLinks(selection) {
 
 // modified from http://bl.ocks.org/mbostock/1153292
 function linkArc(d) {
-  d.source.y = nodeY + nodeSize + nodePadding;
-  d.target.y = nodeY + nodeSize + nodePadding;
   // if target is to left of source, flip them so that the link
   // will still draw an arc below the nodes
   var source = (d.target.x > d.source.x) ? d.target : d.source;
@@ -150,15 +148,15 @@ var Youtubers = React.createClass({
     this.d3Nodes = d3.select(this.refs.nodes.getDOMNode())
       .selectAll('g').data(_.values(nextProps.youtubers), (node) => node.name);
 
-    // var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
-    //   return {
-    //     source: nextProps.youtubers[link.source],
-    //     target: nextProps.youtubers[link.target],
-    //     count: link.count
-    //   };
-    // });
+    var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
+      return {
+        source: nextProps.youtubers[link.source],
+        target: nextProps.youtubers[link.target],
+        count: link.count
+      };
+    });
     this.d3Links = d3.select(this.refs.links.getDOMNode())
-      .selectAll('path').data(linksByVideoId[nextProps.videoId] || [],
+      .selectAll('path').data(links || [],
         (data) => data.source.name + ',' + data.target.name);
 
     this.d3Nodes.enter().append('g').call(enterNodes);
