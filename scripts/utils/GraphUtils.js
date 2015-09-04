@@ -12,7 +12,7 @@ var xPadding = 75;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
 var colorScale = d3.scale.category10();
-var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 19500]);
+var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 29500]);
 
 var GraphUtils = {};
 
@@ -79,6 +79,10 @@ GraphUtils.calculateVideos = (youtubers) => {
       data: video
     };
   });
+}
+
+GraphUtils.getSVGWidth = (lines) => {
+  return (lines.length + 1) * xPadding;
 }
 
 module.exports = GraphUtils; 

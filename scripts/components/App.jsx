@@ -13,6 +13,7 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
 var YoutubersComponent = require('./Youtubers.jsx');
+var VideoSummaryComponent = require('./VideoSummary.jsx');
 
 var onWindowScroll;
 var duration = 200;
@@ -87,13 +88,16 @@ var App = React.createClass({
   },
 
   render() {
-    var svgWidth = window.innerWidth * .6;
-    var lineSVGStyle = {width: svgWidth, height: 20000,
+    var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
+    var summaryWidth = window.innerWidth - lineWidth;
+    var timelineHeight = 30000;
+    var summarySVGStyle = {left: lineWidth, width: summaryWidth};
+    var backgroundSVGStyle = {width: window.innerWidth, height: timelineHeight,
       position: 'absolute', top: 0, left: 0};
 
     var boxShadow = '0 0 ' + window.innerHeight * .05 + 'px #fff';
     var youtuberSVGHeight = window.innerHeight * .35;
-    var youtuberSVGStyle = {width: svgWidth, height: youtuberSVGHeight,
+    var youtuberSVGStyle = {width: lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0,
       backgroundColor: 'rgba(255, 255, 255, .5)', boxShadow};
 
@@ -103,10 +107,13 @@ var App = React.createClass({
       videoId={this.state.videoId} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.videoId} />);
+    var videoSummary = (<VideoSummaryComponent videos={this.state.videos}
+      videoId={this.state.videoId} style={summarySVGStyle} />);
 
     return (
       <div>
-        <svg style={lineSVGStyle}>
+        <svg style={backgroundSVGStyle}>
+          {videoSummary}
           {lines}
           {videos}
         </svg>

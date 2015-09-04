@@ -15,7 +15,7 @@ var allVideos = [];
 var videosByYoutuber = {};
 var videosByAssociation = {};
 
-var minViews = 100000;
+var minViews = 250000;
 function setVideosByYoutuber(youtuber, rawVideos) {
   allYoutubersBack.push(youtuber);
 
