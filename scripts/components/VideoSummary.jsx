@@ -5,73 +5,85 @@ var d3 = require('d3/d3');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-var duration = 350;
-var timeFormat = d3.time.format("%a %b %d, '%y");
-
-function enterSummary(selection, style) {
-
-  selection.append('text')
-    .text((data) => {
-      return timeFormat(data.data.publishedDate) + ' | ' + data.data.views + ' views';
-    }).attr('dy', '.35em')
-    .attr('y', -16)
-    .style({
-      'font-family': 'Helvetica',
-      'font-size': '12px'
-    });
-
-  selection.append('text')
-    .attr('dy', '.35em')
-    .text((data) => data.data.title)
-    .style({
-      'font-family': 'Droid Serif',
-      'font-size': '18px'
-    });
-
-  selection.append('text')
-    .attr('dy', '.35em')
-    .attr('y', 24)
-    .text((data) => data.data.youtuber + ', ' + data.data.associations.join(', '))
-    .style({
-      'font-family': 'Helvetica',
-      'font-size': '12px'
-    });
-
-  selection
-    .attr('opacity', 0)
-    .attr('transform', (data) => 'translate(' + style.left + ',' + data.y + ')');
-}
-
-function updateSummary(selection, videoId) {
-  selection.transition().duration(duration)
-    .attr('opacity', (data) => Math.pow(0.5, videoId - data.id));
-}
-
-function exitSummary(selection) {
-  selection.transition().duration(duration)
-    .attr('opacity', 0).remove();
-}
+var duration = 200;
+var timeFormat = d3.time.format("%a %b %d, %Y");
+var numberFormat = d3.format(',');
 
 var VideoSummarys = React.createClass({
   componentDidMount() {
     this.d3Selection = d3.select(this.getDOMNode());
   },
 
-  shouldComponentUpdate(nextProps) {
-    var videos = _.slice(nextProps.videos, nextProps.videoId - 1, nextProps.videoId);
-    this.d3Videos = this.d3Selection.selectAll('g')
-      .data(videos, (data) => data.id);
+  componentDidUpdate() {
+    var video = this.props.videos[this.props.videoId - 1];
+    if (!video) return;
+    this.d3Selection.transition().duration(duration)
+      .style({top: video.y});
+  },
 
-    this.d3Videos.enter().append('g').call(enterSummary, nextProps.style);
-    this.d3Videos.exit().remove().call(exitSummary);
-    this.d3Videos.call(updateSummary, nextProps.videoId);
-
-    return true;
+  labelStyle(color, madeVideo) {
+    return {
+      fontFamily: 'Helvetica',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      display: 'inline-block',
+      padding: '0 5px',
+      borderRadius: '3px',
+      backgroundColor: (madeVideo ? color : '#fff'),
+      border: '2px solid ' + color,
+      color: (madeVideo ? '#fff' : color),
+      margin: '0 5px 5px 0'
+    };
   },
 
   render() {
+    var video = this.props.videos[this.props.videoId - 1];
+    if (!video) {
+      return (<div />);
+    }
+    var smallTextStyle = {
+      fontFamily: 'Helvetica',
+      fontSize: '14px',
+      color: '#333'
+    };
+    var bigTextStyle = {
+      fontFamily: 'Droid Serif',
+      fontSize: '22px',
+      lineHeight: '24px',
+      color: '#333'
+    };
+    var summaryStyle = {
+      position: 'absolute'
+    };
+    var madeVideo = (<span style={this.labelStyle(video.fill, true)}>{video.data.youtuber}</span>);
+    var inVideos = _.chain(video.data.associations)
+      .sortBy((association) => {
+        var youtuber = this.props.youtubers[association];
+        return youtuber && youtuber.data.joinedDate;
+      }).map((association) => {
+        var youtuber = this.props.youtubers[association];
+        var color = youtuber ? youtuber.fill : '#999';
+        return (<span style={this.labelStyle(color)}>{association}</span>);
+      }).value();
+
     return (
-      <g />
+      <div style={summaryStyle}>
+        <div style={smallTextStyle}>
+          {timeFormat(video.data.publishedDate)}
+        </div>
+        <div style={bigTextStyle}>
+          {video.data.title}
+        </div>
+        <div>
+          <span style={smallTextStyle}>
+            {numberFormat(video.data.views) + ' views'}
+          </span>
+        </div>
+        <div>
+          {madeVideo}
+          {inVideos}
+        </div>
+      </div>
     );
   }
 });
