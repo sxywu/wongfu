@@ -1,94 +1,12 @@
 body {
-	background-color: #FFFDFB;
 	font-family: 'Quicksand', 'sans-serif';
 }
 
 /*******************
 * SVG
 */
-svg {
-	position:absolute;
-	top: 0;
-	height: 20000px;
-	width: 100%;
-	/*height: 50%;*/
+
+path.distancePath {
+	fill: none;
+	stroke: none;
 }
-
-.xAxis path,
-.xAxis line {
-    fill: none;
-    stroke: #999;
-    shape-rendering: crispEdges;
-}
-
-.xAxis text, .markerDate, .video text {
-    font-size: 24px;
-    color: #666;
-}
-
-.youtuber {
-	position:fixed;
-	margin: 50px;
-	bottom: 35%;
-}
-
-.fade {
-	opacity: .15;
-}
-
-.solid {
-	opacity: 1;
-}
-
-/*******************
-* HTML
-*/
-
-.settings {
-	position: fixed;
-	bottom: 0;
-	right: 0;
-	margin: 20px;
-}
-
-.description {
-	position: fixed;
-	width: 500px;
-	bottom: 0;
-	left: 0;
-	margin: 20px;
-	background-color: rgba(255, 253, 251, 1);
-	border: 1px solid #fff;
-	border-radius: 5px;
-
-	box-shadow: 0 0 5px #999;
-}
-
-.videoDesc {
-	float: left;
-}
-
-.videoImage {
-	width: 80px;
-	margin: 10px;
-}
-
-.videoDate {
-	font-size: .85em;
-}
-
-.videoTitle {
-	font-size: 1.25em;
-}
-
-/*******************
-* General
-*/
-.hidden {
-	display: none;
-}
-
-.active {
-	z-index: 1000;
-}
-

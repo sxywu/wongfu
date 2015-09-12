@@ -1,41 +1,21 @@
 <DOCTYPE! html>
 
 <head>
-    <meta property='og:image' content='images/screenshot.png'/>
-    <link href='http://fonts.googleapis.com/css?family=Quicksand:700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="stylesheets/bootstrap.css" type="text/css" />
-    <link rel="stylesheet" href="stylesheets/style.css" type="text/css" />
-
-    <script data-main="scripts/main" src="scripts/contrib/require-jquery.js"></script>
+  <meta charset=utf-8 />
+  <meta property='og:image' content='images/screenshot.png'/>
+  <link href='https://fonts.googleapis.com/css?family=Droid+Serif:700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="stylesheets/bootstrap.css" type="text/css" />
+  <link rel="stylesheet" href="stylesheets/style.css" type="text/css" />
 
 </head>
 
 <body>
+    <svg>
+      <path class="distancePath"></path>
+    </svg>
+    <div id="main"></div>
 
-    <svg></svg>
-
-    <div class="description"></div>
-    <div class="settings">
-        Sort by
-        <div class="btn-group">
-            <div class="btn sortTime">time</div>
-            <div class="btn sortViews">views</div>
-        </div>
-    </div>
-
-    <!-- <div class="marker">
-        <div class="date"></div>
-        <div class="circle"></div>
-    </div> -->
-    <!-- <div class="videos">
-        <div class="border">
-            <div class="date"></div>
-            <div class="content">
-                <div class="youtuberContent"></div>
-                <div class="videoContent"></div>
-            </div>
-        </div>
-    </div> -->
+    <script src="scripts/bundle.js"></script>
 </body>
 
 </html>

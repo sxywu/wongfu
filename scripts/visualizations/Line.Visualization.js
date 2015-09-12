@@ -1,22 +1,18 @@
 define([
     "jquery",
     "underscore",
-    "d3",
-    "app/visualizations/Graph.Visualization"
+    "d3"
 ], function(
     $,
     _,
-    d3,
-    GraphVisualization
+    d3
 ) {
     var width = 800, height, padding = {top: 0, left: 0, right: 0, bottom: 50};
     var youtubers, videos; // data
     var container;
-    var sizeScale, timeScale;
-    var rectPadding = 30, minSize = 10, maxSize = 100, borderRadius = 3;
-    var lineWidth = 4;
+    var timeScale;
+    var lineWidth = 2;
     var color;
-    var graphVisualization = GraphVisualization();
     var Line = function(selection) {
         container = selection;
 
@@ -68,14 +64,13 @@ define([
                     }
                     source = target;
                 });
-                return 'M' + d.youtuber.x + ',' + d.youtuber.y + ' ' + path.replace(/M[0-9\,.]*/gi, '');
+                return 'M' + d.youtuber.x + ',' + app.padding.top + ' ' + path.replace(/M[0-9\,.]*/gi, '');
             }).attr('fill', 'none')
             .attr('stroke', function(d) {return app.d3Colors(d.youtuber.youtuber)})
             .attr('stroke-width', lineWidth)
             .attr('stroke-linecap', 'round')
             .attr('stroke-linejoin', 'round')
-            .attr('opacity', .75)
-            .on('click', Line.click);
+            .attr('opacity', .75);
     }
 
     var exit = function(selection) {
@@ -85,57 +80,6 @@ define([
     /**
     events
     */
-    var mouseover = function(d) {
-        // d3.selectAll('.node, .link, .videoLine').classed('fade', true)
-        //     .classed('solid', false);
-        // d3.selectAll('#' + d.youtuber.youtuber).classed('fade', false)
-        //     .classed('solid', true);
-    }
-
-    var mouseleave = function() {
-        // d3.selectAll('.node, .link, .videoLine').classed('fade', false)
-            // .classed('solid', false);
-    }
-
-    Line.click = function(d, type) {
-        if (type === 'timeline') {
-            d = d.datum();
-        }
-
-        if (app.clicked) {
-            d3.select('.node.solid').call(graphVisualization.hideName);
-            d3.selectAll('.solid').classed('fade', true)
-                .classed('solid', false);
-        } else if (!app.clicked) {
-            d3.selectAll('.node, .link, .videoLine').classed('fade', true)
-                .classed('solid', false);
-        }
-
-        if (app.clicked === d.youtuber) {
-            d3.selectAll('.fade').classed('fade', false)
-                .classed('solid', false);
-            d.youtuber.clicked = false;
-            app.clicked = false;
-        } else {
-            d3.selectAll('#' + d.youtuber.youtuber).classed('fade', false)
-                .classed('solid', true);
-            d3.select('.node#' + d.youtuber.youtuber)
-                .call(graphVisualization.showName);
-
-            d.youtuber.clicked = true;
-            if (app.clicked) app.clicked.clicked = false;
-            app.clicked = d.youtuber;
-        }
-        
-    }
-
-    var showName = function() {
-
-    }
-
-    var hideName = function() {
-
-    }
 
     /*
     getter setters
@@ -158,17 +102,6 @@ define([
         if (!arguments.length) return color;
 
         color = value;
-        return Line;
-    }
-
-    Line.sizeScale = function(minViews, maxViews) {
-        if (!arguments.length) return sizeScale;
-
-        if (arguments.length > 1) {
-            sizeScale = d3.scale.linear().domain([minViews, maxViews]).range([minSize, maxSize]);
-        } else {
-            sizeScale = minViews;
-        }
         return Line;
     }
 
