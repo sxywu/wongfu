@@ -24,6 +24,7 @@ GraphUtils.calculateYoutubers = () => {
       return youtuberObj.joinedDate;
     }).each((youtuberObj, i) => {
       youtubers[youtuberObj.youtuber] = {
+        i,
         name: youtuberObj.youtuber,
         x: (i + 1) * xPadding,
         fill: colorScale(youtuberObj.youtuber),

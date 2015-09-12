@@ -21,10 +21,14 @@ function calculateTop() {
   return scrollY + (window.innerHeight * .6);
 }
 
+var sounds = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
+  return new Audio('sound/violin_' + pitch + '.mp3');
+});
+
 var App = React.createClass({
   getInitialState() {
     return {
-      youtubers: [],
+      youtubers: {},
       lines: [],
       videos: [],
       videoId: 1,
@@ -46,6 +50,15 @@ var App = React.createClass({
     this.windowScroll();
     onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
+  },
+
+  componentDidUpdate() {
+    var video = this.state.videos[this.state.videoId - 1];
+    var youtuber = video && this.state.youtubers[video.data.youtuber];
+    if (!video || !youtuber) return;
+    sounds[youtuber.i].currentTime = 0;
+    sounds[youtuber.i].play();
+    console.log(youtuber, youtuber.i, sounds[youtuber.i]);
   },
 
   componentWillUnmount() {
@@ -82,14 +95,11 @@ var App = React.createClass({
       videoId = 0;
     } else if (video) {
       videoId = video.id;
-      if (video.data.youtuber === 'wongfuproductions' && video.data.views > 1000000) {
-        // if video has more than a million views, change image background
-        image = video.data.images[0];
-      }
-
     } else if (top > lastVideo.y) {
       videoId = lastVideo.id;
     }
+
+    if (this.state.videoId === videoId) return;
 
     this.setState({top, videoId, image});
   },
@@ -108,6 +118,13 @@ var App = React.createClass({
     var youtuberSVGStyle = {width: lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
+    var line;
+    var video = this.state.videos[this.state.videoId - 1];
+    if (video) {
+      line = (<line x1={video.x} x2={window.innerWidth} y1={video.y} y2={video.y}
+        stroke={video.fill} strokeDasharray={2} />);
+    }
+
     var lines = (<LinesComponent data={this.state.lines}
       top={this.state.top} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos}
@@ -120,6 +137,7 @@ var App = React.createClass({
     return (
       <div>
         <svg style={backgroundSVGStyle}>
+          {line}
           {lines}
           {videos}
         </svg>

@@ -17,8 +17,8 @@ var VideoSummarys = React.createClass({
   componentDidUpdate() {
     var video = this.props.videos[this.props.videoId - 1];
     if (!video) return;
-    this.d3Selection.transition().duration(duration)
-      .style({top: video.y});
+    var top = video.y - this.refs.date.getDOMNode().clientHeight - this.refs.title.getDOMNode().clientHeight;
+    this.d3Selection.transition().duration(duration).style({top});
   },
 
   labelStyle(color, madeVideo) {
@@ -68,16 +68,14 @@ var VideoSummarys = React.createClass({
 
     return (
       <div style={summaryStyle}>
-        <div style={smallTextStyle}>
+        <div style={smallTextStyle} ref='date'>
           {timeFormat(video.data.publishedDate)}
         </div>
-        <div style={bigTextStyle}>
+        <div style={bigTextStyle} ref='title'>
           {video.data.title}
         </div>
-        <div>
-          <span style={smallTextStyle}>
-            {numberFormat(video.data.views) + ' views'}
-          </span>
+        <div style={smallTextStyle}>
+          {numberFormat(video.data.views) + ' views'}
         </div>
         <div>
           {madeVideo}
