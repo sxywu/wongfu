@@ -22,7 +22,7 @@ function calculateTop() {
 }
 
 var sounds = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
-  return new Audio('sound/violin_' + pitch + '.mp3');
+  return _.map([1, 2, 3], (dynamic) => new Audio('sound/violin_' + pitch + '_' + dynamic + '.mp3'));
 });
 
 var App = React.createClass({
@@ -56,9 +56,9 @@ var App = React.createClass({
     var video = this.state.videos[this.state.videoId - 1];
     var youtuber = video && this.state.youtubers[video.data.youtuber];
     if (!video || !youtuber) return;
-    sounds[youtuber.i].currentTime = 0;
-    sounds[youtuber.i].play();
-    console.log(youtuber, youtuber.i, sounds[youtuber.i]);
+
+    sounds[youtuber.order][video.dynamic].currentTime = 0;
+    sounds[youtuber.order][video.dynamic].play();
   },
 
   componentWillUnmount() {
