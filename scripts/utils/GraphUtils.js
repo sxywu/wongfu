@@ -73,7 +73,7 @@ GraphUtils.calculateVideos = (youtubers) => {
   return _.map(VideoStore.getVideos(), (video) => {
     var youtuberObj = youtubers[video.youtuber];
     var dynamic = (video.views - minViews) / diffViews;
-    if (dynamic <= 0.25) {
+    if (dynamic <= 0.15) {
       dynamic = 0;
     } else if (dynamic <= 0.5) {
       dynamic = 1;

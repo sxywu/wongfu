@@ -21,7 +21,7 @@ function calculateTop() {
   return scrollY + (window.innerHeight * .6);
 }
 
-var sounds = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
+var sounds = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C4'], (pitch) => {
   return _.map([1, 2, 3], (dynamic) => new Audio('sound/violin_' + pitch + '_' + dynamic + '.mp3'));
 });
 
@@ -53,6 +53,8 @@ var App = React.createClass({
   },
 
   componentDidUpdate() {
+    if (this.state.videoId === this.state.prevVideoId) return;
+
     var video = this.state.videos[this.state.videoId - 1];
     var youtuber = video && this.state.youtubers[video.data.youtuber];
     if (!video || !youtuber) return;
@@ -99,9 +101,7 @@ var App = React.createClass({
       videoId = lastVideo.id;
     }
 
-    if (this.state.videoId === videoId) return;
-
-    this.setState({top, videoId, image});
+    this.setState({top, videoId, image, prevVideoId: this.state.videoId});
   },
 
   render() {
