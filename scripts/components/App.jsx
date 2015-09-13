@@ -21,9 +21,17 @@ function calculateTop() {
   return scrollY + (window.innerHeight * .6);
 }
 
-var sounds = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C4'], (pitch) => {
-  return _.map([1, 2, 3], (dynamic) => new Audio('sound/violin_' + pitch + '_' + dynamic + '.mp3'));
+var allSources = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
+  return 'sound/violin_' + pitch + '_2.mp3';
 });
+
+sounds.load(allSources);
+sounds.whenLoaded = soundsSetup;
+
+var allSounds = [];
+function soundsSetup() {
+  allSounds = _.map(allSources, (source) => sounds[source]);
+}
 
 var App = React.createClass({
   getInitialState() {
@@ -59,8 +67,8 @@ var App = React.createClass({
     var youtuber = video && this.state.youtubers[video.data.youtuber];
     if (!video || !youtuber) return;
 
-    sounds[youtuber.order][video.dynamic].currentTime = 0;
-    sounds[youtuber.order][video.dynamic].play();
+    allSounds[youtuber.order].volume = video.volume;
+    allSounds[youtuber.order].play();
   },
 
   componentWillUnmount() {
