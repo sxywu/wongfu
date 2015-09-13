@@ -7,6 +7,3 @@ scripts/templates/.DS_Store
 scripts/views/.DS_Store
 scripts/visualizations/.DS_Store
 node_modules/*
-
-scripts/.bundle.js
-scripts/bundle.js

@@ -64,29 +64,22 @@ GraphUtils.calculateLines = (youtubers) => {
 };
 
 var videoScale = d3.scale.linear().range([8, 75]);
+var volumeScale = d3.scale.linear().range([.15, 1]);
 GraphUtils.calculateVideos = (youtubers) => {
   var minViews = _.min(VideoStore.getVideos(), (video) => video.views).views;
   var maxViews = _.max(VideoStore.getVideos(), (video) => video.views).views;
-  var diffViews = maxViews - minViews;
   videoScale.domain([minViews, maxViews]);
+  volumeScale.domain([minViews, maxViews]);
 
   return _.map(VideoStore.getVideos(), (video) => {
     var youtuberObj = youtubers[video.youtuber];
-    var dynamic = (video.views - minViews) / diffViews;
-    if (dynamic <= 0.15) {
-      dynamic = 0;
-    } else if (dynamic <= 0.5) {
-      dynamic = 1;
-    } else {
-      dynamic = 2;
-    }
     return {
       id: video.id,
       x: youtuberObj.x,
       y: yScale(video.publishedDate),
       fill: youtuberObj.fill,
       size: videoScale(video.views),
-      dynamic,
+      volume: volumeScale(video.views),
       data: video
     };
   });
