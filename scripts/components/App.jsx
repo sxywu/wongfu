@@ -69,6 +69,9 @@ var App = React.createClass({
 
     allSounds[youtuber.order].volume = video.volume;
     allSounds[youtuber.order].play();
+
+    d3.select(this.refs.line.getDOMNode()).transition().duration(duration)
+      .attr('y1', video.y).attr('y2', video.y);
   },
 
   componentWillUnmount() {
@@ -129,7 +132,7 @@ var App = React.createClass({
     var line;
     var video = this.state.videos[this.state.videoId - 1];
     if (video) {
-      line = (<line x1={video.x} x2={window.innerWidth} y1={video.y} y2={video.y}
+      line = (<line ref='line' x1={video.x} x2={window.innerWidth}
         stroke={video.fill} strokeDasharray={2} />);
     }
 

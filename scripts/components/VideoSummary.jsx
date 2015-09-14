@@ -17,7 +17,7 @@ var VideoSummarys = React.createClass({
   componentDidUpdate() {
     var video = this.props.videos[this.props.videoId - 1];
     if (!video) return;
-    var top = video.y - this.refs.date.getDOMNode().clientHeight - this.refs.title.getDOMNode().clientHeight;
+    var top = video.y;
     this.d3Selection.transition().duration(duration).style({top});
   },
 
@@ -44,13 +44,14 @@ var VideoSummarys = React.createClass({
     var smallTextStyle = {
       fontFamily: 'Helvetica',
       fontSize: '14px',
-      color: '#333'
+      color: '#333',
+      padding: '5px 0'
     };
     var bigTextStyle = {
       fontFamily: 'Droid Serif',
       fontSize: '22px',
       lineHeight: '24px',
-      color: '#333'
+      color: '#333',
     };
     var summaryStyle = {
       position: 'absolute'
