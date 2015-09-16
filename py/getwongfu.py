@@ -129,3 +129,7 @@ sortedAssociations = sortedAssociations[:7]
 for association,count in sortedAssociations:
   getYoutuber(association)
   getVideosForYoutuber(association)
+
+associationFile = open("raw/associations.json", 'w')
+associationFile.write(json.dumps(sortedAssociations))
+associationFile.close()

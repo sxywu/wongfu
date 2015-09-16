@@ -8,14 +8,22 @@ var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 
-var youtuberNames = ["wongfuproductions", "davidchoimusic", "kevjumba", "pauldateh", "nigahiga", "kinagrannis", "lilcdawg", "funemployed"];
+var youtuberNames = [];
 var youtubers = {};
 
+function setYoutuberNames(rawNames) {
+  youtuberNames = _.map(rawNames, (tuple) => tuple[0]);
+  youtuberNames.push("wongfuproductions");
+}
+
 function setYoutubers(rawYoutubers) {
-  _.each(rawYoutubers, (youtuberObj) => {
-    if (!_.contains(youtuberNames, youtuberObj.youtuber)) return;
-    youtuberObj.joinedDate = new Date(youtuberObj.joined);
-    youtubers[youtuberObj.youtuber] = youtuberObj;
+  _.each(rawYoutubers, (youtuberObj, name) => {
+    if (!_.contains(youtuberNames, name)) return;
+    var youtuber = youtuberObj.snippet;
+    youtuber.youtuber = name;
+    youtuber.joinedDate = new Date(youtuberObj.snippet.publishedAt);
+    youtuber.image = youtuber.thumbnails.default.url;
+    youtubers[name] = youtuber;
   });
 }
 
@@ -43,6 +51,10 @@ YoutuberStore.dispatchToken = AppDispatcher.register((action) => {
   switch (action.actionType) {
     case Constants.GET_YOUTUBERS_SUCCESS:
       setYoutubers(action.data.response);
+      break;
+
+    case Constants.GET_YOUTUBER_NAMES_SUCCESS:
+      setYoutuberNames(action.data.response);
       break;
 
     default:

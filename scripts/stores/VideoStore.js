@@ -9,22 +9,22 @@ var YoutuberStore = require('./YoutuberStore');
 
 var CHANGE_EVENT = 'change';
 
-var allYoutubers = YoutuberStore.getYoutuberNames();
+var allYoutubers = [];
 var allYoutubersBack = [];
 var allVideos = [];
 var videosByYoutuber = {};
 var videosByAssociation = {};
 
-var minViews = 250000;
+var minViews = 100000;
 function setVideosByYoutuber(youtuber, rawVideos) {
   allYoutubersBack.push(youtuber);
 
-  videosByYoutuber[youtuber] = _.chain(rawVideos)
+  videosByYoutuber[youtuber] = _.chain(rawVideos.videos)
     .filter(function(video) {
       // only keep those videos that have at least one other youtuber
       video.associations = _.without(video.associations, youtuber);
-      video.views = parseInt(video.views);
-      return video.associations.length && video.views >= minViews;
+      video.views = parseInt(video.statistics.viewCount);
+      return video.associations.length > 1 && video.views >= minViews;
     }).sortBy(function(video) {
       // first push this video into allVideos
       allVideos.push(video);
@@ -39,8 +39,9 @@ function setVideosByYoutuber(youtuber, rawVideos) {
         }
       });
 
+      video.title = video.snippet.title;
       video.youtuber = youtuber;
-      video.publishedDate = new Date(video.published);
+      video.publishedDate = new Date(video.snippet.publishedAt);
 
       return video.publishedDate;
     }).value();
@@ -82,6 +83,11 @@ VideoStore.dispatchToken = AppDispatcher.register((action) => {
   switch (action.actionType) {
     case Constants.GET_VIDEO_SUCCESS:
       setVideosByYoutuber(action.data.youtuber, action.data.response);
+      break;
+
+    case Constants.GET_YOUTUBER_NAMES_SUCCESS:
+      AppDispatcher.waitFor([YoutuberStore.dispatchToken]);
+      allYoutubers = YoutuberStore.getYoutuberNames();
       break;
 
     default:

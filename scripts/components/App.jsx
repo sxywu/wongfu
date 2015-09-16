@@ -46,13 +46,15 @@ var App = React.createClass({
   },
 
   componentWillMount() {
-    var youtubers = YoutuberStore.getYoutuberNames();
-    ServerActionCreators.getYoutubers(() => {
-      _.each(youtubers, (youtuber) => {
-        ServerActionCreators.getVideoForYoutuber(youtuber);
+    ServerActionCreators.getYoutuberNames(() => {
+      ServerActionCreators.getYoutubers(() => {
+        var youtubers = YoutuberStore.getYoutuberNames();
+        _.each(youtubers, (youtuber) => {
+          ServerActionCreators.getVideoForYoutuber(youtuber);
+        });
       });
-    });
-
+    })
+    
     VideoStore.addChangeListener(this.onChange);
 
     this.windowScroll();
@@ -67,7 +69,7 @@ var App = React.createClass({
     var youtuber = video && this.state.youtubers[video.data.youtuber];
     if (!video || !youtuber) return;
 
-    allSounds[youtuber.order].volume = video.volume;
+    allSounds[youtuber.order].volume = 1;
     allSounds[youtuber.order].play();
 
     d3.select(this.refs.line.getDOMNode()).transition().duration(duration)
