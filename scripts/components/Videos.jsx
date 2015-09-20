@@ -10,12 +10,15 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 
 var duration = 350;
 
-function enterVideos(selection) {
+function enterVideos(selection, clickVideo) {
   selection
     .attr('cx', (data) => data.x)
     .attr('cy', (data) => data.y)
     .attr('r', 0)
-    .attr('stroke-width', 2);
+    .attr('stroke-width', 2)
+    .style({
+      cursor: 'pointer'
+    }).on('click', clickVideo);
 }
 
 function updateVideos(selection, videoId) {
@@ -45,17 +48,20 @@ function exitVideos(selection) {
 var Videos = React.createClass({
 
   shouldComponentUpdate(nextProps) {
-    var videos = _.slice(nextProps.data, 0, nextProps.videoId);
+    var videos = _.chain(nextProps.data)
+      .slice(0, nextProps.videoId)
+      .sortBy((data) => -data.size)
+      .value();
     this.d3Videos = d3.select(this.refs.videos.getDOMNode())
       .selectAll('circle').data(videos, (data) => data.id);
     this.d3VideoSizes = d3.select(this.refs.videoSizes.getDOMNode())
       .selectAll('circle').data(videos, (data) => data.id);
 
-    this.d3Videos.enter().append('circle').call(enterVideos);
+    this.d3Videos.enter().append('circle').call(enterVideos, nextProps.clickVideo);
     this.d3Videos.exit().call(exitVideos);
     this.d3Videos.call(updateVideos, nextProps.videoId);
 
-    this.d3VideoSizes.enter().append('circle').call(enterVideos);
+    this.d3VideoSizes.enter().append('circle').call(enterVideos, nextProps.clickVideo);
     this.d3VideoSizes.exit().call(exitVideos);
     this.d3VideoSizes.call(updateVideoSizes, nextProps.videoId);
 

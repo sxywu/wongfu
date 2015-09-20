@@ -18,8 +18,8 @@ var VideoSummaryComponent = require('./VideoSummary.jsx');
 var onWindowScroll;
 var duration = 200;
 var prevVideoId;
-function calculateTop() {
-  return scrollY + (window.innerHeight * .6);
+function calculateTop(top, subtract) {
+  return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight * .6);
 }
 
 var allSources = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
@@ -132,6 +132,12 @@ var App = React.createClass({
     return videoId;
   },
 
+  clickVideo(video) {
+    var top = calculateTop(video.y, true) + 1;
+    window.scrollTo(0, top);
+    this.setState({top: video.y, videoId: video.id});
+  },
+
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
     var summaryWidth = window.innerWidth - lineWidth - 75;
@@ -149,7 +155,7 @@ var App = React.createClass({
     var lines = (<LinesComponent data={this.state.lines} top={this.state.top}
       videos={this.state.videos} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos}
-      videoId={this.state.videoId} />);
+      videoId={this.state.videoId} clickVideo={this.clickVideo} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.videoId} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
