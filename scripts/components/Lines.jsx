@@ -226,7 +226,8 @@ var Lines = React.createClass({
     var video = nextProps.videos[nextProps.videoId - 1];
     video && d3.select(this.refs.line.getDOMNode())
       .transition().duration(duration)
-      .attr('stroke', video.fill).attr('x1', video.x)
+      .attr('stroke', video.fill)
+      .attr('x1', video.x).attr('x2', window.innerWidth)
       .attr('y1', video.y).attr('y2', video.y);
 
     return false;
@@ -235,7 +236,7 @@ var Lines = React.createClass({
   render() {
     return (
       <g>
-        <line ref="line" x2={window.innerWidth} strokeDasharray={2} />
+        <line ref="line" strokeDasharray={2} />
         <g ref="lines" />
       </g>
     );

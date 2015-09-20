@@ -59,7 +59,6 @@ var App = React.createClass({
     
     VideoStore.addChangeListener(this.onChange);
 
-    this.windowScroll();
     onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
     window.addEventListener('scroll', this.playSounds);
@@ -72,10 +71,15 @@ var App = React.createClass({
   },
  
   onChange() {
-    var youtubers = GraphUtils.calculateYoutubers();
-    var lines = GraphUtils.calculateLines(youtubers);
-    var videos = GraphUtils.calculateVideos(youtubers);
-    this.setState({youtubers, lines, videos});
+    var state = {};
+
+    state.youtubers = GraphUtils.calculateYoutubers();
+    state.lines = GraphUtils.calculateLines(state.youtubers);
+    state.videos = GraphUtils.calculateVideos(state.youtubers);
+    state.top = calculateTop();
+    state.videos.length && (state.videoId = this.findVideoId(state.top, state.videos));
+
+    this.setState(state);
   },
 
   windowScroll() {
@@ -97,25 +101,26 @@ var App = React.createClass({
     if (!video) return;
 
     var youtuber = this.state.youtubers[video.data.youtuber];
-    allSounds[youtuber.order].volume = 1;
+    allSounds[youtuber.order].volume = .75;
     allSounds[youtuber.order].play();
     _.each(video.data.associations, (association) => {
       association = this.state.youtubers[association];
       if (!association) return;
-      allSounds[association.order].volume = 1;
+      allSounds[association.order].volume = 1 / video.data.associations.length;
       allSounds[association.order].play();
     });
 
     prevVideoId = videoId;
   },
 
-  findVideoId(top) {
+  findVideoId(top, videos) {
+    videos = videos || this.state.videos;
     var video;
     var videoId = 0;
-    var firstVideo = _.first(this.state.videos);
-    var lastVideo = _.last(this.state.videos);
+    var firstVideo = _.first(videos);
+    var lastVideo = _.last(videos);
 
-    _.some(this.state.videos, (v) => {
+    _.some(videos, (v) => {
       if (v.y >= top) {
         return true;
       }
@@ -137,7 +142,7 @@ var App = React.createClass({
   clickVideo(video) {
     var top = calculateTop(video.y, true) + 1;
     window.scrollTo(0, top);
-    this.setState({top: video.y, videoId: video.id});
+    this.setState({top: video.y + 1, videoId: video.id});
   },
 
   render() {
