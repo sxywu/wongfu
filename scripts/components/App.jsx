@@ -22,8 +22,10 @@ function calculateTop(top, subtract) {
   return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight * .6);
 }
 
-var allSources = _.map(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], (pitch) => {
-  return 'sound/violin_' + pitch + '_2.mp3';
+var allSources = [['cello', 'C2'], ['cello', 'G2'], ['cello', 'C3'], ['violin', 'G3'],
+  ['violin', 'C4'], ['violin', 'G4'], ['viola', 'C5'], ['viola', 'G5']];
+allSources = _.map(allSources, (source) => {
+  return 'sound/' + source[0] + '_' + source[1] + '_3.mp3';
 });
 
 sounds.load(allSources);
