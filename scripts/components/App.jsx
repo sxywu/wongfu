@@ -17,6 +17,7 @@ var VideoSummaryComponent = require('./VideoSummary.jsx');
 
 var onWindowScroll;
 var duration = 200;
+var prevVideoId;
 function calculateTop() {
   return scrollY + (window.innerHeight * .6);
 }
@@ -40,8 +41,7 @@ var App = React.createClass({
       lines: [],
       videos: [],
       videoId: 1,
-      top: calculateTop(),
-      image: null
+      top: calculateTop()
     }
   },
 
@@ -60,25 +60,13 @@ var App = React.createClass({
     this.windowScroll();
     onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
-  },
-
-  componentDidUpdate() {
-    if (this.state.videoId === this.state.prevVideoId) return;
-
-    var video = this.state.videos[this.state.videoId - 1];
-    var youtuber = video && this.state.youtubers[video.data.youtuber];
-    if (!video || !youtuber) return;
-
-    allSounds[youtuber.order].volume = 1;
-    allSounds[youtuber.order].play();
-
-    d3.select(this.refs.line.getDOMNode()).transition().duration(duration)
-      .attr('y1', video.y).attr('y2', video.y);
+    window.addEventListener('scroll', this.playSounds);
   },
 
   componentWillUnmount() {
     VideoStore.removeChangeListener(this.onChange);
     window.removeEventListener('scroll', onWindowScroll);
+    window.removeEventListener('scroll', this.playSounds);
   },
  
   onChange() {
@@ -90,13 +78,40 @@ var App = React.createClass({
 
   windowScroll() {
     if (!this.state.videos.length) return;
+    var top = calculateTop();
+    var videoId = this.findVideoId(top);
+
+    this.setState({top, videoId});
+  },
+
+  playSounds() {
+    if (!this.state.videos.length) return;
 
     var top = calculateTop();
+    var videoId = this.findVideoId(top);
+    if (videoId === prevVideoId) return;
+
+    var video = this.state.videos[this.state.videoId - 1];
+    if (!video) return;
+
+    var youtuber = this.state.youtubers[video.data.youtuber];
+    allSounds[youtuber.order].volume = 1;
+    allSounds[youtuber.order].play();
+    _.each(video.data.associations, (association) => {
+      association = this.state.youtubers[association];
+      if (!association) return;
+      allSounds[association.order].volume = 1;
+      allSounds[association.order].play();
+    });
+
+    prevVideoId = videoId;
+  },
+
+  findVideoId(top) {
     var video;
     var videoId = 0;
     var firstVideo = _.first(this.state.videos);
     var lastVideo = _.last(this.state.videos);
-    var image = this.state.image;
 
     _.some(this.state.videos, (v) => {
       if (v.y >= top) {
@@ -114,13 +129,13 @@ var App = React.createClass({
       videoId = lastVideo.id;
     }
 
-    this.setState({top, videoId, image, prevVideoId: this.state.videoId});
+    return videoId;
   },
 
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
     var summaryWidth = window.innerWidth - lineWidth - 75;
-    var timelineHeight = 30000;
+    var timelineHeight = 10000;
     var summaryDivStyle = {position: 'absolute', top: 0, left: lineWidth,
       width: summaryWidth, height: timelineHeight};
     var backgroundSVGStyle = {width: window.innerWidth, height: timelineHeight,
@@ -131,15 +146,8 @@ var App = React.createClass({
     var youtuberSVGStyle = {width: lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
-    var line;
-    var video = this.state.videos[this.state.videoId - 1];
-    if (video) {
-      line = (<line ref='line' x1={video.x} x2={window.innerWidth}
-        stroke={video.fill} strokeDasharray={2} />);
-    }
-
-    var lines = (<LinesComponent data={this.state.lines}
-      top={this.state.top} videoId={this.state.videoId} />);
+    var lines = (<LinesComponent data={this.state.lines} top={this.state.top}
+      videos={this.state.videos} videoId={this.state.videoId} />);
     var videos = (<VideosComponent data={this.state.videos}
       videoId={this.state.videoId} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
@@ -150,7 +158,6 @@ var App = React.createClass({
     return (
       <div>
         <svg style={backgroundSVGStyle}>
-          {line}
           {lines}
           {videos}
         </svg>
