@@ -214,7 +214,7 @@ var Lines = React.createClass({
 
   shouldComponentUpdate(nextProps) {
     if (!this.d3Selection) {
-      this.d3Selection = d3.select(this.getDOMNode())
+      this.d3Selection = d3.select(this.refs.lines.getDOMNode())
         .selectAll('path').data(nextProps.data);
       this.d3Selection.enter().append('path');
       this.d3Selection
@@ -223,12 +223,21 @@ var Lines = React.createClass({
     }
     
     this.d3Selection.call(windowScroll, nextProps.top, nextProps.videoId);
+    var video = nextProps.videos[nextProps.videoId - 1];
+    video && d3.select(this.refs.line.getDOMNode())
+      .transition().duration(duration)
+      .attr('stroke', video.fill).attr('x1', video.x)
+      .attr('y1', video.y).attr('y2', video.y);
+
     return false;
   },
 
   render() {
     return (
-      <g />
+      <g>
+        <line ref="line" x2={window.innerWidth} strokeDasharray={2} />
+        <g ref="lines" />
+      </g>
     );
   }
 });
