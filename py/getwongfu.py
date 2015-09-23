@@ -28,7 +28,7 @@ def getYoutuber(name):
     # then go get it from youtube and save it to file
     response = youtube.channels().list(
       forUsername=name,
-      part="snippet"
+      part="snippet,statistics"
     ).execute()
 
     youtuber = response["items"][0]
