@@ -9,79 +9,114 @@ var duration = 200;
 var timeFormat = d3.time.format("%a %b %d, %Y");
 var numberFormat = d3.format(',');
 
+function getLabelStyle(color, madeVideo) {
+  return {
+    'font-family': 'Helvetica',
+    'font-size': '12px',
+    'font-weight': 'bold',
+    display: 'inline-block',
+    padding: '0 5px',
+    'border-radius': '3px',
+    'background-color': (madeVideo ? color : '#fff'),
+    border: '2px solid ' + color,
+    color: (madeVideo ? '#fff' : color),
+    margin: '0 5px 5px 0'
+  };
+}
+
+var date, title, views, associations;
+function enterSummary(selection) {
+  var smallTextStyle = {
+    'font-family': 'Helvetica',
+    'font-size': '14px',
+    color: '#333',
+    padding: '5px 0'
+  };
+  var bigTextStyle = {
+    'font-family': 'Droid Serif',
+    'font-size': '22px',
+    'line-height': '24px',
+    color: '#333',
+  };
+  var summaryStyle = {
+    position: 'absolute'
+  };
+
+  selection.style(summaryStyle);
+
+  date = selection.append('div')
+    .style(smallTextStyle);
+
+  title = selection.append('a')
+    .style(bigTextStyle)
+    .attr('target', '_new');
+
+  views = selection.append('div')
+    .style(smallTextStyle);
+
+  associations = selection.append('div');
+}
+
+function updateSummary(selection, video, youtubers) {
+  date.text(timeFormat(video.data.publishedDate));
+
+  title
+    .attr('href', "http://www.youtube.com/video/" + video.data.videoId)
+    .text(video.data.title);
+
+  views.text(numberFormat(video.data.views) + ' views');
+
+  var youtubersData = _.sortBy(video.data.associations, (association) => {
+    var youtuber = youtubers[association];
+    return youtuber && youtuber.data.joinedDate;
+  });
+  youtubersData.unshift(video.data.youtuber);
+
+  var allAssociations = associations.selectAll('a')
+    .data(youtubersData);
+
+  allAssociations.enter().append('a');
+  allAssociations
+    .each(function(association, i) {
+      var madeVideo = (i === 0);
+      var youtuber = youtubers[association];
+      var color = youtuber ? youtuber.fill : '#999';
+      d3.select(this).style(getLabelStyle(color, madeVideo));
+    })
+    .attr('target', '_new')
+    .attr('href', (association) => "http://www.youtube.com/" + association)
+    .text((association) => association);
+  allAssociations.exit().remove();
+
+  var top = video.y - selection.node().offsetHeight - 20;
+  selection.transition().duration(duration)
+    .style({top});
+}
+
 var VideoSummarys = React.createClass({
+
   componentDidMount() {
-    this.d3Selection = d3.select(this.getDOMNode());
+    this.d3Video = d3.select(this.refs.videoData.getDOMNode())
+      .call(enterSummary);
   },
 
-  componentDidUpdate() {
-    var video = this.props.videos[this.props.videoId - 1];
-    if (!video) return;
-    var top = video.y;
-    this.d3Selection.transition().duration(duration).style({top});
-  },
+  shouldComponentUpdate(nextProps) {
+    var video = nextProps.videos[nextProps.videoId - 1];
 
-  labelStyle(color, madeVideo) {
-    return {
-      fontFamily: 'Helvetica',
-      fontSize: '12px',
-      fontWeight: 'bold',
-      display: 'inline-block',
-      padding: '0 5px',
-      borderRadius: '3px',
-      backgroundColor: (madeVideo ? color : '#fff'),
-      border: '2px solid ' + color,
-      color: (madeVideo ? '#fff' : color),
-      margin: '0 5px 5px 0'
-    };
+    if (video) {
+      this.d3Video.call(updateSummary, video, nextProps.youtubers);
+    }
+
+    return false;
   },
 
   render() {
     var video = this.props.videos[this.props.videoId - 1];
-    if (!video) {
-      return (<div />);
-    }
-    var smallTextStyle = {
-      fontFamily: 'Helvetica',
-      fontSize: '14px',
-      color: '#333',
-      padding: '5px 0'
-    };
-    var bigTextStyle = {
-      fontFamily: 'Droid Serif',
-      fontSize: '22px',
-      lineHeight: '24px',
-      color: '#333',
-    };
-    var summaryStyle = {
-      position: 'absolute'
-    };
-    var madeVideo = (<span style={this.labelStyle(video.fill, true)}>{video.data.youtuber}</span>);
-    var inVideos = _.chain(video.data.associations)
-      .sortBy((association) => {
-        var youtuber = this.props.youtubers[association];
-        return youtuber && youtuber.data.joinedDate;
-      }).map((association) => {
-        var youtuber = this.props.youtubers[association];
-        var color = youtuber ? youtuber.fill : '#999';
-        return (<span style={this.labelStyle(color)}>{association}</span>);
-      }).value();
 
     return (
-      <div style={summaryStyle}>
-        <div style={smallTextStyle} ref='date'>
-          {timeFormat(video.data.publishedDate)}
-        </div>
-        <div style={bigTextStyle} ref='title'>
-          {video.data.title}
-        </div>
-        <div style={smallTextStyle}>
-          {numberFormat(video.data.views) + ' views'}
-        </div>
-        <div>
-          {madeVideo}
-          {inVideos}
-        </div>
+      <div>
+        <div ref="videoData" />
+        <div ref="youtuberData" />
       </div>
     );
   }

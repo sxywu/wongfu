@@ -39,6 +39,7 @@ function setVideosByYoutuber(youtuber, rawVideos) {
         }
       });
 
+      video.videoId = video.id.videoId;
       video.title = video.snippet.title;
       video.youtuber = youtuber;
       video.publishedDate = new Date(video.snippet.publishedAt);
