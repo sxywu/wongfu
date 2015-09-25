@@ -12,7 +12,8 @@ var xPadding = 75;
 var earliestTime = new Date(2005, 10, 1);
 var latestTime = new Date();
 var colorScale = d3.scale.category10();
-var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, 9500]);
+var vizHeight = 9500;
+var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, vizHeight]);
 
 var GraphUtils = {};
 
@@ -65,6 +66,7 @@ GraphUtils.calculateLines = (youtubers) => {
 
 var videoScale = d3.scale.linear().range([8, 75]);
 var volumeScale = d3.scale.linear().range([.15, 1]);
+var mapScale = d3.scale.linear().domain([0, vizHeight]).range([0, window.innerHeight]);
 GraphUtils.calculateVideos = (youtubers) => {
   var minViews = _.min(VideoStore.getVideos(), (video) => video.views).views;
   var maxViews = _.max(VideoStore.getVideos(), (video) => video.views).views;
@@ -73,17 +75,45 @@ GraphUtils.calculateVideos = (youtubers) => {
 
   return _.map(VideoStore.getVideos(), (video) => {
     var youtuberObj = youtubers[video.youtuber];
+    var y = yScale(video.publishedDate);
     return {
       id: video.id,
       x: youtuberObj.x,
-      y: yScale(video.publishedDate),
+      y,
+      sideY: mapScale(y),
       fill: youtuberObj.fill,
       size: videoScale(video.views),
       volume: volumeScale(video.views),
       data: video
     };
   });
-}
+};
+
+var mapHeight = 300;
+var opacityScale = d3.scale.linear().range([.01, .1]);
+GraphUtils.calculateMiniMap = (youtubers, videos) => {
+  var videosGrouped = _.groupBy(videos, (video) => mapHeight * Math.round(video.y / mapHeight));
+  var minVideos = _.min(videosGrouped, (videos) => videos.length).length;
+  var maxVideos = _.max(videosGrouped, (videos) => videos.length).length;
+  opacityScale.domain([minVideos, maxVideos]);
+
+  return _.map(videosGrouped, (videos, y1) => {
+    var youtuberOfTheMonth = _.chain(videos)
+      .groupBy((video) => video.data.youtuber)
+      .sortBy((videos) => -videos.length).value();
+    var y1 = parseInt(y1, 10);
+
+    return {
+      opacity: opacityScale(videos.length),
+      fill: youtuberOfTheMonth[0][0].fill,
+      y1,
+      height: mapHeight,
+      sideY1: mapScale(y1),
+      sideHeight: mapScale(mapHeight),
+      videos
+    };
+  });
+};
 
 GraphUtils.getSVGWidth = (lines) => {
   return (lines.length + 1) * xPadding;

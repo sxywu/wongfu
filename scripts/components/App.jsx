@@ -14,6 +14,7 @@ var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
 var YoutubersComponent = require('./Youtubers.jsx');
 var VideoSummaryComponent = require('./VideoSummary.jsx');
+var MiniMapComponent = require('./MiniMap.jsx');
 
 var onWindowScroll;
 var duration = 200;
@@ -76,6 +77,7 @@ var App = React.createClass({
     state.youtubers = GraphUtils.calculateYoutubers();
     state.lines = GraphUtils.calculateLines(state.youtubers);
     state.videos = GraphUtils.calculateVideos(state.youtubers);
+    state.miniMap = GraphUtils.calculateMiniMap(state.youtubers, state.videos);
     state.top = calculateTop();
     state.videos.length && (state.videoId = this.findVideoId(state.top, state.videos));
 
@@ -167,9 +169,11 @@ var App = React.createClass({
       videos={this.state.videos} videoId={this.state.videoId} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.videoId} />);
+    var miniMap = (<MiniMapComponent miniMap={this.state.miniMap} videos={this.state.videos} />);
 
     return (
       <div>
+        {miniMap}
         <svg style={backgroundSVGStyle}>
           {lines}
           {videos}

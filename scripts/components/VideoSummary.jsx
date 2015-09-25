@@ -93,7 +93,7 @@ function updateSummary(selection, video, youtubers) {
     .style({top});
 }
 
-var VideoSummarys = React.createClass({
+var VideoSummary = React.createClass({
 
   componentDidMount() {
     this.d3Video = d3.select(this.refs.videoData.getDOMNode())
@@ -122,4 +122,4 @@ var VideoSummarys = React.createClass({
   }
 });
 
-module.exports = VideoSummarys;
+module.exports = VideoSummary;
