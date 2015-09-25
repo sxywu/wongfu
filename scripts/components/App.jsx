@@ -149,7 +149,7 @@ var App = React.createClass({
 
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
-    var summaryWidth = window.innerWidth - lineWidth - 75;
+    var summaryWidth = window.innerWidth - lineWidth - 75 * 2;
     var timelineHeight = 10000;
     var summaryDivStyle = {position: 'absolute', top: 0, left: lineWidth,
       width: summaryWidth, height: timelineHeight};

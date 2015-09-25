@@ -90,7 +90,7 @@ GraphUtils.calculateVideos = (youtubers) => {
 };
 
 var mapHeight = 300;
-var opacityScale = d3.scale.linear().range([.01, .1]);
+var opacityScale = d3.scale.linear().range([.01, .35]);
 GraphUtils.calculateMiniMap = (youtubers, videos) => {
   var videosGrouped = _.groupBy(videos, (video) => mapHeight * Math.round(video.y / mapHeight));
   var minVideos = _.min(videosGrouped, (videos) => videos.length).length;
@@ -117,6 +117,10 @@ GraphUtils.calculateMiniMap = (youtubers, videos) => {
 
 GraphUtils.getSVGWidth = (lines) => {
   return (lines.length + 1) * xPadding;
-}
+};
+
+GraphUtils.getMapScale = () => {
+  return mapScale;
+};
 
 module.exports = GraphUtils; 
