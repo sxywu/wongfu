@@ -29,14 +29,14 @@ function enterSummary(selection) {
   var smallTextStyle = {
     'font-family': 'Helvetica',
     'font-size': '14px',
-    color: '#333',
+    color: '#3A2F2F',
     padding: '5px 0'
   };
   var bigTextStyle = {
     'font-family': 'Droid Serif',
     'font-size': '22px',
     'line-height': '24px',
-    color: '#333',
+    color: '#3A2F2F',
   };
   var summaryStyle = {
     position: 'absolute'
@@ -80,7 +80,7 @@ function updateSummary(selection, video, youtubers) {
     .each(function(association, i) {
       var madeVideo = (i === 0);
       var youtuber = youtubers[association];
-      var color = youtuber ? youtuber.fill : '#999';
+      var color = youtuber ? youtuber.fill : '#BEB6B6';
       d3.select(this).style(getLabelStyle(color, madeVideo));
     })
     .attr('target', '_new')
