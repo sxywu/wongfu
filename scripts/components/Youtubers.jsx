@@ -11,6 +11,7 @@ var nodeY = 50;
 var nodePadding = 50;
 var linksByVideoId = {};
 var widthScale = d3.scale.linear().range([2, 12]);
+var opacity = .5;
 
 function calculateLinksByVideoId(youtubers, videos) {
   var prevLinks = [];
@@ -51,6 +52,11 @@ function calculateLinksByVideoId(youtubers, videos) {
 }
 
 function enterNodes(selection) {
+  selection.append('circle')
+    .attr('r', nodeSize - 1)
+    .attr('fill', '#fff')
+    .attr('stroke', '#fff');
+
   selection.append('image')
     .attr('x', -nodeSize)
     .attr('y', -nodeSize)
@@ -66,6 +72,7 @@ function enterNodes(selection) {
     .attr('stroke-width', 2);
 
   selection.append('circle')
+    .classed('colorStroke', true)
     .attr('r', nodeSize)
     .attr('fill', 'none')
     .attr('stroke', (data) => data.fill)
@@ -88,19 +95,37 @@ function enterLinks(selection) {
 }
 
 function updateNodes(selection, video) {
+  selection.selectAll('image, .colorStroke')
+    .transition().duration(duration)
+    .attr('opacity', (data) => {
+      var madeVideo = video && (data.name === video.data.youtuber);
+      var inVideo = video && _.find(video.data.associations, (association) => data.name === association);
+      return (madeVideo || inVideo) ? 1 : opacity;
+    });
+
   selection
     .transition().duration(duration)
     .attr('transform', (data) => {
       var madeVideo = video && (data.name === video.data.youtuber);
-      var inVideo = video && _.find(video.data.associations, (association) => data.name === association);
-      data.y = (madeVideo ? nodeSize : (inVideo ? nodeSize * 2 : nodeSize * 3)) + 10;
+      data.y = (madeVideo ? nodeSize : nodeSize * 3) + 10;
       return 'translate(' + data.x + ',' + data.y + ')'
     });
 }
 
-function updateLinks(selection) {
-  selection.transition().duration(duration)
-    .attr('d', linkArc)
+function updateLinks(selection, video) {
+  selection
+    .transition().duration(duration)
+    .attr('opacity', (data) => {
+      var sourceMadeVideo = video && (data.source.name === video.data.youtuber);
+      var targetMadeVideo = video && (data.target.name === video.data.youtuber);
+      var inVideo;
+      if (sourceMadeVideo) {
+        inVideo = video && _.find(video.data.associations, (association) => data.target.name === association);
+      } else if (targetMadeVideo) {
+        inVideo = video && _.find(video.data.associations, (association) => data.source.name === association);
+      }
+      return inVideo ? 1 : opacity;
+    }).attr('d', linkArc)
     .attr('stroke-dasharray', function(data) {
       return this.getTotalLength();
     }).attr('stroke-dashoffset', 0)
@@ -148,6 +173,7 @@ var Youtubers = React.createClass({
     this.d3Nodes = d3.select(this.refs.nodes.getDOMNode())
       .selectAll('g').data(_.values(nextProps.youtubers), (node) => node.name);
 
+    var video = nextProps.videos[nextProps.videoId - 1];
     var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
       return {
         source: nextProps.youtubers[link.source],
@@ -160,11 +186,11 @@ var Youtubers = React.createClass({
         (data) => data.source.name + ',' + data.target.name);
 
     this.d3Nodes.enter().append('g').call(enterNodes);
-    this.d3Nodes.call(updateNodes, nextProps.videos[nextProps.videoId - 1]);
+    this.d3Nodes.call(updateNodes, video);
 
     this.d3Links.enter().append('path').call(enterLinks);
     this.d3Links.exit().call(exitLinks);
-    this.d3Links.call(updateLinks);
+    this.d3Links.call(updateLinks, video);
 
     return false;
   },

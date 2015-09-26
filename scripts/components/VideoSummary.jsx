@@ -89,7 +89,8 @@ function updateSummary(selection, video, youtubers) {
   allAssociations.exit().remove();
 
   var top = video.y - selection.node().offsetHeight - 20;
-  selection.transition().duration(duration)
+  selection
+    .transition().duration(duration)
     .style({top});
 }
 

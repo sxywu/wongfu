@@ -45,7 +45,7 @@ function enterOverlay(selection, miniMap) {
       'right': 0,
       'width': 75,
       'background-color': 'rgba(255,255,255,.75)',
-      'border-bottom': '3px double #999'
+      // 'border-bottom': '3px double #999'
     });
 
   bottom = selection.append('div')
@@ -55,7 +55,7 @@ function enterOverlay(selection, miniMap) {
       'right': 0,
       'width': 75,
       'background-color': 'rgba(255,255,255,.75)',
-      'border-top': '3px double #999'
+      // 'border-top': '3px double #999'
     });
 };
 
