@@ -1,5 +1,6 @@
 var React = require('react');
 var _ = require('lodash');
+var ss = require('simple-statistics');
 
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
@@ -96,26 +97,55 @@ GraphUtils.calculateVideos = (youtubers) => {
 var mapHeight = 300;
 var opacityScale = d3.scale.linear().range([.01, .35]);
 GraphUtils.calculateMiniMap = (youtubers, videos) => {
-  var videosGrouped = _.groupBy(videos, (video) => mapHeight * Math.round(video.y / mapHeight));
+  var videoByDates = {};
+  _.each(videos, (video) => {
+    videoByDates[video.data.publishedDate.getTime()] = video;
+  });
+  var videoDates = _.chain(videoByDates).keys().map((date) => parseInt(date)).value();
+  var groupByCkmeans = ss.ckmeans(videoDates, 15);
+  var videosGrouped = _.map(groupByCkmeans, (group) => {
+    return _.map(group, (videoTime) => videoByDates[videoTime]);
+  });
   var minVideos = _.min(videosGrouped, (videos) => videos.length).length;
   var maxVideos = _.max(videosGrouped, (videos) => videos.length).length;
   opacityScale.domain([minVideos, maxVideos]);
 
-  return _.map(videosGrouped, (videos, y1) => {
+  var prevVideo;
+  return _.map(videosGrouped, (videos, i) => {
     var youtuberOfTheMonth = _.chain(videos)
       .groupBy((video) => video.data.youtuber)
       .sortBy((videos) => -videos.length).value();
-    var y1 = parseInt(y1, 10);
+    var y1, y2, height;
 
-    return {
+    if (!prevVideo) {
+      // first video so just subtract 50 from the top video
+      y1 = _.first(videos).y - 50;
+      y2 = _.last(videos).y;
+    } else {
+      // all the middle videos groups
+      y1 = (prevVideo.y2 - _.first(videos).y) / 2 + prevVideo.y2;
+      y2 = _.last(videos).y;
+      prevVideo.y2 = y1;
+      prevVideo.height = prevVideo.y2 - prevVideo.y1;
+      prevVideo.sideHeight = mapScale(prevVideo.height);
+
+      if (videosGrouped.length - 1 === i) {
+        // last video, so add 50 to the last video
+        y2 = _.last(videos).y + 50;
+        height = y2 - y1;
+      }
+    }
+
+    prevVideo = {
       opacity: opacityScale(videos.length),
       fill: youtuberOfTheMonth[0][0].fill,
-      y1,
-      height: mapHeight,
+      y1, y2, height,
       sideY1: mapScale(y1),
-      sideHeight: mapScale(mapHeight),
+      sideHeight: mapScale(height),
       videos
     };
+
+    return prevVideo;    
   });
 };
 
