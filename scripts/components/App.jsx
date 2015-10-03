@@ -19,8 +19,10 @@ var MiniMapComponent = require('./MiniMap.jsx');
 var onWindowScroll;
 var duration = 200;
 var prevVideoId;
+var xPadding = 75;
+var youtuberSVGHeight = 300;
 function calculateTop(top, subtract) {
-  return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight * .6);
+  return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight - youtuberSVGHeight - xPadding);
 }
 
 var allSources = [['cello', 'C2'], ['cello', 'G2'], ['cello', 'C3'], ['violin', 'G3'],
@@ -62,13 +64,13 @@ var App = React.createClass({
 
     onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
     window.addEventListener('scroll', onWindowScroll);
-    window.addEventListener('scroll', this.playSounds);
+    // window.addEventListener('scroll', this.playSounds);
   },
 
   componentWillUnmount() {
     VideoStore.removeChangeListener(this.onChange);
     window.removeEventListener('scroll', onWindowScroll);
-    window.removeEventListener('scroll', this.playSounds);
+    // window.removeEventListener('scroll', this.playSounds);
   },
  
   onChange() {
@@ -149,7 +151,7 @@ var App = React.createClass({
 
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
-    var summaryWidth = window.innerWidth - lineWidth - 75 * 2;
+    var summaryWidth = window.innerWidth - lineWidth - xPadding * 2;
     var timelineHeight = 10000;
     var summaryDivStyle = {position: 'absolute', top: 0, left: lineWidth,
       width: summaryWidth, height: timelineHeight};
@@ -157,7 +159,6 @@ var App = React.createClass({
       position: 'absolute', top: 0, left: 0};
 
     var boxShadow = '0 0 ' + window.innerHeight * .05 + 'px #fff';
-    var youtuberSVGHeight = window.innerHeight * .35;
     var youtuberSVGStyle = {width: lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
