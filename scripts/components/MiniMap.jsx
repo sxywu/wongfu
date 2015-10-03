@@ -6,6 +6,20 @@ var GraphUtils = require('../utils/GraphUtils');
 
 var duration = 200;
 
+function enterBackground(selection, miniMap) {
+  selection.selectAll('div')
+    .data(miniMap).enter().append('div')
+    .style('background-color', (map) => map.fill)
+    .style('opacity', (map) => map.opacity / 3)
+    .style('top', (map) => map.y1)
+    .style('height', (map) => map.height)
+    .style({
+      'position': 'absolute',
+      'left': 0,
+      'width': '100%'
+    });
+};
+
 function enterMiniMap(selection, miniMap, videos) {
   selection.selectAll('div')
     .data(miniMap).enter().append('div')
@@ -71,6 +85,8 @@ function updateTopBottom() {
 var MiniMap = React.createClass({
 
   shouldComponentUpdate(nextProps) {
+    // this.d3Background = d3.select(this.refs.background.getDOMNode())
+    //   .call(enterBackground, nextProps.miniMap);
     this.d3MiniMap = d3.select(this.refs.miniMap.getDOMNode())
       .call(enterMiniMap, nextProps.miniMap, nextProps.videos);
     this.d3Overlay = d3.select(this.refs.overlay.getDOMNode())
@@ -89,6 +105,7 @@ var MiniMap = React.createClass({
 
     return (
       <div>
+        <div ref="background" />
         <div ref="miniMap" style={miniMapStyle} />
         <div ref="overlay" style={miniMapStyle} />
       </div>
