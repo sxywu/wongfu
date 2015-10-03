@@ -7,7 +7,8 @@
     "d3": "*",
     "lodash": "*",
     "keymirror": "~0.1.0",
-    "object-assign": "^1.0.0"
+    "object-assign": "^1.0.0",
+    "simple-statistics": "*"
   },
   "devDependencies": {
     "browserify": "^6.2.0",
