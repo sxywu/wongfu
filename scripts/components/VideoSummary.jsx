@@ -57,7 +57,7 @@ function enterSummary(selection, unhoverVideo) {
   };
   var summaryStyle = {
     position: 'absolute',
-    'background-color': 'rgba(255,255,255,.85)',
+    'background-color': 'rgba(255,255,255,.65)',
     padding: '10px 20px 5px 20px',
     border: '1px solid #BEB6B6',
     'box-shadow': '0 0 10px #BEB6B6',
@@ -71,7 +71,7 @@ function enterSummary(selection, unhoverVideo) {
     .style(videoSVGStyle);
 
   videoSize = videoSVG.append('circle')
-    .attr('opacity', .5);
+    .attr('opacity', .75);
 
   videoDot = videoSVG.append('circle')
     .attr('r', 4)
@@ -154,7 +154,8 @@ function updateSummary(selection, video, youtubers) {
   var videoSpanNode = videoSpan.node();
   var videoX = videoSpanNode.offsetLeft + videoSpanNode.offsetWidth / 2;
   var videoY = videoSpanNode.offsetTop + videoSpanNode.offsetHeight / 2;
-  var videoPadding = 1;
+  var videoPadding = 0;
+  var videoBorder = 1;
   videoSVG.attr('width', (video.size + videoPadding) * 2)
     .attr('height', (video.size + videoPadding) * 2)
     .style({
@@ -173,8 +174,8 @@ function updateSummary(selection, video, youtubers) {
 
   selection
     .style({
-      top: video.y - videoY,
-      left: video.x - videoX,
+      top: video.y - videoY - videoPadding - videoBorder,
+      left: video.x - videoX - videoPadding - videoBorder,
     });
 }
 

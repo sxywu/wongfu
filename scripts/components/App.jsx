@@ -171,9 +171,9 @@ var App = React.createClass({
       position: 'fixed', bottom: 0, left: 0};
 
     var lines = (<LinesComponent data={this.state.lines} top={this.state.top}
-      videos={this.state.videos} videoId={this.state.videoId} />);
+      videos={this.state.videos} videoId={this.state.videoId} hoverVideoId={this.state.hoverVideoId} />);
     var videos = (<VideosComponent data={this.state.videos} videoId={this.state.videoId}
-      hoverVideo={this.hoverVideo} clickVideo={this.clickVideo} />);
+      hoverVideo={this.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.state.hoverVideoId} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.videoId} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}

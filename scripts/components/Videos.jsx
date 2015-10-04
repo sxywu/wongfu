@@ -16,25 +16,25 @@ function enterVideos(selection, hoverVideo, clickVideo) {
     .attr('cy', (data) => data.y)
     .attr('r', 0)
     .attr('stroke-width', 2)
-    .style({
-      cursor: 'pointer'
-    }).on('mouseenter', hoverVideo)
+    .on('mouseenter', hoverVideo)
     .on('click', clickVideo);
 }
 
-function updateVideos(selection, videoId) {
+function updateVideos(selection, videoId, hoverVideoId) {
   var size = 4;
   selection
     .attr('stroke', (data) => data.id === videoId ? '#fff' : data.fill)
     .attr('fill', (data) => data.id === videoId ? data.fill : '#fff')
+    .attr('opacity', (data) => data.id === hoverVideoId ? 0 : 1)
     .transition().duration(duration)
       .attr('r', size);
 }
 
-function updateVideoSizes(selection, videoId) {
+function updateVideoSizes(selection, videoId, hoverVideoId) {
   selection
     .attr('fill', (data) => data.fill)
-    .attr('opacity', (data) => data.id === videoId ? .75 : .25)
+    .attr('opacity', (data) => data.id === hoverVideoId ? 0 :
+      (data.id === videoId ? .75 : .25))
     .transition().duration(duration)
     .attr('r', (data) => data.size)
 }
@@ -60,11 +60,11 @@ var Videos = React.createClass({
 
     this.d3Videos.enter().append('circle').call(enterVideos, nextProps.hoverVideo, nextProps.clickVideo);
     this.d3Videos.exit().call(exitVideos);
-    this.d3Videos.call(updateVideos, nextProps.videoId);
+    this.d3Videos.call(updateVideos, nextProps.videoId, nextProps.hoverVideoId);
 
-    this.d3VideoSizes.enter().append('circle').call(enterVideos, nextProps.hoverVideo, nextProps.clickVideo);
+    this.d3VideoSizes.enter().append('circle').call(enterVideos);
     this.d3VideoSizes.exit().call(exitVideos);
-    this.d3VideoSizes.call(updateVideoSizes, nextProps.videoId);
+    this.d3VideoSizes.call(updateVideoSizes, nextProps.videoId, nextProps.hoverVideoId);
 
     return false;
   },
