@@ -11,7 +11,7 @@ var nodeY = 50;
 var nodePadding = 50;
 var linksByVideoId = {};
 var widthScale = d3.scale.linear().range([2, 12]);
-var opacity = .75;
+var opacity = .15;
 
 function calculateLinksByVideoId(youtubers, videos) {
   var prevLinks = [];
@@ -72,6 +72,7 @@ function enterNodes(selection) {
     .attr('stroke-width', 2);
 
   selection.append('circle')
+    .classed('colorStroke', true)
     .attr('r', nodeSize)
     .attr('fill', 'none')
     .attr('stroke', (data) => data.fill)
@@ -93,22 +94,41 @@ function enterLinks(selection) {
     });
 }
 
-function updateNodes(selection, video) {
+function updateNodes(selection, video, hoverVideo) {
+  selection.selectAll('image, .colorStroke')
+    .transition().duration(duration)
+    .attr('opacity', (data) => {
+      if (!hoverVideo) return 1;
+      var madeVideo = data.name === hoverVideo.data.youtuber;
+      var inVideo = _.find(hoverVideo.data.associations, (association) => data.name === association);
+      return (madeVideo || inVideo) ? 1 : opacity;
+    });
+
   selection
     .transition().duration(duration)
     .attr('transform', (data) => {
-      var madeVideo = video && (data.name === video.data.youtuber);
-      var inVideo = video && _.find(video.data.associations, (association) => data.name === association);
-      // data.y = (madeVideo || inVideo ? nodeSize : nodeSize * 3) + 10;
       data.y =  nodeSize + 10;
       return 'translate(' + data.x + ',' + data.y + ')'
     });
 }
 
-function updateLinks(selection, video) {
-  selection.transition().duration(duration)
+function updateLinks(selection, video, hoverVideo) {
+  selection
+    .transition().duration(duration)
     .attr('d', linkArc)
-    .attr('stroke-dasharray', function(data) {
+    .attr('opacity', (data) => {
+      if (!hoverVideo) return .5;
+
+      var sourceMadeVideo = data.source.name === hoverVideo.data.youtuber;
+      var targetMadeVideo = data.target.name === hoverVideo.data.youtuber;
+      var inVideo;
+      if (sourceMadeVideo) {
+        inVideo = _.find(hoverVideo.data.associations, (association) => data.target.name === association);
+      } else if (targetMadeVideo) {
+        inVideo = _.find(hoverVideo.data.associations, (association) => data.source.name === association);
+      }
+      return inVideo ? 1 : opacity;
+    }).attr('stroke-dasharray', function(data) {
       return this.getTotalLength();
     }).attr('stroke-dashoffset', 0)
     .attr('stroke-width', (data) => widthScale(data.count));
@@ -156,6 +176,7 @@ var Youtubers = React.createClass({
       .selectAll('g').data(_.values(nextProps.youtubers), (node) => node.name);
 
     var video = nextProps.videos[nextProps.videoId - 1];
+    var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
     var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
       return {
         source: nextProps.youtubers[link.source],
@@ -168,11 +189,11 @@ var Youtubers = React.createClass({
         (data) => data.source.name + ',' + data.target.name);
 
     this.d3Nodes.enter().append('g').call(enterNodes);
-    this.d3Nodes.call(updateNodes, video);
+    this.d3Nodes.call(updateNodes, video, hoverVideo);
 
     this.d3Links.enter().append('path').call(enterLinks);
     this.d3Links.exit().call(exitLinks);
-    this.d3Links.call(updateLinks, video);
+    this.d3Links.call(updateLinks, video, hoverVideo);
 
     return false;
   },
