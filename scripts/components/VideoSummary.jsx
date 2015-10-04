@@ -25,7 +25,7 @@ function getLabelStyle(color, madeVideo) {
 }
 
 var date, videoSpan, videoSVG, videoDot, videoSize, title, views, associations;
-function enterSummary(selection) {
+function enterSummary(selection, unhoverVideo) {
   var smallTextStyle = {
     'font-family': 'Helvetica',
     'font-size': '14px',
@@ -45,25 +45,27 @@ function enterSummary(selection) {
   };
   var videoSVGStyle = {
     position: 'absolute',
-    'z-index': 1
+    'z-index': 1,
+    cursor: 'pointer',
   };
   var videoSpanStyle = {
     display: 'inline-block',
     width: 8,
-    height: 8,
-    margin: '0 10px 0 0',
+    height: 10,
+    margin: '0 8px 0 0',
   };
   var summaryStyle = {
     position: 'absolute',
     width: 400,
-    'background-color': 'rgba(255,255,255,.75)',
+    'background-color': 'rgba(255,255,255,.85)',
     padding: '10px 20px',
     border: '1px solid #BEB6B6',
     'box-shadow': '0 0 10px #BEB6B6',
-    'border-radius': '2px',
+    'border-radius': '3px',
   };
 
-  selection.style(summaryStyle);
+  selection.style(summaryStyle)
+    .on('mouseleave', unhoverVideo);
 
   videoSVG = selection.append('svg')
     .style(videoSVGStyle);
@@ -76,12 +78,6 @@ function enterSummary(selection) {
     .attr('stroke-width', 2)
     .attr('stroke', '#fff');
 
-  videoSpan = selection.append('span')
-    .style(videoSpanStyle);
-
-  views = selection.append('span')
-    .style(smallTextStyle);
-
   date = selection.append('div')
     .style(smallTextStyle);
 
@@ -91,28 +87,26 @@ function enterSummary(selection) {
 
   associations = selection.append('div')
     .style(smallTextStyle);
+
+  videoSpan = selection.append('span')
+    .style(videoSpanStyle);
+
+  views = selection.append('span')
+    .style(smallTextStyle);
 }
 
 function updateSummary(selection, video, youtubers) {
-  var videoSpanNode = videoSpan.node();
-  var videoX = videoSpanNode.offsetLeft + videoSpanNode.offsetWidth / 2;
-  var videoY = videoSpanNode.offsetTop + videoSpanNode.offsetHeight / 2;
-  var videoPadding = 2;
-  videoSVG.attr('width', (video.size + videoPadding) * 2)
-    .attr('height', (video.size + videoPadding) * 2)
-    .style({
-      'top': -video.size - videoPadding + videoY,
-      'left': -video.size - videoPadding + videoX,
+  if (!video) {
+    selection.style({
+      display: 'none',
     });
-  videoSize
-    .attr('cx', video.size + videoPadding)
-    .attr('cy', video.size + videoPadding)
-    .attr('fill', video.fill)
-    .attr('r', video.size);
-  videoDot
-    .attr('cx', video.size + videoPadding)
-    .attr('cy', video.size + videoPadding)
-    .attr('fill', video.fill);
+
+    return;
+  } else {
+    selection.style({
+      display: 'block',
+    })
+  }
 
   date.text(timeFormat(video.data.publishedDate));
 
@@ -144,8 +138,27 @@ function updateSummary(selection, video, youtubers) {
     .text((association) => association);
   allAssociations.exit().remove();
 
+  var videoSpanNode = videoSpan.node();
+  var videoX = videoSpanNode.offsetLeft + videoSpanNode.offsetWidth / 2;
+  var videoY = videoSpanNode.offsetTop + videoSpanNode.offsetHeight / 2;
+  var videoPadding = 1;
+  videoSVG.attr('width', (video.size + videoPadding) * 2)
+    .attr('height', (video.size + videoPadding) * 2)
+    .style({
+      'top': -video.size - videoPadding + videoY,
+      'left': -video.size - videoPadding + videoX,
+    });
+  videoSize
+    .attr('cx', video.size + videoPadding)
+    .attr('cy', video.size + videoPadding)
+    .attr('fill', video.fill)
+    .attr('r', video.size);
+  videoDot
+    .attr('cx', video.size + videoPadding)
+    .attr('cy', video.size + videoPadding)
+    .attr('fill', video.fill);
+
   selection
-    .transition().duration(duration)
     .style({
       top: video.y - videoY,
       left: video.x - videoX,
@@ -156,22 +169,17 @@ var VideoSummary = React.createClass({
 
   componentDidMount() {
     this.d3Video = d3.select(this.getDOMNode())
-      .call(enterSummary);
+      .call(enterSummary, this.props.unhoverVideo);
   },
 
   shouldComponentUpdate(nextProps) {
     var video = nextProps.videos[nextProps.videoId - 1];
-
-    if (video) {
-      this.d3Video.call(updateSummary, video, nextProps.youtubers);
-    }
+    this.d3Video.call(updateSummary, video, nextProps.youtubers);
 
     return false;
   },
 
   render() {
-    var video = this.props.videos[this.props.videoId - 1];
-
     return (
       <div />
     );

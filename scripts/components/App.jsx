@@ -46,6 +46,7 @@ var App = React.createClass({
       lines: [],
       videos: [],
       videoId: 1,
+      hoverVideoId: null,
       top: calculateTop()
     }
   },
@@ -149,6 +150,14 @@ var App = React.createClass({
     this.setState({top: video.y + 1, videoId: video.id});
   },
 
+  hoverVideo(video) {
+    this.setState({hoverVideoId: video.id}); 
+  },
+
+  unhoverVideo() {
+    this.setState({hoverVideoId: null});
+  },
+
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
     var summaryWidth = window.innerWidth - lineWidth - xPadding * 2;
@@ -163,12 +172,12 @@ var App = React.createClass({
 
     var lines = (<LinesComponent data={this.state.lines} top={this.state.top}
       videos={this.state.videos} videoId={this.state.videoId} />);
-    var videos = (<VideosComponent data={this.state.videos}
-      videoId={this.state.videoId} clickVideo={this.clickVideo} />);
+    var videos = (<VideosComponent data={this.state.videos} videoId={this.state.videoId}
+      hoverVideo={this.hoverVideo} clickVideo={this.clickVideo} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.videoId} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
-      videos={this.state.videos} videoId={this.state.videoId} />);
+      videos={this.state.videos} videoId={this.state.hoverVideoId} unhoverVideo={this.unhoverVideo} />);
     var miniMap = (<MiniMapComponent miniMap={this.state.miniMap} videos={this.state.videos} />);
 
     return (
