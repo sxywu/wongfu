@@ -79,7 +79,7 @@ function enterSummary(selection, unhoverVideo) {
     .attr('stroke', '#fff');
 
   videoIframe = selection.append('iframe')
-    .attr('width', 400)
+    .attr('width', 360)
     .attr('height', 240)
     .attr('frameborder', 0);
 
@@ -119,7 +119,7 @@ function updateSummary(selection, video, youtubers) {
     display: 'block',
   });
 
-  videoIframe.attr('src', 'https://www.youtube.com/embed/' + video.data.videoId);
+  videoIframe.attr('src', 'https://www.youtube.com/embed/' + video.data.videoId + '?showinfo=0');
 
   date.text(timeFormat(video.data.publishedDate));
 
