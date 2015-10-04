@@ -47,7 +47,8 @@ var App = React.createClass({
       videos: [],
       videoId: 1,
       hoverVideoId: null,
-      top: calculateTop()
+      hoverYoutuberName: null,
+      top: calculateTop(),
     }
   },
 
@@ -151,11 +152,19 @@ var App = React.createClass({
   },
 
   hoverVideo(video) {
-    this.setState({hoverVideoId: video.id}); 
+    this.setState({hoverVideoId: video.id, hoverYoutuberName: null}); 
   },
 
   unhoverVideo() {
-    this.setState({hoverVideoId: null});
+    this.setState({hoverVideoId: null, hoverYoutuberName: null});
+  },
+
+  hoverYoutuber(youtuber) {
+    this.setState({hoverVideoId: null, hoverYoutuberName: youtuber.name});
+  },
+
+  unhoverYoutuber() {
+    this.setState({hoverVideoId: null, hoverYoutuberName: null});
   },
 
   render() {
@@ -174,8 +183,9 @@ var App = React.createClass({
       videos={this.state.videos} videoId={this.state.videoId} hoverVideoId={this.state.hoverVideoId} />);
     var videos = (<VideosComponent data={this.state.videos} videoId={this.state.videoId}
       hoverVideo={this.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.state.hoverVideoId} />);
-    var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
-      videos={this.state.videos} videoId={this.state.videoId} hoverVideoId={this.state.hoverVideoId} />);
+    var youtubers = (<YoutubersComponent youtubers={this.state.youtubers} videos={this.state.videos}
+      videoId={this.state.videoId} hoverVideoId={this.state.hoverVideoId} hoverYoutuberName={this.state.hoverYoutuberName}
+      hoverYoutuber={this.hoverYoutuber} unhoverYoutuber={this.unhoverYoutuber} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.hoverVideoId} unhoverVideo={this.unhoverVideo} />);
     var miniMap = (<MiniMapComponent miniMap={this.state.miniMap} videos={this.state.videos} />);

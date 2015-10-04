@@ -51,7 +51,7 @@ function calculateLinksByVideoId(youtubers, videos) {
   widthScale.domain([_.min(counts), _.max(counts)]);
 }
 
-function enterNodes(selection) {
+function enterNodes(selection, hoverYoutuber, unhoverYoutuber) {
   selection.append('circle')
     .attr('r', nodeSize - 1)
     .attr('fill', '#fff')
@@ -78,7 +78,11 @@ function enterNodes(selection) {
     .attr('stroke', (data) => data.fill)
     .attr('stroke-width', 2);
 
-  selection.attr('transform', (data) => 'translate(' + data.x + ',' + nodeY + ')');
+  selection
+    .attr('transform', (data) => 'translate(' + data.x + ',' + nodeY + ')')
+    .style({cursor: 'pointer'})
+    .on('mouseenter', hoverYoutuber)
+    .on('mouseleave', unhoverYoutuber);
 }
 
 function enterLinks(selection) {
@@ -94,14 +98,18 @@ function enterLinks(selection) {
     });
 }
 
-function updateNodes(selection, video, hoverVideo) {
+function updateNodes(selection, video, links, hoverVideo, hoverYoutuberName) {
   selection.selectAll('image, .colorStroke')
     .transition().duration(duration)
     .attr('opacity', (data) => {
-      if (!hoverVideo) return 1;
-      var madeVideo = data.name === hoverVideo.data.youtuber;
-      var inVideo = _.find(hoverVideo.data.associations, (association) => data.name === association);
-      return (madeVideo || inVideo) ? 1 : opacity;
+      if (!hoverVideo && !hoverYoutuberName) return 1;
+      var madeVideo = hoverVideo && data.name === hoverVideo.data.youtuber;
+      var inVideo = hoverVideo && _.find(hoverVideo.data.associations, (association) => data.name === association);
+      var nodeHovered = data.name === hoverYoutuberName;
+      nodeHovered = nodeHovered || _.find(links, (link) =>
+        (link.source.name === data.name && link.target.name === hoverYoutuberName) ||
+        (link.source.name === hoverYoutuberName && link.target.name === data.name));
+      return (madeVideo || inVideo || nodeHovered) ? 1 : opacity;
     });
 
   selection
@@ -112,22 +120,26 @@ function updateNodes(selection, video, hoverVideo) {
     });
 }
 
-function updateLinks(selection, video, hoverVideo) {
+function updateLinks(selection, video, hoverVideo, hoverYoutuberName) {
   selection
     .transition().duration(duration)
     .attr('d', linkArc)
     .attr('opacity', (data) => {
-      if (!hoverVideo) return .5;
+      if (!hoverVideo && !hoverYoutuberName) return .5;
 
-      var sourceMadeVideo = data.source.name === hoverVideo.data.youtuber;
-      var targetMadeVideo = data.target.name === hoverVideo.data.youtuber;
+      var sourceMadeVideo = hoverVideo && data.source.name === hoverVideo.data.youtuber;
+      var targetMadeVideo = hoverVideo && data.target.name === hoverVideo.data.youtuber;
       var inVideo;
       if (sourceMadeVideo) {
-        inVideo = _.find(hoverVideo.data.associations, (association) => data.target.name === association);
+        inVideo = hoverVideo && _.find(hoverVideo.data.associations, (association) => data.target.name === association);
       } else if (targetMadeVideo) {
-        inVideo = _.find(hoverVideo.data.associations, (association) => data.source.name === association);
+        inVideo = hoverVideo && _.find(hoverVideo.data.associations, (association) => data.source.name === association);
       }
-      return inVideo ? 1 : opacity;
+
+      var nodeHovered = hoverYoutuberName &&
+        (data.source.name === hoverYoutuberName || data.target.name === hoverYoutuberName);
+
+      return (inVideo || nodeHovered) ? 1 : opacity;
     }).attr('stroke-dasharray', function(data) {
       return this.getTotalLength();
     }).attr('stroke-dashoffset', 0)
@@ -188,12 +200,13 @@ var Youtubers = React.createClass({
       .selectAll('path').data(links || [],
         (data) => data.source.name + ',' + data.target.name);
 
-    this.d3Nodes.enter().append('g').call(enterNodes);
-    this.d3Nodes.call(updateNodes, video, hoverVideo);
+    this.d3Nodes.enter().append('g')
+      .call(enterNodes, nextProps.hoverYoutuber, nextProps.unhoverYoutuber);
+    this.d3Nodes.call(updateNodes, video, links, hoverVideo, nextProps.hoverYoutuberName);
 
     this.d3Links.enter().append('path').call(enterLinks);
     this.d3Links.exit().call(exitLinks);
-    this.d3Links.call(updateLinks, video, hoverVideo);
+    this.d3Links.call(updateLinks, video, hoverVideo, nextProps.hoverYoutuberName);
 
     return false;
   },
