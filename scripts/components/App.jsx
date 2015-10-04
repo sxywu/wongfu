@@ -153,8 +153,7 @@ var App = React.createClass({
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
     var summaryWidth = window.innerWidth - lineWidth - xPadding * 2;
     var timelineHeight = 10000;
-    var summaryDivStyle = {position: 'absolute', top: 0, left: lineWidth,
-      width: summaryWidth, height: timelineHeight};
+    var summaryDivStyle = {position: 'absolute', top: 0, height: timelineHeight};
     var backgroundSVGStyle = {width: window.innerWidth, height: timelineHeight,
       position: 'absolute', top: 0, left: 0};
 

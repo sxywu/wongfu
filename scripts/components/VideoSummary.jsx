@@ -24,25 +24,63 @@ function getLabelStyle(color, madeVideo) {
   };
 }
 
-var date, title, views, associations;
+var date, videoSpan, videoSVG, videoDot, videoSize, title, views, associations;
 function enterSummary(selection) {
   var smallTextStyle = {
     'font-family': 'Helvetica',
     'font-size': '14px',
     color: '#3A2F2F',
-    padding: '5px 0'
+    'z-index': 10,
+    padding: '5px 0',
+    position: 'relative',
   };
   var bigTextStyle = {
     'font-family': 'Droid Serif',
     'font-size': '22px',
     'line-height': '24px',
     color: '#3A2F2F',
+    'z-index': 10,
+    padding: '5px 0',
+    position: 'relative',
+  };
+  var videoSVGStyle = {
+    position: 'absolute',
+    'z-index': 1
+  };
+  var videoSpanStyle = {
+    display: 'inline-block',
+    width: 8,
+    height: 8,
+    margin: '0 10px 0 0',
   };
   var summaryStyle = {
-    position: 'absolute'
+    position: 'absolute',
+    width: 400,
+    'background-color': 'rgba(255,255,255,.75)',
+    padding: '10px 20px',
+    border: '1px solid #BEB6B6',
+    'box-shadow': '0 0 10px #BEB6B6',
+    'border-radius': '2px',
   };
 
   selection.style(summaryStyle);
+
+  videoSVG = selection.append('svg')
+    .style(videoSVGStyle);
+
+  videoSize = videoSVG.append('circle')
+    .attr('opacity', .25);
+
+  videoDot = videoSVG.append('circle')
+    .attr('r', 4)
+    .attr('stroke-width', 2)
+    .attr('stroke', '#fff');
+
+  videoSpan = selection.append('span')
+    .style(videoSpanStyle);
+
+  views = selection.append('span')
+    .style(smallTextStyle);
 
   date = selection.append('div')
     .style(smallTextStyle);
@@ -51,13 +89,31 @@ function enterSummary(selection) {
     .style(bigTextStyle)
     .attr('target', '_new');
 
-  views = selection.append('div')
+  associations = selection.append('div')
     .style(smallTextStyle);
-
-  associations = selection.append('div');
 }
 
 function updateSummary(selection, video, youtubers) {
+  var videoSpanNode = videoSpan.node();
+  var videoX = videoSpanNode.offsetLeft + videoSpanNode.offsetWidth / 2;
+  var videoY = videoSpanNode.offsetTop + videoSpanNode.offsetHeight / 2;
+  var videoPadding = 2;
+  videoSVG.attr('width', (video.size + videoPadding) * 2)
+    .attr('height', (video.size + videoPadding) * 2)
+    .style({
+      'top': -video.size - videoPadding + videoY,
+      'left': -video.size - videoPadding + videoX,
+    });
+  videoSize
+    .attr('cx', video.size + videoPadding)
+    .attr('cy', video.size + videoPadding)
+    .attr('fill', video.fill)
+    .attr('r', video.size);
+  videoDot
+    .attr('cx', video.size + videoPadding)
+    .attr('cy', video.size + videoPadding)
+    .attr('fill', video.fill);
+
   date.text(timeFormat(video.data.publishedDate));
 
   title
@@ -88,16 +144,18 @@ function updateSummary(selection, video, youtubers) {
     .text((association) => association);
   allAssociations.exit().remove();
 
-  var top = video.y - selection.node().offsetHeight - 20;
   selection
     .transition().duration(duration)
-    .style({top});
+    .style({
+      top: video.y - videoY,
+      left: video.x - videoX,
+    });
 }
 
 var VideoSummary = React.createClass({
 
   componentDidMount() {
-    this.d3Video = d3.select(this.refs.videoData.getDOMNode())
+    this.d3Video = d3.select(this.getDOMNode())
       .call(enterSummary);
   },
 
@@ -115,10 +173,7 @@ var VideoSummary = React.createClass({
     var video = this.props.videos[this.props.videoId - 1];
 
     return (
-      <div>
-        <div ref="videoData" />
-        <div ref="youtuberData" />
-      </div>
+      <div />
     );
   }
 });

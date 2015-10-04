@@ -58,7 +58,7 @@ function enterOverlay(selection, miniMap) {
       'top': 0,
       'right': 0,
       'width': 75,
-      'background-color': 'rgba(255,255,255,.75)',
+      'background-color': 'rgba(255,255,255,.5)',
       // 'border-bottom': '3px double #999'
     });
 
@@ -68,7 +68,7 @@ function enterOverlay(selection, miniMap) {
       'bottom': window.innerHeight,
       'right': 0,
       'width': 75,
-      'background-color': 'rgba(255,255,255,.75)',
+      'background-color': 'rgba(255,255,255,.5)',
       // 'border-top': '3px double #999'
     });
 };
