@@ -8,6 +8,7 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 var duration = 200;
 var timeFormat = d3.time.format("%a %b %d, %Y");
 var numberFormat = d3.format(',');
+var prevVideoId;
 
 function getLabelStyle(color, madeVideo) {
   return {
@@ -24,7 +25,7 @@ function getLabelStyle(color, madeVideo) {
   };
 }
 
-var date, videoSpan, videoSVG, videoDot, videoSize, title, views, associations;
+var date, videoSpan, videoSVG, videoDot, videoSize, videoIframe, title, views, associations;
 function enterSummary(selection, unhoverVideo) {
   var smallTextStyle = {
     'font-family': 'Helvetica',
@@ -56,7 +57,7 @@ function enterSummary(selection, unhoverVideo) {
   };
   var summaryStyle = {
     position: 'absolute',
-    width: 400,
+    // width: 400,
     'background-color': 'rgba(255,255,255,.85)',
     padding: '10px 20px',
     border: '1px solid #BEB6B6',
@@ -71,12 +72,17 @@ function enterSummary(selection, unhoverVideo) {
     .style(videoSVGStyle);
 
   videoSize = videoSVG.append('circle')
-    .attr('opacity', .25);
+    .attr('opacity', .5);
 
   videoDot = videoSVG.append('circle')
     .attr('r', 4)
     .attr('stroke-width', 2)
     .attr('stroke', '#fff');
+
+  videoIframe = selection.append('iframe')
+    .attr('width', 400)
+    .attr('height', 240)
+    .attr('frameborder', 0);
 
   date = selection.append('div')
     .style(smallTextStyle);
@@ -100,13 +106,21 @@ function updateSummary(selection, video, youtubers) {
     selection.style({
       display: 'none',
     });
+    videoIframe.attr('src', null);
+    prevVideoId = null;
 
     return;
-  } else {
-    selection.style({
-      display: 'block',
-    })
+  } else if (video.id === prevVideoId) {
+    return;
   }
+
+  prevVideoId = video.id;
+
+  selection.style({
+    display: 'block',
+  });
+
+  videoIframe.attr('src', 'https://www.youtube.com/embed/' + video.data.videoId);
 
   date.text(timeFormat(video.data.publishedDate));
 
