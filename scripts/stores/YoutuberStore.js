@@ -20,7 +20,7 @@ function setYoutubers(rawYoutubers) {
   _.each(rawYoutubers, (youtuberObj, name) => {
     if (!_.contains(youtuberNames, name)) return;
     var youtuber = youtuberObj.snippet;
-    youtuber.youtuber = name;
+    youtuber.youtuber = name.toLowerCase();
     youtuber.joinedDate = new Date(youtuberObj.snippet.publishedAt);
     youtuber.image = youtuber.thumbnails.default.url;
     youtubers[name] = youtuber;

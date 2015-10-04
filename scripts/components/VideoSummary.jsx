@@ -57,9 +57,8 @@ function enterSummary(selection, unhoverVideo) {
   };
   var summaryStyle = {
     position: 'absolute',
-    // width: 400,
     'background-color': 'rgba(255,255,255,.85)',
-    padding: '10px 20px',
+    padding: '10px 20px 5px 20px',
     border: '1px solid #BEB6B6',
     'box-shadow': '0 0 10px #BEB6B6',
     'border-radius': '3px',

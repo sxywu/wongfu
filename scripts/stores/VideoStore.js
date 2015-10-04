@@ -22,7 +22,10 @@ function setVideosByYoutuber(youtuber, rawVideos) {
   videosByYoutuber[youtuber] = _.chain(rawVideos.videos)
     .filter(function(video) {
       // only keep those videos that have at least one other youtuber
-      video.associations = _.without(video.associations, youtuber);
+      video.associations = _.chain(video.associations)
+        .without(youtuber)
+        .map((association) => association.toLowerCase())
+        .uniq().value();
       video.views = parseInt(video.statistics.viewCount);
       return video.associations.length > 1 && video.views >= minViews;
     }).sortBy(function(video) {
