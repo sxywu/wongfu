@@ -99,7 +99,8 @@ function updateNodes(selection, video) {
     .attr('transform', (data) => {
       var madeVideo = video && (data.name === video.data.youtuber);
       var inVideo = video && _.find(video.data.associations, (association) => data.name === association);
-      data.y = (madeVideo || inVideo ? nodeSize : nodeSize * 3) + 10;
+      // data.y = (madeVideo || inVideo ? nodeSize : nodeSize * 3) + 10;
+      data.y =  nodeSize + 10;
       return 'translate(' + data.x + ',' + data.y + ')'
     });
 }

@@ -77,24 +77,20 @@ function calculateDistance(selection) {
   });
 }
 
-function updateLines(selection) {
-  selection.attr('fill-opacity', 0)
-    .attr('stroke', (data) => data.fill)
-    .attr('stroke-width', 3)
-    .attr('stroke-linecap', 'round')
-    .attr('stroke-opacity', .5)
-    .attr('d', (data) => _.pluck(data.points, 'd').join(' '))
-    .attr('stroke-dasharray', (data) => data.totalDistance);
-}
-
-function windowScroll(selection, top, pointId) {
+function windowScroll(selection, top, hoverVideo) {
   selection
     .each((data) => {
       var {source, target} = findPoint(top, data);
       data.source = source;
       data.target = target;
-    }).transition().duration(duration)
-    .attr('stroke-dashoffset', (data) => {
+    })
+    .transition().duration(duration)
+    .attr('stroke-opacity', (data) => {
+      if (!hoverVideo) return .5;
+      var madeVideo = hoverVideo.data.youtuber === data.name;
+      var inVideo = _.find(hoverVideo.data.associations, (association) => association === data.name);
+      return (madeVideo || inVideo) ? .75 : .15;
+    }).attr('stroke-dashoffset', (data) => {
       var source = data.source;
       var target = data.target;
       var distance = 0;
@@ -138,6 +134,16 @@ function windowScroll(selection, top, pointId) {
 
       return data.totalDistance - distance;
     });
+}
+
+function enterLines(selection) {
+  selection.attr('fill-opacity', 0)
+    .attr('stroke-width', 3)
+    .attr('stroke-linecap', 'round')
+    .attr('stroke-opacity', .5)
+    .attr('stroke', (data) => data.fill)
+    .attr('stroke-dasharray', (data) => data.totalDistance)
+    .attr('d', (data) => _.pluck(data.points, 'd').join(' '));
 }
 
 function findPoint(top, data) {
@@ -219,11 +225,14 @@ var Lines = React.createClass({
       this.d3Selection.enter().append('path');
       this.d3Selection
         .call(calculateDistance)
-        .call(updateLines);
+        .call(enterLines);
     }
     
-    this.d3Selection.call(windowScroll, nextProps.top, nextProps.videoId);
     var video = nextProps.videos[nextProps.videoId - 1];
+    var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
+
+    this.d3Selection
+      .call(windowScroll, nextProps.top, hoverVideo);
     video && d3.select(this.refs.line.getDOMNode())
       .transition().duration(duration)
       .attr('stroke', video.fill)
