@@ -129,11 +129,12 @@ function updateSummary(selection, video, youtubers) {
 
   views.text(numberFormat(video.data.views) + ' views');
 
-  var youtubersData = _.sortBy(video.data.associations, (association) => {
-    var youtuber = youtubers[association];
-    return youtuber && youtuber.data.joinedDate;
-  });
-  youtubersData.unshift(video.data.youtuber);
+  var youtubersData = _.chain(video.data.associations)
+    .union([video.data.youtuber])
+    .sortBy((association) => {
+      var youtuber = youtubers[association];
+      return youtuber && youtuber.data.joinedDate;
+    }).value();
 
   var allAssociations = associations.selectAll('a')
     .data(youtubersData);
@@ -141,7 +142,7 @@ function updateSummary(selection, video, youtubers) {
   allAssociations.enter().append('a');
   allAssociations
     .each(function(association, i) {
-      var madeVideo = (i === 0);
+      var madeVideo = association === video.data.youtuber;
       var youtuber = youtubers[association];
       var color = youtuber ? youtuber.fill : '#BEB6B6';
       d3.select(this).style(getLabelStyle(color, madeVideo));

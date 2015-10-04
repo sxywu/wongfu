@@ -175,7 +175,7 @@ var App = React.createClass({
     var videos = (<VideosComponent data={this.state.videos} videoId={this.state.videoId}
       hoverVideo={this.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.state.hoverVideoId} />);
     var youtubers = (<YoutubersComponent youtubers={this.state.youtubers}
-      videos={this.state.videos} videoId={this.state.videoId} />);
+      videos={this.state.videos} videoId={this.state.videoId} hoverVideoId={this.state.hoverVideoId} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.hoverVideoId} unhoverVideo={this.unhoverVideo} />);
     var miniMap = (<MiniMapComponent miniMap={this.state.miniMap} videos={this.state.videos} />);
