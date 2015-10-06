@@ -55,9 +55,11 @@ var App = React.createClass({
   componentWillMount() {
     ServerActionCreators.getYoutuberNames(() => {
       ServerActionCreators.getYoutubers(() => {
-        var youtubers = YoutuberStore.getYoutuberNames();
-        _.each(youtubers, (youtuber) => {
-          ServerActionCreators.getVideoForYoutuber(youtuber);
+        ServerActionCreators.getYoutuberAffiliates(() => {
+          var youtubers = YoutuberStore.getYoutuberNames();
+          _.each(youtubers, (youtuber) => {
+            ServerActionCreators.getVideoForYoutuber(youtuber);
+          });
         });
       });
     })

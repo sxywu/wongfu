@@ -34,6 +34,17 @@ module.exports = {
 
       callback && callback(response);
     });
-  }
+  },
+
+  getYoutuberAffiliates(callback) {
+    d3.json('raw/affiliates.json', (response) => {
+      AppDispatcher.dispatch({
+        actionType: Constants.GET_YOUTUBER_AFFILIATES_SUCCESS,
+        data: {response}
+      });
+
+      callback && callback(response);
+    });
+  },
 
 };

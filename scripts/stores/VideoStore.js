@@ -11,23 +11,32 @@ var CHANGE_EVENT = 'change';
 
 var allYoutubers = [];
 var allYoutubersBack = [];
+var youtuberAffliates = {};
 var allVideos = [];
 var videosByYoutuber = {};
 var videosByAssociation = {};
 
-var minViews = 100000;
-function setVideosByYoutuber(youtuber, rawVideos) {
-  allYoutubersBack.push(youtuber);
+var minViews = 500000;
 
+function setYoutuberAffiliates(rawAffiliates) {
+  _.each(rawAffiliates, (affiliates, youtuber) => {
+    youtuberAffliates[youtuber] = _.map(affiliates, (affiliate) => affiliate.toLowerCase());
+  });
+}
+
+function setVideosByYoutuber(youtuber, rawVideos) {
   videosByYoutuber[youtuber] = _.chain(rawVideos.videos)
     .filter(function(video) {
-      // only keep those videos that have at least one other youtuber
+      // only keep those videos that have at least one other
+      // youtube channel it's not affliated with
       video.associations = _.chain(video.associations)
-        .without(youtuber)
         .map((association) => association.toLowerCase())
-        .uniq().value();
+        .filter((association) => {
+          return association !== youtuber &&
+            !_.contains(youtuberAffliates[youtuber], association);
+        }).uniq().value();
       video.views = parseInt(video.statistics.viewCount);
-      return video.associations.length > 1 && video.views >= minViews;
+      return video.associations.length && video.views >= minViews;
     }).sortBy(function(video) {
       // first push this video into allVideos
       allVideos.push(video);
@@ -58,6 +67,7 @@ function setVideoIds() {
       video.id = id + 1;
       return video;
     }).value();
+    console.log(allVideos.length)
 }
 
 // store information about the graph
@@ -86,12 +96,17 @@ var VideoStore = assign({}, EventEmitter.prototype, {
 VideoStore.dispatchToken = AppDispatcher.register((action) => {
   switch (action.actionType) {
     case Constants.GET_VIDEO_SUCCESS:
+      allYoutubersBack.push(action.data.youtuber);
       setVideosByYoutuber(action.data.youtuber, action.data.response);
       break;
 
     case Constants.GET_YOUTUBER_NAMES_SUCCESS:
       AppDispatcher.waitFor([YoutuberStore.dispatchToken]);
       allYoutubers = YoutuberStore.getYoutuberNames();
+      break;
+
+    case Constants.GET_YOUTUBER_AFFILIATES_SUCCESS:
+      setYoutuberAffiliates(action.data.response);
       break;
 
     default:
