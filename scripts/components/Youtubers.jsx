@@ -8,7 +8,7 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 var duration = 350;
 var nodeSize = 20;
 var nodeY = 50;
-var nodePadding = 50;
+var nodePadding = 25;
 var linksByVideoId = {};
 var widthScale = d3.scale.linear().range([2, 12]);
 var opacity = .15;
@@ -115,7 +115,7 @@ function updateNodes(selection, video, links, hoverVideo, hoverYoutuberName) {
   selection
     .transition().duration(duration)
     .attr('transform', (data) => {
-      data.y =  nodeSize + 10;
+      data.y =  nodeSize + nodePadding;
       return 'translate(' + data.x + ',' + data.y + ')'
     });
 }

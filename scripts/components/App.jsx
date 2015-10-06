@@ -20,9 +20,9 @@ var onWindowScroll;
 var duration = 200;
 var prevVideoId;
 var xPadding = 75;
-var youtuberSVGHeight = 300;
+var youtuberSVGHeight = 200;
 function calculateTop(top, subtract) {
-  return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight - youtuberSVGHeight - xPadding);
+  return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight - youtuberSVGHeight);
 }
 
 var allSources = [['cello', 'C2'], ['cello', 'G2'], ['cello', 'C3'], ['violin', 'G3'],
