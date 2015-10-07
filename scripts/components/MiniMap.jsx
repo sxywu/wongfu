@@ -5,6 +5,7 @@ var d3 = require('d3/d3');
 var GraphUtils = require('../utils/GraphUtils');
 
 var duration = 200;
+var youtuberSVGHeight = 200;
 
 function enterBackground(selection, miniMap) {
   selection.selectAll('div')
@@ -47,39 +48,28 @@ function enterMiniMap(selection, miniMap, videos) {
     });
 };
 
-var top;
-var bottom;
+var overlay;
 function enterOverlay(selection, miniMap) {
-  if (top && bottom) return;
+  if (overlay) return;
 
-  top = selection.append('div')
+  var mapScale = GraphUtils.getMapScale();
+  overlay = selection.append('div')
     .style({
       'position': 'absolute',
-      'top': 0,
       'right': 0,
       'width': 75,
-      'background-color': 'rgba(255,255,255,.5)',
-      // 'border-bottom': '3px double #999'
-    });
-
-  bottom = selection.append('div')
-    .style({
-      'position': 'absolute',
-      'bottom': window.innerHeight,
-      'right': 0,
-      'width': 75,
-      'background-color': 'rgba(255,255,255,.5)',
-      // 'border-top': '3px double #999'
+      'height': mapScale(window.innerHeight - youtuberSVGHeight),
+      'background-color': 'rgba(190,182,182,.25)',
+      'border': '1px solid #BEB6B6',
+      'border-right': 0
     });
 };
 
-function updateTopBottom() {
+function updateOverlay() {
   var mapScale = GraphUtils.getMapScale();
-  top.transition().duration(duration)
-    .style('height', mapScale(window.scrollY));
-  bottom.transition().duration(duration)
-    .style('top', mapScale(window.scrollY + (window.innerHeight * .6)))
-    .style('height', window.innerHeight - mapScale(window.scrollY + (window.innerHeight * .6)));
+  overlay.transition().duration(duration)
+    .style('top', mapScale(window.scrollY));
+    
 };
 
 var MiniMap = React.createClass({
@@ -92,7 +82,7 @@ var MiniMap = React.createClass({
     this.d3Overlay = d3.select(this.refs.overlay.getDOMNode())
       .call(enterOverlay, nextProps.miniMap);
 
-    updateTopBottom();
+    updateOverlay();
     return false;
   },
 
