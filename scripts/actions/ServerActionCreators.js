@@ -1,5 +1,6 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var Constants = require('../constants/Constants');
+var d3 = require('d3/d3');
 
 module.exports = {
 

@@ -17,7 +17,9 @@ var VideoSummaryComponent = require('./VideoSummary.jsx');
 var MiniMapComponent = require('./MiniMap.jsx');
 
 var onWindowScroll;
-var duration = 200;
+var duration = 250;
+var playLength = 60000;
+var vizHeight = 15000;
 var prevVideoId;
 var xPadding = 75;
 var youtuberSVGHeight = 200;
@@ -25,19 +27,16 @@ function calculateTop(top, subtract) {
   return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight - youtuberSVGHeight);
 }
 
-var allSources = [['cello', 'C2'], ['cello', 'G2'], ['cello', 'C3'], ['violin', 'G3'],
-  ['violin', 'C4'], ['violin', 'G4'], ['viola', 'C5'], ['viola', 'G5']];
-allSources = _.map(allSources, (source) => {
-  return 'sound/' + source[0] + '_' + source[1] + '_3.mp3';
-});
-
-sounds.load(allSources);
-sounds.whenLoaded = soundsSetup;
-
-var allSounds = [];
-function soundsSetup() {
-  allSounds = _.map(allSources, (source) => sounds[source]);
-}
+var allSounds = [
+  () => {soundEffect(65.41, 0, 0.2, "triangle", 1, -0.8)},
+  () => {soundEffect(98.00, 0, 0.2, "triangle", 1, 0.8)},
+  () => {soundEffect(130.81, 0, 0.2, "triangle", 1, -0.8)},
+  () => {soundEffect(196.00, 0, 0.2, "triangle", 1, 0.8)},
+  () => {soundEffect(261.63, 0, 0.2, "triangle", 1, -0.8)},
+  () => {soundEffect(392.00, 0, 0.2, "triangle", 1, 0.8)},
+  () => {soundEffect(523.25, 0, 0.2, "triangle", 1, -0.8)},
+  () => {soundEffect(783.99, 0, 0.2, "triangle", 1, 0.8)} // consider sine or triangle
+];
 
 var App = React.createClass({
   getInitialState() {
@@ -66,15 +65,16 @@ var App = React.createClass({
     
     VideoStore.addChangeListener(this.onChange);
 
-    onWindowScroll = _.throttle(this.windowScroll.bind(this), duration);
+    onWindowScroll = _.throttle(() => {
+      this.windowScroll();
+      this.playSounds();
+    }, duration);
     window.addEventListener('scroll', onWindowScroll);
-    // window.addEventListener('scroll', this.playSounds);
   },
 
   componentWillUnmount() {
     VideoStore.removeChangeListener(this.onChange);
     window.removeEventListener('scroll', onWindowScroll);
-    // window.removeEventListener('scroll', this.playSounds);
   },
  
   onChange() {
@@ -98,6 +98,20 @@ var App = React.createClass({
     this.setState({top, videoId});
   },
 
+  play() {
+    var lastAnimated = 0;
+    d3.timer((elapsed) => {
+      var top = (elapsed / playLength) * vizHeight;
+      var animated = Math.floor(elapsed / (duration / 4));
+
+      if (lastAnimated !== animated) {
+        window.scrollTo(0, top);
+        lastAnimated = animated;
+      }
+      return elapsed >= playLength;
+    });
+  },
+
   playSounds() {
     if (!this.state.videos.length) return;
 
@@ -109,13 +123,11 @@ var App = React.createClass({
     if (!video) return;
 
     var youtuber = this.state.youtubers[video.data.youtuber];
-    allSounds[youtuber.order].volume = .75;
-    allSounds[youtuber.order].play();
+    allSounds[youtuber.order]();
     _.each(video.data.associations, (association) => {
       association = this.state.youtubers[association];
       if (!association) return;
-      allSounds[association.order].volume = 1 / video.data.associations.length;
-      allSounds[association.order].play();
+      allSounds[association.order]();
     });
 
     prevVideoId = videoId;
@@ -172,7 +184,7 @@ var App = React.createClass({
   render() {
     var lineWidth = GraphUtils.getSVGWidth(this.state.lines);
     var summaryWidth = window.innerWidth - lineWidth - xPadding * 2;
-    var timelineHeight = 10000;
+    var timelineHeight = vizHeight + youtuberSVGHeight;
     var summaryDivStyle = {position: 'absolute', top: 0, height: timelineHeight};
     var backgroundSVGStyle = {width: window.innerWidth, height: timelineHeight,
       position: 'absolute', top: 0, left: 0};
@@ -192,6 +204,12 @@ var App = React.createClass({
       videos={this.state.videos} videoId={this.state.hoverVideoId} unhoverVideo={this.unhoverVideo} />);
     var miniMap = (<MiniMapComponent miniMap={this.state.miniMap} videos={this.state.videos} />);
 
+    var play = (<div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+    }} onClick={this.play} >play</div>);
+
     return (
       <div>
         {miniMap}
@@ -205,6 +223,7 @@ var App = React.createClass({
         <div style={summaryDivStyle}>
           {videoSummary}
         </div>
+        {play}
       </div>
     );
   }
