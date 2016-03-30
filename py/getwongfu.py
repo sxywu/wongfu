@@ -69,6 +69,9 @@ def getVideosForYoutuber(youtuber):
       maxResults=50
     ).execute()
 
+    if not response["items"]:
+      return
+
     if not nextPageToken:
       # remember latest video date so that next time we can start from there
       youtuberVideos["latestDate"] = response["items"][0]["snippet"]["publishedAt"]
@@ -92,6 +95,9 @@ def getVideosForYoutuber(youtuber):
       part=part,
       id=videoId
     ).execute()
+
+    if not response["items"]:
+      return
 
     videoResponse = response["items"][0]
     video["statistics"] = videoResponse["statistics"]
