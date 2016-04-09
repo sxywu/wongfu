@@ -5,7 +5,7 @@ var d3 = require('d3/d3');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-var duration = 350;
+var duration = 200;
 var nodeSize = 20;
 var nodeY = 50;
 var nodePadding = 25;
@@ -169,58 +169,51 @@ function linkArc(d) {
     "A" + dr + "," + dr + " 0 0,1 " + target.x + "," + target.y;
 }
 
-var Youtubers = React.createClass({
-  componentDidMount() {
-    // create clip path because react doesn't support clipPath ):
-    d3.select(this.refs.defs.getDOMNode())
-      .append('clipPath')
-        .attr('id', 'imageClip')
-        .append('circle')
-          .attr('r', nodeSize);
-  },
+module.exports = function () {
+  return {
+    nodes: null,
+    links: null,
 
-  shouldComponentUpdate(nextProps) {
-    if (_.isEmpty(linksByVideoId)) {
-      calculateLinksByVideoId(nextProps.youtubers, nextProps.videos);
-    }
+    enter(svg) {
+      // defs
+      svg.append('defs')
+        .append('clipPath')
+          .attr('id', 'imageClip')
+          .append('circle')
+            .attr('r', nodeSize);
 
-    this.d3Nodes = d3.select(this.refs.nodes.getDOMNode())
-      .selectAll('g').data(_.values(nextProps.youtubers), (node) => node.name);
+      this.links = svg.append('g');
+      this.nodes = svg.append('g');
+    },
 
-    var video = nextProps.videos[nextProps.videoId - 1];
-    var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
-    var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
-      return {
-        source: nextProps.youtubers[link.source],
-        target: nextProps.youtubers[link.target],
-        count: link.count
-      };
-    });
-    this.d3Links = d3.select(this.refs.links.getDOMNode())
-      .selectAll('path').data(links || [],
-        (data) => data.source.name + ',' + data.target.name);
+    update(svg, nextProps) {
+      if (_.isEmpty(linksByVideoId)) {
+        calculateLinksByVideoId(nextProps.youtubers, nextProps.videos);
+      }
 
-    this.d3Nodes.enter().append('g')
-      .call(enterNodes, nextProps.hoverYoutuber, nextProps.unhoverYoutuber);
-    this.d3Nodes.call(updateNodes, video, links, hoverVideo, nextProps.hoverYoutuberName);
+      var nodes = this.nodes.selectAll('g')
+        .data(_.values(nextProps.youtubers), (node) => node.name);
 
-    this.d3Links.enter().append('path').call(enterLinks);
-    this.d3Links.exit().call(exitLinks);
-    this.d3Links.call(updateLinks, video, hoverVideo, nextProps.hoverYoutuberName);
+      var video = nextProps.videos[nextProps.videoId - 1];
+      var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
+      var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
+        return {
+          source: nextProps.youtubers[link.source],
+          target: nextProps.youtubers[link.target],
+          count: link.count
+        };
+      });
+      var links = this.links.selectAll('path').data(links || [],
+          (data) => data.source.name + ',' + data.target.name);
 
-    return false;
-  },
+      nodes.enter().append('g')
+        .call(enterNodes, nextProps.hoverYoutuber, nextProps.unhoverYoutuber);
+      nodes.call(updateNodes, video, links, hoverVideo, nextProps.hoverYoutuberName);
 
-  render() {
-    return (
-      <g>
-        <defs ref="defs" />
-        <g ref="links" />
-        <g ref="dots" />
-        <g ref="nodes" />
-      </g>
-    );
+      links.enter().append('path').call(enterLinks);
+      links.exit().call(exitLinks);
+      links.call(updateLinks, video, hoverVideo, nextProps.hoverYoutuberName);
+    },
+
   }
-});
-
-module.exports = Youtubers;
+};

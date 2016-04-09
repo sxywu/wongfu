@@ -2,24 +2,47 @@ var React = require('react/addons');
 var cx = React.addons.classSet;
 var _ = require('lodash');
 var d3 = require('d3/d3');
-// utils
-var GraphUtils = require('../utils/GraphUtils');
-// actions
-var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
 var LinesComponent = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
-var YoutubersComponent = require('./Youtubers.jsx');
-var VideoSummaryComponent = require('./VideoSummary.jsx');
+var Youtubers = require('./Youtubers.jsx');
 var MiniMapComponent = require('./MiniMap.jsx');
 
 var onWindowScroll;
-var duration = 250;
+var duration = 200;
 var playLength = 60000;
-var prevVideoId;
 var youtuberSVGHeight = 200;
+var videoId = 1;
+var prevVideoId;
+var top = calculateTop();
+
 function calculateTop(top, subtract) {
   return (top || scrollY) + (subtract ? -1 : 1) * (window.innerHeight - youtuberSVGHeight);
+}
+
+function findVideoId(top, videos) {
+  var video;
+  var videoId = 0;
+  var firstVideo = _.first(videos);
+  var lastVideo = _.last(videos);
+
+  _.some(videos, (v) => {
+    if (v.y >= top) {
+      return true;
+    }
+    video = v;
+  });
+
+  if (top < firstVideo.y) {
+    // if we're past the last video
+    videoId = 0;
+  } else if (video) {
+    videoId = video.id;
+  } else if (top > lastVideo.y) {
+    videoId = lastVideo.id;
+  }
+
+  return videoId;
 }
 
 var allSounds = [
@@ -34,41 +57,50 @@ var allSounds = [
 ];
 
 var Graph = React.createClass({
-  getInitialState() {
-    return {
-      videoId: 1,
-      top: calculateTop(),
-    }
-  },
 
   componentWillMount() {
     onWindowScroll = _.throttle(() => {
-      this.windowScroll();
+      if (!this.props.videos.length) return;
+      top = calculateTop();
+      videoId = findVideoId(top, this.props.videos);
+
+      this.updateGraph();
       this.playSounds();
     }, duration);
     window.addEventListener('scroll', onWindowScroll);
+  },
+
+  componentDidMount() {
+    this.youtubersComponent = Youtubers();
+
+    this.backgroundSVG = d3.select(this.refs.backgroundSVG.getDOMNode());
+    this.youtubersSVG = d3.select(this.refs.youtubersSVG.getDOMNode())
+      .call(_.bind(this.youtubersComponent.enter, this.youtubersComponent));
+  },
+
+  componentDidUpdate() {
+    this.updateGraph();
   },
 
   componentWillUnmount() {
     window.removeEventListener('scroll', onWindowScroll);
   },
 
-  windowScroll() {
-    if (!this.props.videos.length) return;
-    var top = calculateTop();
-    var videoId = this.findVideoId(top);
+  updateGraph() {
+    var data = _.merge(this.props, {top, videoId});
 
-    this.setState({top, videoId});
+    this.youtubersSVG
+      .call(_.bind(this.youtubersComponent.update, this.youtubersComponent), data);
   },
 
   playSounds() {
     if (!this.props.videos.length) return;
 
     var top = calculateTop();
-    var videoId = this.findVideoId(top);
+    var videoId = findVideoId(top, this.props.videos);
     if (videoId === prevVideoId) return;
 
-    var video = this.props.videos[this.state.videoId - 1];
+    var video = this.props.videos[videoId - 1];
     if (!video) return;
 
     var youtuber = this.props.youtubers[video.data.youtuber];
@@ -82,45 +114,19 @@ var Graph = React.createClass({
     prevVideoId = videoId;
   },
 
-  findVideoId(top, videos) {
-    videos = videos || this.props.videos;
-    var video;
-    var videoId = 0;
-    var firstVideo = _.first(videos);
-    var lastVideo = _.last(videos);
-
-    _.some(videos, (v) => {
-      if (v.y >= top) {
-        return true;
-      }
-      video = v;
-    });
-
-    if (top < firstVideo.y) {
-      // if we're past the last video
-      videoId = 0;
-    } else if (video) {
-      videoId = video.id;
-    } else if (top > lastVideo.y) {
-      videoId = lastVideo.id;
-    }
-
-    return videoId;
-  },
-
   render() {
     var backgroundSVGStyle = {width: window.innerWidth, height: this.props.timelineHeight,
       position: 'absolute', top: 0, left: 0};
     var youtuberSVGStyle = {width: this.props.lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
-    var lines = (<LinesComponent data={this.props.lines} top={this.state.top}
-      videos={this.props.videos} videoId={this.state.videoId} hoverVideoId={this.props.hoverVideoId} />);
-    var videos = (<VideosComponent data={this.props.videos} videoId={this.state.videoId}
-      hoverVideo={this.props.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.props.hoverVideoId} />);
-    var youtubers = (<YoutubersComponent youtubers={this.props.youtubers} videos={this.props.videos}
-      videoId={this.state.videoId} hoverVideoId={this.props.hoverVideoId} hoverYoutuberName={this.props.hoverYoutuberName}
-      hoverYoutuber={this.props.hoverYoutuber} unhoverYoutuber={this.props.unhoverYoutuber} />);
+    // var lines = (<LinesComponent data={this.props.lines} top={top}
+    //   videos={this.props.videos} videoId={videoId} hoverVideoId={this.props.hoverVideoId} />);
+    // var videos = (<VideosComponent data={this.props.videos} videoId={videoId}
+    //   hoverVideo={this.props.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.props.hoverVideoId} />);
+    // var youtubers = (<YoutubersComponent youtubers={this.props.youtubers} videos={this.props.videos}
+    //   videoId={videoId} hoverVideoId={this.props.hoverVideoId} hoverYoutuberName={this.props.hoverYoutuberName}
+    //   hoverYoutuber={this.props.hoverYoutuber} unhoverYoutuber={this.props.unhoverYoutuber} />);
     var miniMap = (<MiniMapComponent miniMap={this.props.miniMap} videos={this.props.videos} />);
 
     var play = (<div style={{
@@ -132,13 +138,8 @@ var Graph = React.createClass({
     return (
       <div>
         {miniMap}
-        <svg style={backgroundSVGStyle}>
-          {lines}
-          {videos}
-        </svg>
-        <svg style={youtuberSVGStyle}>
-          {youtubers}
-        </svg>
+        <svg style={backgroundSVGStyle} ref='backgroundSVG' />
+        <svg style={youtuberSVGStyle} ref='youtubersSVG' />
         {play}
       </div>
     );
