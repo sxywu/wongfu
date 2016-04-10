@@ -94,7 +94,8 @@ function enterLinks(selection) {
     .attr('stroke-dashoffset', function(data) {
       // if target is to the right of source, then make dashoffset negative
       // so that it will still animate from source to target
-      return this.getTotalLength() * (data.target.x > data.source.x ? -1 : 1);
+      data.totalLength = this.getTotalLength();
+      return data.totalLength * (data.target.x > data.source.x ? -1 : 1);
     });
 }
 
@@ -141,7 +142,7 @@ function updateLinks(selection, video, hoverVideo, hoverYoutuberName) {
 
       return (inVideo || nodeHovered) ? 1 : opacity;
     }).attr('stroke-dasharray', function(data) {
-      return this.getTotalLength();
+      return data.totalLength;
     }).attr('stroke-dashoffset', 0)
     .attr('stroke-width', (data) => widthScale(data.count));
 }
@@ -151,7 +152,7 @@ function exitLinks(selection) {
     .attr('stroke-dashoffset', function(data) {
       // if target is to the right of source, then make dashoffset negative
       // so that it will still animate from source to target
-      return this.getTotalLength() * (data.target.x > data.source.x ? -1 : 1);
+      return data.totalLength * (data.target.x > data.source.x ? -1 : 1);
     }).attr('stroke-width', 0)
     .remove();
 }
@@ -196,19 +197,19 @@ module.exports = function () {
 
       var video = nextProps.videos[nextProps.videoId - 1];
       var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
-      var links = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
+      var linksData = _.map(linksByVideoId[nextProps.videoId] || [], (link) => {
         return {
           source: nextProps.youtubers[link.source],
           target: nextProps.youtubers[link.target],
           count: link.count
         };
       });
-      var links = this.links.selectAll('path').data(links || [],
+      var links = this.links.selectAll('path').data(linksData || [],
           (data) => data.source.name + ',' + data.target.name);
 
       nodes.enter().append('g')
         .call(enterNodes, nextProps.hoverYoutuber, nextProps.unhoverYoutuber);
-      nodes.call(updateNodes, video, links, hoverVideo, nextProps.hoverYoutuberName);
+      nodes.call(updateNodes, video, linksData, hoverVideo, nextProps.hoverYoutuberName);
 
       links.enter().append('path').call(enterLinks);
       links.exit().call(exitLinks);
