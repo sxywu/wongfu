@@ -46,37 +46,28 @@ function exitVideos(selection) {
     .remove();
 }
 
-var Videos = React.createClass({
+module.exports = function() {
+  return {
+    videos: null,
+    videoSizes: null,
 
-  shouldComponentUpdate(nextProps) {
-    var videos = _.chain(nextProps.data)
-      .slice(0, nextProps.videoId)
-      .sortBy((data) => -data.size)
-      .value();
-    this.d3Videos = d3.select(this.refs.videos.getDOMNode())
-      .selectAll('circle').data(videos, (data) => data.id);
-    this.d3VideoSizes = d3.select(this.refs.videoSizes.getDOMNode())
-      .selectAll('circle').data(videos, (data) => data.id);
+    enter(g) {
+      this.videoSizes = g.append('g');
+      this.videos = g.append('g');
+    },
 
-    this.d3Videos.enter().append('circle').call(enterVideos, nextProps.hoverVideo, nextProps.clickVideo);
-    this.d3Videos.exit().call(exitVideos);
-    this.d3Videos.call(updateVideos, nextProps.videoId, nextProps.hoverVideoId);
+    update(g, nextProps) {
+      var videosData = _.slice(nextProps.videos, 0, nextProps.videoId);
+      var videos = this.videos.selectAll('circle').data(videosData, (data) => data.id);
+      var videoSizes = this.videoSizes.selectAll('circle').data(videosData, (data) => data.id);
 
-    this.d3VideoSizes.enter().append('circle').call(enterVideos);
-    this.d3VideoSizes.exit().call(exitVideos);
-    this.d3VideoSizes.call(updateVideoSizes, nextProps.videoId, nextProps.hoverVideoId);
+      videos.enter().append('circle').call(enterVideos, nextProps.hoverVideo, nextProps.clickVideo);
+      videos.exit().call(exitVideos);
+      videos.call(updateVideos, nextProps.videoId, nextProps.hoverVideoId);
 
-    return false;
-  },
-
-  render() {
-    return (
-      <g>
-        <g ref="videoSizes" />
-        <g ref="videos" />
-      </g>
-    );
+      videoSizes.enter().append('circle').call(enterVideos);
+      videoSizes.exit().call(exitVideos);
+      videoSizes.call(updateVideoSizes, nextProps.videoId, nextProps.hoverVideoId);
+    },
   }
-});
-
-module.exports = Videos;
+};

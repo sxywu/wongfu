@@ -4,7 +4,7 @@ var _ = require('lodash');
 var d3 = require('d3/d3');
 // components
 var Lines = require('./Lines.jsx');
-var VideosComponent = require('./Videos.jsx');
+var Videos = require('./Videos.jsx');
 var Youtubers = require('./Youtubers.jsx');
 var MiniMapComponent = require('./MiniMap.jsx');
 
@@ -60,6 +60,7 @@ var Graph = React.createClass({
 
   componentWillMount() {
     this.linesComponent = Lines();
+    this.videosComponent = Videos();
     this.youtubersComponent = Youtubers();
 
     onWindowScroll = _.throttle(() => {
@@ -76,7 +77,8 @@ var Graph = React.createClass({
   componentDidMount() {
     this.linesSVG = d3.select(this.refs.linesSVG.getDOMNode())
       .call(this.linesComponent.enter.bind(this.linesComponent));
-    this.videosSVG = d3.select(this.refs.videosSVG.getDOMNode());
+    this.videosSVG = d3.select(this.refs.videosSVG.getDOMNode())
+      .call(this.videosComponent.enter.bind(this.videosComponent));
     this.youtubersSVG = d3.select(this.refs.youtubersSVG.getDOMNode())
       .call(this.youtubersComponent.enter.bind(this.youtubersComponent));
   },
@@ -93,6 +95,7 @@ var Graph = React.createClass({
     var data = _.merge(this.props, {top, videoId});
 
     this.linesSVG.call(this.linesComponent.update.bind(this.linesComponent), data);
+    this.videosSVG.call(this.videosComponent.update.bind(this.videosComponent), data);
     this.youtubersSVG.call(this.youtubersComponent.update.bind(this.youtubersComponent), data);
   },
 
@@ -123,8 +126,6 @@ var Graph = React.createClass({
     var youtuberSVGStyle = {width: this.props.lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
-    // var videos = (<VideosComponent data={this.props.videos} videoId={videoId}
-    //   hoverVideo={this.props.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.props.hoverVideoId} />);
     var miniMap = (<MiniMapComponent miniMap={this.props.miniMap} videos={this.props.videos} />);
 
     // var play = (<div style={{
