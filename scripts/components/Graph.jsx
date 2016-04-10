@@ -9,7 +9,7 @@ var Youtubers = require('./Youtubers.jsx');
 var MiniMapComponent = require('./MiniMap.jsx');
 
 var onWindowScroll;
-var duration = 200;
+var duration = 250;
 var playLength = 60000;
 var youtuberSVGHeight = 200;
 var videoId = 1;
@@ -46,14 +46,14 @@ function findVideoId(top, videos) {
 }
 
 var allSounds = [
-  () => {soundEffect(65.41, 0, 0.2, "triangle", 1, -0.8)},
-  () => {soundEffect(98.00, 0, 0.2, "triangle", 1, 0.8)},
-  () => {soundEffect(130.81, 0, 0.2, "triangle", 1, -0.8)},
-  () => {soundEffect(196.00, 0, 0.2, "triangle", 1, 0.8)},
-  () => {soundEffect(261.63, 0, 0.2, "triangle", 1, -0.8)},
-  () => {soundEffect(392.00, 0, 0.2, "triangle", 1, 0.8)},
-  () => {soundEffect(523.25, 0, 0.2, "triangle", 1, -0.8)},
-  () => {soundEffect(783.99, 0, 0.2, "triangle", 1, 0.8)} // consider sine or triangle
+  () => {soundEffect(65.41, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(98.00, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(130.81, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(196.00, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(261.63, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(392.00, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(523.25, 0, 0.2, "triangle", 1)},
+  () => {soundEffect(783.99, 0, 0.2, "triangle", 1)} // consider sine or triangle
 ];
 
 var Graph = React.createClass({
@@ -95,16 +95,14 @@ var Graph = React.createClass({
     var data = _.merge(this.props, {top, videoId});
 
     this.linesSVG.call(this.linesComponent.update.bind(this.linesComponent), data);
+
+    if (videoId === prevVideoId) return;
     this.videosSVG.call(this.videosComponent.update.bind(this.videosComponent), data);
     this.youtubersSVG.call(this.youtubersComponent.update.bind(this.youtubersComponent), data);
   },
 
   playSounds() {
-    if (!this.props.videos.length) return;
-
-    var top = calculateTop();
-    var videoId = findVideoId(top, this.props.videos);
-    if (videoId === prevVideoId) return;
+    if (!this.props.videos.length || videoId === prevVideoId) return;
 
     var video = this.props.videos[videoId - 1];
     if (!video) return;

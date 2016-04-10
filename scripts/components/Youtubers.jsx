@@ -5,7 +5,7 @@ var d3 = require('d3/d3');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-var duration = 200;
+var duration = 125;
 var nodeSize = 20;
 var nodeY = 50;
 var nodePadding = 25;
@@ -79,8 +79,10 @@ function enterNodes(selection, hoverYoutuber, unhoverYoutuber) {
     .attr('stroke-width', 2);
 
   selection
-    .attr('transform', (data) => 'translate(' + data.x + ',' + nodeY + ')')
-    .style({cursor: 'pointer'})
+    .attr('transform', (data) => {
+      data.y = nodeSize + nodePadding;
+      return 'translate(' + data.x + ',' + data.y + ')';
+    }).style({cursor: 'pointer'})
     .on('mouseenter', hoverYoutuber)
     .on('mouseleave', unhoverYoutuber);
 }
@@ -100,25 +102,11 @@ function enterLinks(selection) {
 }
 
 function updateNodes(selection, video, links, hoverVideo, hoverYoutuberName) {
-  selection.selectAll('image, .colorStroke')
+  video && selection.filter((data) => video.data.youtuber === data.name)
     .transition().duration(duration)
-    .attr('opacity', (data) => {
-      if (!hoverVideo && !hoverYoutuberName) return 1;
-      var madeVideo = hoverVideo && data.name === hoverVideo.data.youtuber;
-      var inVideo = hoverVideo && _.find(hoverVideo.data.associations, (association) => data.name === association);
-      var nodeHovered = data.name === hoverYoutuberName;
-      nodeHovered = nodeHovered || _.find(links, (link) =>
-        (link.source.name === data.name && link.target.name === hoverYoutuberName) ||
-        (link.source.name === hoverYoutuberName && link.target.name === data.name));
-      return (madeVideo || inVideo || nodeHovered) ? 1 : opacity;
-    });
-
-  selection
+    .attr('transform', (data) => 'translate(' + data.x + ',' + nodeSize + ')')
     .transition().duration(duration)
-    .attr('transform', (data) => {
-      data.y =  nodeSize + nodePadding;
-      return 'translate(' + data.x + ',' + data.y + ')'
-    });
+      .attr('transform', (data) => 'translate(' + data.x + ',' + data.y + ')');
 }
 
 function updateLinks(selection, video, hoverVideo, hoverYoutuberName) {

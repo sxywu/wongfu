@@ -8,7 +8,7 @@ var YoutuberStore = require('../stores/YoutuberStore');
 // actions
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
-var duration = 350;
+var duration = 200;
 
 function enterVideos(selection, hoverVideo, clickVideo) {
   selection
