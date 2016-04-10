@@ -213,43 +213,34 @@ function setDistance(source, target) {
   target.distance = parseFloat(distancePath.getTotalLength().toFixed(2));
 }
 
-var Lines = React.createClass({
-  componentWillMount() {
-    distancePath = d3.select('path.distancePath').node();
-  },
+module.exports = function() {
+  return {
+    line: null, // indicator line
+    lines: null, // all paths
 
-  shouldComponentUpdate(nextProps) {
-    if (!this.d3Selection) {
-      this.d3Selection = d3.select(this.refs.lines.getDOMNode())
-        .selectAll('path').data(nextProps.data);
-      this.d3Selection.enter().append('path');
-      this.d3Selection
-        .call(calculateDistance)
-        .call(enterLines);
-    }
-    
-    var video = nextProps.videos[nextProps.videoId - 1];
-    var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
+    enter(g) {
+      distancePath = d3.select('path.distancePath').node();
+    },
 
-    this.d3Selection
-      .call(windowScroll, nextProps.top, hoverVideo);
-    video && d3.select(this.refs.line.getDOMNode())
-      .transition().duration(duration)
-      .attr('stroke', video.fill)
-      .attr('x1', video.x).attr('x2', window.innerWidth)
-      .attr('y1', video.y).attr('y2', video.y);
+    update(g, nextProps) {
+      if (!this.lines) {
+        this.lines = g.selectAll('path').data(nextProps.lines);
+        this.lines.enter().append('path');
+        this.lines
+          .call(calculateDistance)
+          .call(enterLines);
+      }
+      
+      var video = nextProps.videos[nextProps.videoId - 1];
+      var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
 
-    return false;
-  },
+      this.lines.call(windowScroll, nextProps.top, hoverVideo);
+      // video && d3.select(this.refs.line.getDOMNode())
+      //   .transition().duration(duration)
+      //   .attr('stroke', video.fill)
+      //   .attr('x1', video.x).attr('x2', window.innerWidth)
+      //   .attr('y1', video.y).attr('y2', video.y);
+    },
 
-  render() {
-    return (
-      <g>
-        <line ref="line" strokeDasharray={2} />
-        <g ref="lines" />
-      </g>
-    );
-  }
-});
-
-module.exports = Lines;
+  };
+};

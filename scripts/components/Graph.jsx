@@ -3,7 +3,7 @@ var cx = React.addons.classSet;
 var _ = require('lodash');
 var d3 = require('d3/d3');
 // components
-var LinesComponent = require('./Lines.jsx');
+var Lines = require('./Lines.jsx');
 var VideosComponent = require('./Videos.jsx');
 var Youtubers = require('./Youtubers.jsx');
 var MiniMapComponent = require('./MiniMap.jsx');
@@ -59,6 +59,9 @@ var allSounds = [
 var Graph = React.createClass({
 
   componentWillMount() {
+    this.linesComponent = Lines();
+    this.youtubersComponent = Youtubers();
+
     onWindowScroll = _.throttle(() => {
       if (!this.props.videos.length) return;
       top = calculateTop();
@@ -71,11 +74,11 @@ var Graph = React.createClass({
   },
 
   componentDidMount() {
-    this.youtubersComponent = Youtubers();
-
-    this.backgroundSVG = d3.select(this.refs.backgroundSVG.getDOMNode());
+    this.linesSVG = d3.select(this.refs.linesSVG.getDOMNode())
+      .call(this.linesComponent.enter.bind(this.linesComponent));
+    this.videosSVG = d3.select(this.refs.videosSVG.getDOMNode());
     this.youtubersSVG = d3.select(this.refs.youtubersSVG.getDOMNode())
-      .call(_.bind(this.youtubersComponent.enter, this.youtubersComponent));
+      .call(this.youtubersComponent.enter.bind(this.youtubersComponent));
   },
 
   componentDidUpdate() {
@@ -89,8 +92,8 @@ var Graph = React.createClass({
   updateGraph() {
     var data = _.merge(this.props, {top, videoId});
 
-    this.youtubersSVG
-      .call(_.bind(this.youtubersComponent.update, this.youtubersComponent), data);
+    this.linesSVG.call(this.linesComponent.update.bind(this.linesComponent), data);
+    this.youtubersSVG.call(this.youtubersComponent.update.bind(this.youtubersComponent), data);
   },
 
   playSounds() {
@@ -120,27 +123,24 @@ var Graph = React.createClass({
     var youtuberSVGStyle = {width: this.props.lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
 
-    // var lines = (<LinesComponent data={this.props.lines} top={top}
-    //   videos={this.props.videos} videoId={videoId} hoverVideoId={this.props.hoverVideoId} />);
     // var videos = (<VideosComponent data={this.props.videos} videoId={videoId}
     //   hoverVideo={this.props.hoverVideo} clickVideo={this.clickVideo} hoverVideoId={this.props.hoverVideoId} />);
-    // var youtubers = (<YoutubersComponent youtubers={this.props.youtubers} videos={this.props.videos}
-    //   videoId={videoId} hoverVideoId={this.props.hoverVideoId} hoverYoutuberName={this.props.hoverYoutuberName}
-    //   hoverYoutuber={this.props.hoverYoutuber} unhoverYoutuber={this.props.unhoverYoutuber} />);
     var miniMap = (<MiniMapComponent miniMap={this.props.miniMap} videos={this.props.videos} />);
 
-    var play = (<div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-    }} onClick={this.play} >play</div>);
+    // var play = (<div style={{
+    //   position: 'fixed',
+    //   top: 0,
+    //   left: 0,
+    // }} onClick={this.play} >play</div>);
 
     return (
       <div>
         {miniMap}
-        <svg style={backgroundSVGStyle} ref='backgroundSVG' />
+        <svg style={backgroundSVGStyle}>
+          <g ref='linesSVG' />
+          <g ref='videosSVG' />
+        </svg>
         <svg style={youtuberSVGStyle} ref='youtubersSVG' />
-        {play}
       </div>
     );
   }
