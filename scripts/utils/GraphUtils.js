@@ -1,5 +1,6 @@
 var React = require('react');
 var _ = require('lodash');
+var d3 = require('d3/d3');
 var ss = require('simple-statistics');
 
 var AppDispatcher = require('../dispatcher/AppDispatcher');
@@ -17,7 +18,7 @@ var colorScale = d3.scale.ordinal()
   .range(['#BD3939', '#E7A0B5', '#EBC06F', '#6FA874', '#8191C6', '#95619F', '#E8CAC3', '#D79C94']);
   // darker colors
   // .range(['#B21E1E', '#E683A6', '#F1C538', '#3A923C', '#4466BE', '#6E3380', '#E9C9C0', '#D37B6B']);
-var vizHeight = 9500;
+var vizHeight = 15000;
 var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, vizHeight]);
 
 var GraphUtils = {};
