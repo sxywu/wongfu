@@ -6,20 +6,7 @@ var GraphUtils = require('../utils/GraphUtils');
 
 var duration = 200;
 var youtuberSVGHeight = 200;
-
-function enterBackground(selection, miniMap) {
-  selection.selectAll('div')
-    .data(miniMap).enter().append('div')
-    .style('background-color', (map) => map.fill)
-    .style('opacity', (map) => map.opacity / 3)
-    .style('top', (map) => map.y1)
-    .style('height', (map) => map.height)
-    .style({
-      'position': 'absolute',
-      'left': 0,
-      'width': '100%'
-    });
-};
+var width = 12;
 
 function enterMiniMap(selection, miniMap, videos) {
   selection.selectAll('div')
@@ -31,20 +18,7 @@ function enterMiniMap(selection, miniMap, videos) {
     .style({
       'position': 'absolute',
       'right': 0,
-      'width': 75
-    });
-
-  selection.selectAll('span')
-    .data(videos).enter().append('span')
-    .style('background-color', (video) => video.fill)
-    .style('top', (video) => video.sideY - 1)
-    .style('width', (video) => video.size)
-    .style({
-      'display': 'inside-block',
-      'position': 'absolute',
-      'right': 0,
-      'height': 2,
-      'opacity': .75
+      'width': width,
     });
 };
 
@@ -57,7 +31,7 @@ function enterOverlay(selection, miniMap) {
     .style({
       'position': 'absolute',
       'right': 0,
-      'width': 75,
+      'width': width,
       'height': mapScale(window.innerHeight - youtuberSVGHeight),
       'background-color': 'rgba(190,182,182,.25)',
       'border': '1px solid #BEB6B6',
@@ -72,35 +46,28 @@ function updateOverlay() {
     
 };
 
-var MiniMap = React.createClass({
+module.exports = function() {
+  return {
+    minimap: null,
+    overlay: null,
 
-  shouldComponentUpdate(nextProps) {
-    // this.d3Background = d3.select(this.refs.background.getDOMNode())
-    //   .call(enterBackground, nextProps.miniMap);
-    this.d3MiniMap = d3.select(this.refs.miniMap.getDOMNode())
-      .call(enterMiniMap, nextProps.miniMap, nextProps.videos);
-    this.d3Overlay = d3.select(this.refs.overlay.getDOMNode())
-      .call(enterOverlay, nextProps.miniMap);
+    enter(selection) {
+      var miniMapStyle = {
+        position: 'fixed',
+        right: 0,
+        top: 0
+      };
+      this.minimap = selection.append('div')
+        .style(miniMapStyle);
+      this.overlay = selection.append('div')
+        .style(miniMapStyle);
+    },
 
-    updateOverlay();
-    return false;
-  },
+    update(selection, nextProps) {
+      this.minimap.call(enterMiniMap, nextProps.miniMap, nextProps.videos);
+      this.overlay.call(enterOverlay, nextProps.miniMap);
 
-  render() {
-    var miniMapStyle = {
-      position: 'fixed',
-      right: 0,
-      top: 0
-    };
-
-    return (
-      <div>
-        <div ref="background" />
-        <div ref="miniMap" style={miniMapStyle} />
-        <div ref="overlay" style={miniMapStyle} />
-      </div>
-    );
+      updateOverlay();
+    },
   }
-});
-
-module.exports = MiniMap;
+};

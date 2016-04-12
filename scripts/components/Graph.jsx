@@ -6,7 +6,7 @@ var d3 = require('d3/d3');
 var Lines = require('./Lines.jsx');
 var Videos = require('./Videos.jsx');
 var Youtubers = require('./Youtubers.jsx');
-var MiniMapComponent = require('./MiniMap.jsx');
+var MiniMap = require('./MiniMap.jsx');
 
 var onWindowScroll;
 var duration = 250;
@@ -62,6 +62,7 @@ var Graph = React.createClass({
     this.linesComponent = Lines();
     this.videosComponent = Videos();
     this.youtubersComponent = Youtubers();
+    this.miniMapComponent = MiniMap();
 
     onWindowScroll = _.throttle(() => {
       if (!this.props.videos.length) return;
@@ -81,6 +82,8 @@ var Graph = React.createClass({
       .call(this.videosComponent.enter.bind(this.videosComponent));
     this.youtubersSVG = d3.select(this.refs.youtubersSVG.getDOMNode())
       .call(this.youtubersComponent.enter.bind(this.youtubersComponent));
+    this.minimapDiv = d3.select(this.refs.minimapDiv.getDOMNode())
+      .call(this.miniMapComponent.enter.bind(this.miniMapComponent));
   },
 
   componentDidUpdate() {
@@ -95,6 +98,7 @@ var Graph = React.createClass({
     var data = _.merge(this.props, {top, videoId});
 
     this.linesSVG.call(this.linesComponent.update.bind(this.linesComponent), data);
+    this.minimapDiv.call(this.miniMapComponent.update.bind(this.miniMapComponent), data);
 
     if (videoId === prevVideoId) return;
     this.videosSVG.call(this.videosComponent.update.bind(this.videosComponent), data);
@@ -118,13 +122,25 @@ var Graph = React.createClass({
     prevVideoId = videoId;
   },
 
+  play() {
+    var lastAnimated = 0;
+    d3.timer((elapsed) => {
+      var top = (elapsed / playLength) * this.props.vizHeight;
+      var animated = Math.floor(elapsed / duration);
+
+      if (lastAnimated !== animated) {
+        window.scrollTo(0, top);
+        lastAnimated = animated;
+      }
+      return elapsed >= playLength;
+    });
+  },
+
   render() {
     var backgroundSVGStyle = {width: window.innerWidth, height: this.props.timelineHeight,
       position: 'absolute', top: 0, left: 0};
     var youtuberSVGStyle = {width: this.props.lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
-
-    var miniMap = (<MiniMapComponent miniMap={this.props.miniMap} videos={this.props.videos} />);
 
     // var play = (<div style={{
     //   position: 'fixed',
@@ -134,7 +150,7 @@ var Graph = React.createClass({
 
     return (
       <div>
-        {miniMap}
+        <div ref='minimapDiv' />
         <svg style={backgroundSVGStyle}>
           <g ref='linesSVG' />
           <g ref='videosSVG' />

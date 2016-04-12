@@ -96,14 +96,14 @@ GraphUtils.calculateVideos = (youtubers) => {
 };
 
 var mapHeight = 300;
-var opacityScale = d3.scale.linear().range([.01, .35]);
+var opacityScale = d3.scale.linear().range([.15, .75]);
 GraphUtils.calculateMiniMap = (youtubers, videos) => {
   var videoByDates = {};
   _.each(videos, (video) => {
     videoByDates[video.data.publishedDate.getTime()] = video;
   });
   var videoDates = _.chain(videoByDates).keys().map((date) => parseInt(date)).value();
-  var groupByCkmeans = ss.ckmeans(videoDates, 15);
+  var groupByCkmeans = ss.ckmeans(videoDates, 30);
   var videosGrouped = _.map(groupByCkmeans, (group) => {
     return _.map(group, (videoTime) => videoByDates[videoTime]);
   });
