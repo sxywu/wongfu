@@ -66,21 +66,39 @@ function calculateDistance(selection) {
     });
 
     data.totalDistance = totalDistance;
-    data.pointsById = {};
-    _.chain(data.points)
-      .groupBy((point) => Math.floor(point.y / 100) * 100)
-      .each((points, key) => {
-        data.pointsById[key] = _.groupBy(points, (point) => {
-          return Math.floor((point.y - parseInt(key)) / 10) * 10;
-        });
-      }).value();
   });
 }
 
-function windowScroll(selection, top, hoverVideo) {
+var sourceTargetByVideo = {0: {}};
+function calculateSourceTarget(videos, lines) {
+  var sourceByLine = {};
+  _.each(lines, line => {
+    var source = sourceByLine[line.name] = line.points[0];
+    sourceTargetByVideo[0][line.name] = {
+      source,
+      target: source && source.target,
+    };
+  });
+  _.each(videos, video => {
+    var sourceTargetObj = sourceTargetByVideo[video.id] = {};
+    _.each(lines, line => {
+      var source = sourceByLine[line.name];
+      if (source && source.target && source.target.y <= video.y) {
+        source = sourceByLine[line.name] = source.target;
+      }
+
+      sourceTargetObj[line.name] = {
+        source,
+        target: source && source.target,
+      };
+    });
+  });
+}
+
+function windowScroll(selection, top, sourceTargetByVideo, hoverVideo) {
   selection
     .each((data) => {
-      var {source, target} = findPoint(top, data);
+      var {source, target} = sourceTargetByVideo[data.name];
       data.source = source;
       data.target = target;
     })
@@ -146,57 +164,6 @@ function enterLines(selection) {
     .attr('d', (data) => _.pluck(data.points, 'd').join(' '));
 }
 
-function findPoint(top, data) {
-  var source, target;
-  var floor100 = Math.floor(top / 100) * 100;
-  var floor10 = Math.floor((top - floor100) / 10) * 10;
-
-  if (data.pointsById[floor100] && data.pointsById[floor100][floor10]) {
-    _.some(data.pointsById[floor100][floor10], function(point) {
-      // if there's that entry, then see if it's in that entry
-      if (!point.target || (point.y < top && top <= point.target.y)) {
-        source = point;
-        target = source.target;
-        return true;
-      }
-    });
-
-    if (source) return {source, target};
-    // if it wasn't in there, find next lowest
-    return findNextLowest(data, floor100, floor10 - 10);
-  } else {
-    return findNextLowest(data, floor100, floor10);
-  }
-  return {source, target};
-}
-
-function findNextLowest(data, floor100, floor10) {
-  var source, target;
-  if (data.pointsById[floor100]) {
-    // if floor10 is more than 0, can loop it down
-    while (floor10 >= 0) {
-      if (data.pointsById[floor100][floor10]) {
-        source = _.last(data.pointsById[floor100][floor10]);
-        target = source.target;
-        break;
-      } else {
-        floor10 -= 10;
-      }
-    }
-
-    if (source) return {source, target}; 
-  }
-
-  if (floor100 <= 0 && floor100 <= 0) {
-    target = _.first(data.points);
-    return {source, target};
-  }
-
-  // if we didn't find a source, means we didn't find it in this 100
-  // or if there wasn't this 100 to begin with, then subtract
-  return findNextLowest(data, floor100 - 100, 90);
-}
-
 function drawLine(x, y) {
   return 'L' + x.toFixed(2) + ',' + y.toFixed(2);
 }
@@ -224,17 +191,21 @@ module.exports = function() {
 
     update(g, nextProps) {
       if (!this.lines) {
+        // calculate distance for lines
         this.lines = g.selectAll('path').data(nextProps.lines);
         this.lines.enter().append('path');
         this.lines
           .call(calculateDistance)
           .call(enterLines);
+
+        // first calculate source/target for each line for each video
+        calculateSourceTarget(nextProps.videos, nextProps.lines);
       }
       
       var video = nextProps.videos[nextProps.videoId - 1];
       var hoverVideo = nextProps.videos[nextProps.hoverVideoId - 1];
 
-      this.lines.call(windowScroll, nextProps.top, hoverVideo);
+      this.lines.call(windowScroll, nextProps.top, sourceTargetByVideo[nextProps.videoId], hoverVideo);
       // video && d3.select(this.refs.line.getDOMNode())
       //   .transition().duration(duration)
       //   .attr('stroke', video.fill)
