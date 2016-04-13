@@ -151,38 +151,42 @@ GraphUtils.calculateMiniMap = (youtubers, videos) => {
 };
 
 GraphUtils.calculateAnnotations = (youtubers, videos) => {
-  var annotations = {};
+  var annotations = [];
   var collaborations = {};
+  var viewsThreshold = 5000000;
 
   _.each(videos, video => {
     var youtuber = video.data.youtuber;
-    if (!collaborations[youtuber]) {
-      collaborations[youtuber] = {};
-    }
-
-    var collaborators = [youtuber];
-    _.each(video.data.associations, association => {
-      if (youtubers[association]) {
-        // if association is one of the youtubers
-        // see if it's the first time they collaborated
-        if (!collaborations[youtuber][association]) {
-          collaborations[youtuber][association] = 0;
-          collaborators.push(association);
-        }
-        collaborations[youtuber][association] += 1;
-      }
-    });
+    var collaborators = _.chain(video.data.associations) 
+      .filter(association => youtubers[association])
+      .union([youtuber])
+      .sortBy()
+      .value();
+    var collaboratorsKey = collaborators.join(',');
 
     if (collaborators.length > 1) {
-      annotations[video.id] = {
-        type: 'collaboration',
-        count: 1,
-        collaborators,
+      if (!collaborations[collaboratorsKey]) {
+        collaborations[collaboratorsKey] = 0;
+        annotations.push({
+          video,
+          type: 'collaboration',
+          collaborators,
+        });
       }
+      collaborations[collaboratorsKey] += 1;
+
+      if (video.data.views > viewsThreshold) {
+        annotations.push({
+          video,
+          type: 'views',
+          count: collaborations[collaboratorsKey],
+          views: video.data.views,
+          collaborators,
+        });
+      }   
     }
   });
 
-  console.log(videos, annotations)
   return annotations;
 };
 

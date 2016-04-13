@@ -15,20 +15,31 @@ var Annotations = React.createClass({
       right: 0,
       padding: '0 20px',
     };
-    var collaborations = _.map(this.props.annotations, (annotation, videoId) => {
-      var video = this.props.videos[videoId];
-      var collaborationStyle = {
-        position: 'absolute',
-        top: video.y,
-      };
-      return (
-        <div style={collaborationStyle}>
-          <div>{timeFormat(video.data.publishedDate)}</div>
-          <div>{annotation.collaborators.join(', ')}</div>
-          <div>{video.data.title}</div>
-        </div>
-      );
-    });
+    var prevVideo = null;
+    var heightAllocation = 150;
+    var collaborations = _.chain(this.props.annotations)
+      .filter((annotation) => {
+        var video = annotation.video;
+        if (!prevVideo || (prevVideo && prevVideo.y + heightAllocation < video.y)) {
+          prevVideo = video;
+          return true;
+        }
+      }).map(annotation => {
+        var video = annotation.video;
+        var collaborationStyle = {
+          position: 'absolute',
+          top: video.y,
+        };
+        return (
+          <div style={collaborationStyle}>
+            <div>{timeFormat(video.data.publishedDate)}</div>
+            <div>{annotation.collaborators.join(', ')}</div>
+            <div>{video.data.title}</div>
+            <div>{annotation.views}</div>
+            <div>{annotation.count ? annotation.count + ' times' : null}</div>
+          </div>
+        );
+      }).value();
     return (
       <div style={style}>
         {collaborations}
