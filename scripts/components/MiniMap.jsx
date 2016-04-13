@@ -17,7 +17,7 @@ function enterMiniMap(selection, miniMap, videos) {
     .style('height', (map) => map.sideHeight)
     .style({
       'position': 'absolute',
-      'right': 0,
+      'left': 0,
       'width': width,
     });
 };
@@ -30,12 +30,12 @@ function enterOverlay(selection, miniMap) {
   overlay = selection.append('div')
     .style({
       'position': 'absolute',
-      'right': 0,
+      'left': 0,
       'width': width,
       'height': mapScale(window.innerHeight - youtuberSVGHeight),
       'background-color': 'rgba(190,182,182,.25)',
       'border': '1px solid #BEB6B6',
-      'border-right': 0
+      'border-left': 0
     });
 };
 
@@ -54,7 +54,7 @@ module.exports = function() {
     enter(selection) {
       var miniMapStyle = {
         position: 'fixed',
-        right: 0,
+        left: 0,
         top: 0
       };
       this.minimap = selection.append('div')

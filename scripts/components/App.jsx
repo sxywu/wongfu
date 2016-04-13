@@ -14,7 +14,7 @@ var GraphComponent = require('./Graph.jsx');
 var VideoSummaryComponent = require('./VideoSummary.jsx');
 var AnnotationsComponent = require('./Annotations.jsx');
 
-var vizHeight = 15000;
+var vizHeight = 20000;
 var xPadding = 75;
 var youtuberSVGHeight = 200;
 

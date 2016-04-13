@@ -11,14 +11,14 @@ var YoutuberStore = require('../stores/YoutuberStore');
 var VideoStore = require('../stores/VideoStore');
 
 var xPadding = 75;
-var earliestTime = new Date(2005, 10, 1);
+var earliestTime = new Date(2006, 10, 1);
 var latestTime = new Date();
 var colorScale = d3.scale.ordinal()
   // lighter colors
   .range(['#BD3939', '#E7A0B5', '#EBC06F', '#6FA874', '#8191C6', '#95619F', '#E8CAC3', '#D79C94']);
   // darker colors
   // .range(['#B21E1E', '#E683A6', '#F1C538', '#3A923C', '#4466BE', '#6E3380', '#E9C9C0', '#D37B6B']);
-var vizHeight = 15000;
+var vizHeight = 20000;
 var yScale = d3.time.scale().domain([earliestTime, latestTime]).range([0, vizHeight]);
 
 var GraphUtils = {};

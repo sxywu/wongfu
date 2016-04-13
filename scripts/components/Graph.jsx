@@ -137,7 +137,7 @@ var Graph = React.createClass({
   },
 
   render() {
-    var backgroundSVGStyle = {width: window.innerWidth, height: this.props.timelineHeight,
+    var backgroundSVGStyle = {width: this.props.lineWidth, height: this.props.timelineHeight,
       position: 'absolute', top: 0, left: 0};
     var youtuberSVGStyle = {width: this.props.lineWidth, height: youtuberSVGHeight,
       position: 'fixed', bottom: 0, left: 0};
