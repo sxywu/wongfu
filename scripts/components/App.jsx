@@ -12,6 +12,7 @@ var ServerActionCreators = require('../actions/ServerActionCreators');
 // components
 var GraphComponent = require('./Graph.jsx');
 var VideoSummaryComponent = require('./VideoSummary.jsx');
+var AnnotationsComponent = require('./Annotations.jsx');
 
 var vizHeight = 15000;
 var xPadding = 75;
@@ -24,6 +25,7 @@ var App = React.createClass({
       lines: [],
       videos: [],
       miniMap: [],
+      annotations: [],
       hoverVideoId: null,
       hoverYoutuberName: null,
     }
@@ -55,6 +57,7 @@ var App = React.createClass({
     state.lines = GraphUtils.calculateLines(state.youtubers);
     state.videos = GraphUtils.calculateVideos(state.youtubers);
     state.miniMap = GraphUtils.calculateMiniMap(state.youtubers, state.videos);
+    state.annotations = GraphUtils.calculateAnnotations(state.youtubers, state.videos);
 
     this.setState(state);
   },
@@ -80,17 +83,20 @@ var App = React.createClass({
     var timelineHeight = vizHeight + youtuberSVGHeight;
     var summaryDivStyle = {position: 'absolute', top: 0, height: timelineHeight};
 
-    var graph = (<GraphComponent lineWidth={lineWidth} timelineHeight={timelineHeight}
+    var graph = (<GraphComponent vizHeight={vizHeight} lineWidth={lineWidth} timelineHeight={timelineHeight}
       youtubers={this.state.youtubers} videos={this.state.videos} lines={this.state.lines} miniMap={this.state.miniMap}
       hoverVideoId={this.state.hoverVideoId} hoverYoutuberName={this.state.hoverYoutuberName}
       hoverVideo={this.hoverVideo} unhoverVideo={this.unhoverVideo}
       hoverYoutuber={this.hoverYoutuber} unhoverYoutuber={this.unhoverYoutuber} />);
     var videoSummary = (<VideoSummaryComponent youtubers={this.state.youtubers}
       videos={this.state.videos} videoId={this.state.hoverVideoId} unhoverVideo={this.unhoverVideo} />);
+    var annotations = (<AnnotationsComponent lineWidth={lineWidth}
+      videos={this.state.videos} annotations={this.state.annotations} />);
 
     return (
       <div>
         {graph}
+        {annotations}
         <div style={summaryDivStyle}>
           {videoSummary}
         </div>

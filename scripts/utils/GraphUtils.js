@@ -150,6 +150,42 @@ GraphUtils.calculateMiniMap = (youtubers, videos) => {
   });
 };
 
+GraphUtils.calculateAnnotations = (youtubers, videos) => {
+  var annotations = {};
+  var collaborations = {};
+
+  _.each(videos, video => {
+    var youtuber = video.data.youtuber;
+    if (!collaborations[youtuber]) {
+      collaborations[youtuber] = {};
+    }
+
+    var collaborators = [youtuber];
+    _.each(video.data.associations, association => {
+      if (youtubers[association]) {
+        // if association is one of the youtubers
+        // see if it's the first time they collaborated
+        if (!collaborations[youtuber][association]) {
+          collaborations[youtuber][association] = 0;
+          collaborators.push(association);
+        }
+        collaborations[youtuber][association] += 1;
+      }
+    });
+
+    if (collaborators.length > 1) {
+      annotations[video.id] = {
+        type: 'collaboration',
+        count: 1,
+        collaborators,
+      }
+    }
+  });
+
+  console.log(videos, annotations)
+  return annotations;
+};
+
 GraphUtils.getSVGWidth = (lines) => {
   return (lines.length + 1) * xPadding;
 };
