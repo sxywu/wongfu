@@ -55,6 +55,7 @@ function setVideosByYoutuber(youtuber, rawVideos) {
       video.title = video.snippet.title;
       video.youtuber = youtuber;
       video.publishedDate = new Date(video.snippet.publishedAt);
+      video.image = video.snippet.thumbnails.medium;
 
       return video.publishedDate;
     }).value();
