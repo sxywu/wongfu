@@ -45,15 +45,17 @@ function findVideoId(top, videos) {
   return videoId;
 }
 
+var decay = 0.1;
+var volume = 0.75;
 var allSounds = [
-  () => {soundEffect(65.41, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(98.00, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(130.81, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(196.00, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(261.63, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(392.00, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(523.25, 0, 0.2, "triangle", 1)},
-  () => {soundEffect(783.99, 0, 0.2, "triangle", 1)} // consider sine or triangle
+  () => {soundEffect(65.41, 0, decay, "triangle", volume)},
+  () => {soundEffect(98.00, 0, decay, "triangle", volume)},
+  () => {soundEffect(130.81, 0, decay, "triangle", volume)},
+  () => {soundEffect(196.00, 0, decay, "triangle", volume)},
+  () => {soundEffect(261.63, 0, decay, "triangle", volume)},
+  () => {soundEffect(392.00, 0, decay, "triangle", volume)},
+  () => {soundEffect(523.25, 0, decay, "triangle", volume)},
+  () => {soundEffect(783.99, 0, decay, "triangle", volume)} // consider sine or triangle
 ];
 
 var Graph = React.createClass({
