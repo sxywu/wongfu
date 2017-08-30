@@ -33,7 +33,7 @@ function setVideosByYoutuber(youtuber, rawVideos) {
         .map((association) => association.toLowerCase())
         .filter((association) => {
           return association !== youtuber &&
-            !_.contains(youtuberAffliates[youtuber], association);
+            !_.includes(youtuberAffliates[youtuber], association);
         }).uniq().value();
       video.views = parseInt(video.statistics.viewCount);
       return video.associations.length && video.views >= minViews;
@@ -43,7 +43,7 @@ function setVideosByYoutuber(youtuber, rawVideos) {
       // then keep track of it by association
       var allAssociations = _.union(video.associations, [youtuber]);
       _.each(allAssociations, function(association) {
-        if (!_.contains(allYoutubers, association)) return;
+        if (!_.includes(allYoutubers, association)) return;
         if (videosByAssociation[association]) {
           videosByAssociation[association].push(video);
         } else {
@@ -117,8 +117,8 @@ VideoStore.dispatchToken = AppDispatcher.register((action) => {
   // only emit change if all videos are back
   if (allYoutubers.length === allYoutubersBack.length) {
     setVideoIds();
-    VideoStore.emitChange(); 
+    VideoStore.emitChange();
   }
 });
 
-module.exports = VideoStore; 
+module.exports = VideoStore;

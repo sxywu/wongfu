@@ -161,7 +161,7 @@ function enterLines(selection) {
     .attr('stroke-opacity', .5)
     .attr('stroke', (data) => data.fill)
     .attr('stroke-dasharray', (data) => data.totalDistance)
-    .attr('d', (data) => _.pluck(data.points, 'd').join(' '));
+    .attr('d', (data) => _.map(data.points, 'd').join(' '));
 }
 
 function drawLine(x, y) {

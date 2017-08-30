@@ -47,7 +47,7 @@ function calculateLinksByVideoId(youtubers, videos) {
     prevLinks = links;
   });
 
-  var counts = _.chain(linksByVideoId).values().flatten().pluck('count').value();
+  var counts = _.chain(linksByVideoId).values().flatten().map('count').value();
   widthScale.domain([_.min(counts), _.max(counts)]);
 }
 

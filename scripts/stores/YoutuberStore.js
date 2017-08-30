@@ -18,7 +18,7 @@ function setYoutuberNames(rawNames) {
 
 function setYoutubers(rawYoutubers) {
   _.each(rawYoutubers, (youtuberObj, name) => {
-    if (!_.contains(youtuberNames, name)) return;
+    if (!_.includes(youtuberNames, name)) return;
     var youtuber = youtuberObj.snippet;
     youtuber.youtuber = name.toLowerCase();
     youtuber.joinedDate = new Date(youtuberObj.snippet.publishedAt);
@@ -64,4 +64,4 @@ YoutuberStore.dispatchToken = AppDispatcher.register((action) => {
   YoutuberStore.emitChange();
 });
 
-module.exports = YoutuberStore; 
+module.exports = YoutuberStore;
